@@ -3,14 +3,11 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Sistem Analisis PBD Sekolah</title>
+  <title>Sistem Analisis PBD Bersepadu</title>
   <script src="https://cdn.tailwindcss.com/3.4.17"></script>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-  
-  <script>window.PBD_DATA_GITHUB = null;</script>
-  <script src="data.js" onerror="console.log('Tiada fail data.js dijumpai di pelayan, menggunakan Local Storage.')"></script>
 
   <style>
     * { font-family: 'Poppins', sans-serif; }
@@ -29,22 +26,31 @@
     .scrollbar-thin::-webkit-scrollbar { width: 6px; height: 6px; }
     .scrollbar-thin::-webkit-scrollbar-track { background: #f1f5f9; border-radius: 3px; }
     .scrollbar-thin::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+    /* Animasi Loading Spinner */
+    .loader { border: 4px solid rgba(255, 255, 255, 0.3); border-radius: 50%; border-top: 4px solid #10b981; width: 50px; height: 50px; animation: spin 1s linear infinite; }
+    @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
   </style>
 </head>
 <body class="h-full bg-slate-50 overflow-auto scrollbar-thin flex flex-col">
   
+  <div id="loading-overlay" class="fixed inset-0 bg-slate-900/90 z-[100] flex flex-col items-center justify-center text-white transition-opacity duration-300">
+    <div class="loader mb-4"></div>
+    <h2 id="loading-text" class="text-xl font-bold tracking-wider">Menyambung ke Pangkalan Data...</h2>
+    <p class="text-sm text-emerald-400 mt-2">Sila tunggu sebentar</p>
+  </div>
+
   <header class="text-white sticky top-0 z-50 gradient-header shadow-lg">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
       <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div class="flex items-center gap-4">
           <div class="w-12 h-12 bg-white/10 rounded-xl flex items-center justify-center border border-white/20">
             <svg class="w-7 h-7 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
             </svg>
           </div>
           <div>
             <h1 class="text-xl font-bold tracking-tight">Sistem Analisis PBD Pintar</h1>
-            <p class="text-emerald-300 text-xs">Janaan Automatik Bersepadu</p>
+            <p class="text-emerald-300 text-xs flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-green-400 animate-pulse"></span> Bersambung dengan Cloud (Live)</p>
           </div>
         </div>
         <div class="flex flex-wrap gap-2">
@@ -56,7 +62,7 @@
     </div>
   </header>
 
-  <div id="global-filters" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 w-full">
+  <div id="global-filters" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 w-full hidden">
     <div class="bg-white p-4 rounded-xl card-shadow flex flex-wrap gap-4 items-end border border-slate-200">
       <div>
         <label class="block text-xs font-semibold text-slate-500 mb-1">Tapis Fasa</label>
@@ -79,7 +85,7 @@
     </div>
   </div>
 
-  <main id="dashboard-view" class="flex-grow max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 w-full">
+  <main id="dashboard-view" class="flex-grow max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 w-full hidden">
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
       <div class="bg-white rounded-2xl p-5 card-shadow border border-slate-100">
         <p class="text-sm font-medium text-slate-500">Kadar Menguasai (TP3-TP6)</p>
@@ -111,7 +117,6 @@
   </main>
 
   <main id="laporan-view" class="hidden flex-grow max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 w-full space-y-8">
-    
     <section>
       <div class="flex items-center gap-3 mb-4">
         <div class="w-1 h-8 rounded-full gradient-accent"></div>
@@ -144,13 +149,11 @@
     <section class="grid grid-cols-1 lg:grid-cols-2 gap-6">
       <div class="bg-white rounded-2xl p-5 card-shadow border border-slate-100">
         <h3 class="text-sm font-semibold text-slate-700 mb-4">Ranking Kelas (Berdasarkan Purata TP)</h3>
-        <div id="lap-ranking-kelas" class="space-y-3">
-          </div>
+        <div id="lap-ranking-kelas" class="space-y-3"></div>
       </div>
       <div class="bg-white rounded-2xl p-5 card-shadow border border-slate-100">
         <h3 class="text-sm font-semibold text-slate-700 mb-4">Ranking Subjek (Berdasarkan Purata TP)</h3>
-        <div id="lap-ranking-subjek" class="space-y-3">
-          </div>
+        <div id="lap-ranking-subjek" class="space-y-3"></div>
       </div>
     </section>
 
@@ -180,8 +183,7 @@
                 <th class="px-6 py-3 font-semibold">Tahap</th>
               </tr>
             </thead>
-            <tbody id="lap-table-intervensi" class="text-sm divide-y divide-slate-100">
-              </tbody>
+            <tbody id="lap-table-intervensi" class="text-sm divide-y divide-slate-100"></tbody>
           </table>
         </div>
       </div>
@@ -190,21 +192,18 @@
     <section>
       <div class="bg-gradient-to-br from-slate-800 to-slate-900 rounded-2xl p-6 card-shadow text-white">
         <h3 class="text-lg font-bold text-emerald-400 mb-3">Ringkasan Analisis Profesional (Janaan Sistem)</h3>
-        <div id="lap-ai-insight" class="space-y-3 text-sm text-slate-200 leading-relaxed">
-          Sila muat naik data untuk menjana ringkasan profesional ini.
-        </div>
+        <div id="lap-ai-insight" class="space-y-3 text-sm text-slate-200 leading-relaxed"></div>
       </div>
     </section>
   </main>
 
   <main id="admin-view" class="hidden flex-grow max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full">
     
-    <div class="bg-blue-50 border border-blue-200 rounded-xl p-5 mb-6 flex items-start gap-4">
-      <span class="text-2xl">💾</span>
+    <div class="bg-emerald-50 border border-emerald-200 rounded-xl p-5 mb-6 flex items-start gap-4">
+      <span class="text-2xl">☁️</span>
       <div>
-        <h3 class="font-bold text-blue-800">Penyimpanan Data Global (Untuk Akses Semua Peranti)</h3>
-        <p class="text-sm text-blue-700 mt-1">Selepas Cikgu siap muat naik fail-fail Excel, klik butang "Muat Turun Fail Data" di bawah. Kemudian, masukkan fail <code>data.js</code> tersebut ke dalam GitHub Cikgu. Data akan terpapar untuk PGB dan rakan guru lain secara automatik!</p>
-        <button onclick="downloadDataJS()" class="mt-3 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold rounded shadow transition">⬇️ Muat Turun Fail Data (data.js)</button>
+        <h3 class="font-bold text-emerald-800">Sistem Pangkalan Data Cloud (Google Sheets)</h3>
+        <p class="text-sm text-emerald-700 mt-1">Sistem ini bersambung terus ke Pangkalan Data Google Sheets. Sebarang Excel mentah yang Cikgu muat naik di sini akan dihantar, diproses, dan disimpan ke <i>Cloud</i> serta-merta. Data akan terus kelihatan (*sync*) di peranti PGB dan rakan guru yang lain!</p>
       </div>
     </div>
 
@@ -214,7 +213,7 @@
           <h2 class="text-xl font-bold text-slate-800">Muat Naik Data Mentah Excel (Pukal)</h2>
           <p class="text-sm text-slate-500 mt-1">Sistem akan gunakan <strong>Nama Fail</strong> sebagai Nama Kelas (Cth: 5 Topaz.xlsx).</p>
         </div>
-        <button onclick="clearData()" class="px-4 py-2 bg-red-100 text-red-600 text-xs font-bold rounded-lg hover:bg-red-200 transition">🗑️ Padam Semua (Reset)</button>
+        <button onclick="clearDataCloud()" class="px-4 py-2 bg-red-100 text-red-600 text-xs font-bold rounded-lg hover:bg-red-200 transition">🗑️ Padam Semua Data Di Cloud</button>
       </div>
 
       <div class="mb-6">
@@ -229,7 +228,7 @@
         <label class="block text-sm font-semibold text-slate-700 mb-2">2. Pilih Fail Excel (Sokongan pelbagai fail serentak)</label>
         <div class="border-2 border-dashed border-slate-300 rounded-xl p-8 text-center bg-slate-50 hover:bg-slate-100 transition">
           <input type="file" id="file-upload" accept=".xls,.xlsx,.csv" multiple class="hidden" onchange="handleFileSelect(event)">
-          <button onclick="document.getElementById('file-upload').click()" class="inline-flex items-center gap-2 px-6 py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-medium rounded-lg transition shadow-md">
+          <button onclick="document.getElementById('file-upload').click()" class="inline-flex items-center gap-2 px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition shadow-md">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
             Klik untuk cari fail Excel
           </button>
@@ -237,96 +236,167 @@
         </div>
       </div>
 
-      <button onclick="processUpload()" class="w-full py-4 bg-slate-800 hover:bg-slate-900 text-white font-bold rounded-xl shadow-lg transition text-lg">
-        Sahkan & Proses Ke Dalam Sistem
+      <button onclick="processUploadAndSync()" class="w-full py-4 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl shadow-lg transition text-lg flex items-center justify-center gap-2">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" /></svg>
+        Proses & Hantar Ke Cloud
       </button>
     </div>
   </main>
 
+  <footer class="bg-slate-900 text-slate-400 py-6 text-center text-xs mt-auto">
+    <div class="max-w-7xl mx-auto px-4">
+      <p>© <span id="current-year"></span> Sistem Analisis PBD Bersepadu | Bersambung dengan Pangkalan Data Google</p>
+    </div>
+  </footer>
+
   <script>
-    // --- PENYEDIAAN DATA & CARTA ---
+    document.getElementById('current-year').textContent = new Date().getFullYear();
+
+    // ==========================================
+    // URL API GOOGLE SHEETS CIKGU NAIMULLAH
+    // ==========================================
+    const GAS_URL = "https://script.google.com/macros/s/AKfycbwYKVgs6XsXaOUqQ7ZYmQdvyaEA0-lcNuBnbFyqPVCRZzKydKYESZWfzS0JMPnwzt_zDg/exec";
+    
     let appData = [];
     const knownSubjects = ['BM', 'BI', 'MM', 'SAINS', 'SEJ', 'PAI', 'PM', 'BC', 'BT', 'BIN', 'RBT', 'AR', 'PJPK', 'PMZ', 'PSV'];
     
-    let charts = {
-      dashSubject: null,
-      dashPie: null,
-      lapKelas: null
-    };
+    let charts = { dashSubject: null, dashPie: null, lapKelas: null };
 
     window.onload = () => {
-      // Logic keutamaan Data: Guna fail data.js (dari GitHub) jika wujud. Jika tak, guna Local Storage browser.
-      if (window.PBD_DATA_GITHUB && window.PBD_DATA_GITHUB.length > 0) {
-        appData = window.PBD_DATA_GITHUB;
-        console.log("Berjaya memuat turun pangkalan data dari data.js");
-      } else {
-        appData = JSON.parse(localStorage.getItem('pbdSistemData')) || [];
-      }
-
-      updateFilterDropdowns();
-      processAllViews();
+      // Automatik sedut data dari Cloud bila website dibuka!
+      loadDataFromCloud();
     };
 
-    function switchTab(tab) {
-      document.getElementById('dashboard-view').classList.add('hidden');
-      document.getElementById('laporan-view').classList.add('hidden');
-      document.getElementById('admin-view').classList.add('hidden');
-      document.getElementById('global-filters').classList.add('hidden');
-      
-      const navs = ['nav-dashboard', 'nav-laporan', 'nav-admin'];
-      navs.forEach(n => {
-        document.getElementById(n).className = "px-4 py-2 rounded-lg border border-white/20 text-white/70 text-sm font-medium hover:bg-white/10 transition-all";
-      });
-
-      const activeBtnClass = "px-4 py-2 rounded-lg bg-emerald-500/30 border border-emerald-400/50 text-white text-sm font-medium transition-all";
-
-      if (tab === 'dashboard') {
-        document.getElementById('dashboard-view').classList.remove('hidden');
-        document.getElementById('global-filters').classList.remove('hidden');
-        document.getElementById('nav-dashboard').className = activeBtnClass;
-      } else if (tab === 'laporan') {
-        document.getElementById('laporan-view').classList.remove('hidden');
-        document.getElementById('global-filters').classList.remove('hidden');
-        document.getElementById('nav-laporan').className = activeBtnClass;
+    function showLoading(show, text = "Menyambung ke Pangkalan Data...") {
+      const overlay = document.getElementById('loading-overlay');
+      document.getElementById('loading-text').textContent = text;
+      if(show) {
+        overlay.classList.remove('hidden');
       } else {
-        document.getElementById('admin-view').classList.remove('hidden');
-        document.getElementById('nav-admin').className = activeBtnClass;
+        overlay.classList.add('hidden');
       }
-      
-      if(tab !== 'admin') processAllViews();
     }
 
-    // --- UPLOAD LOGIC ---
+    // --- FUNGSI CLOUD (GET & POST) ---
+
+    // 1. Sedut data dari Google Sheets
+    async function loadDataFromCloud() {
+      showLoading(true, "Menyemak dan menarik data terbaharu dari Cloud...");
+      try {
+        let res = await fetch(GAS_URL);
+        let data2D = await res.json();
+        parse2DArrayToData(data2D);
+        
+        switchTab('dashboard'); // Lepas siap loading, tunjuk dashboard
+      } catch (err) {
+        console.error("Gagal menarik data:", err);
+        alert("Ralat sambungan ke Pangkalan Data. Sila cuba 'refresh' laman web ini.");
+        showLoading(false);
+      }
+    }
+
+    // 2. Simpan/Hantar data ke Google Sheets
+    async function saveDataToCloud() {
+      showLoading(true, "Sedang menyelaras & menyimpan ke Cloud (Sila tunggu)...");
+      try {
+        let array2D = build2DArrayFromData();
+        let payload = { action: "SIMPAN_DATA", data: array2D };
+        
+        // POST menggunakan text/plain untuk mengelakkan ralat CORS pada browser
+        await fetch(GAS_URL, {
+          method: "POST",
+          headers: { "Content-Type": "text/plain;charset=utf-8" },
+          body: JSON.stringify(payload)
+        });
+        
+        showLoading(false);
+        alert("Penyimpanan Selesai! Data telah berjaya dikemas kini di Cloud.");
+        switchTab('dashboard');
+      } catch (err) {
+        console.error(err);
+        showLoading(false);
+        alert("Ralat! Gagal menghantar data ke Cloud.");
+      }
+    }
+
+    // 3. Convert Array 2D (Dari Google Sheets) kepada Array Objek (Sistem)
+    function parse2DArrayToData(data) {
+      appData = [];
+      if (!data || data.length < 2) return; // Jika kosong atau cuma ada header
+      
+      let headers = data[0];
+      for (let i = 1; i < data.length; i++) {
+        let row = data[i];
+        let record = { id: String(row[0]), nama: row[1], jantina: row[2], kelas: row[3], fasa: row[4], scores: {} };
+        
+        // Baca markah bermula lajur ke-5 (index 5)
+        for (let j = 5; j < headers.length; j++) {
+          let sub = headers[j];
+          let val = row[j];
+          if (val !== '' && val !== null && val !== undefined) {
+            record.scores[sub] = parseInt(val);
+          }
+        }
+        appData.push(record);
+      }
+    }
+
+    // 4. Convert Array Objek (Sistem) kepada Array 2D (Untuk dihantar ke Google Sheets)
+    function build2DArrayFromData() {
+      let headers = ['ID', 'NAMA', 'JANTINA', 'KELAS', 'FASA', ...knownSubjects];
+      let rows = [headers];
+      
+      appData.forEach(d => {
+        let row = [d.id, d.nama, d.jantina || '', d.kelas, d.fasa];
+        knownSubjects.forEach(sub => {
+          row.push(d.scores[sub] !== undefined ? d.scores[sub] : '');
+        });
+        rows.push(row);
+      });
+      return rows;
+    }
+
+    // Padam semua dari Cloud
+    function clearDataCloud() {
+      if(confirm("AWAS PENTADBIR! Anda pasti mahu padam SEMUA data di Cloud? Data yang dipadam tidak boleh diselamatkan lagi.")) {
+        appData = [];
+        saveDataToCloud(); // Hantar 'array kosong' ke cloud untuk padam data lama
+      }
+    }
+
+    // --- UPLOAD EXCEL LOGIC ---
     let selectedFiles = [];
     function handleFileSelect(event) {
       selectedFiles = Array.from(event.target.files);
       if (selectedFiles.length > 0) {
-        document.getElementById('file-name-display').innerHTML = `<strong class="text-emerald-600">${selectedFiles.length} fail sedia diproses:</strong><br><span class="text-xs">${selectedFiles.map(f=>f.name).join(', ')}</span>`;
+        document.getElementById('file-name-display').innerHTML = `<strong class="text-blue-600">${selectedFiles.length} fail sedia diproses:</strong><br><span class="text-xs text-slate-500">${selectedFiles.map(f=>f.name).join(', ')}</span>`;
       }
     }
 
-    async function processUpload() {
+    async function processUploadAndSync() {
       const fasa = document.getElementById('input-fasa').value;
       if (selectedFiles.length === 0) return alert("Sila pilih fail-fail Excel terlebih dahulu.");
 
-      let totalAdded = 0;
+      let totalAddedOrUpdated = 0;
       for (let file of selectedFiles) {
-        let kelas = file.name.replace(/\.[^/.]+$/, "").trim(); // Buang .xlsx
+        let kelas = file.name.replace(/\.[^/.]+$/, "").trim(); // Guna nama fail sebagai kelas
         try {
           let jsonData = await readExcelAsync(file);
-          totalAdded += parseExcelJSONBulk(jsonData, fasa, kelas);
+          totalAddedOrUpdated += parseExcelJSONBulk(jsonData, fasa, kelas);
         } catch (error) { console.error("Ralat fail " + file.name, error); }
       }
 
-      localStorage.setItem('pbdSistemData', JSON.stringify(appData));
-      alert(`Selesai! ${totalAdded} rekod baharu berjaya disimpan.\nJangan lupa muat turun fail data.js jika ingin update ke GitHub.`);
-      
+      // Reset file input
       document.getElementById('file-upload').value = '';
       selectedFiles = [];
       document.getElementById('file-name-display').textContent = 'Tiada fail dipilih';
-      
-      updateFilterDropdowns();
-      switchTab('dashboard');
+
+      if(totalAddedOrUpdated > 0) {
+        // Selepas selesai baca dan masukkan ke memori (appData), HANTAR KE CLOUD!
+        saveDataToCloud(); 
+      } else {
+        alert("Tiada data sah dijumpai dalam fail tersebut.");
+      }
     }
 
     function readExcelAsync(file) {
@@ -350,6 +420,7 @@
       const keys = Object.keys(jsonData[0]);
       const keyNama = keys.find(k => k.toUpperCase().includes('NAMA'));
       const keyId = keys.find(k => k.toUpperCase().includes('KID') || k.toUpperCase().includes('ID'));
+      const keyJantina = keys.find(k => k.toUpperCase().includes('JANTINA'));
       
       if (!keyNama) return 0;
       
@@ -359,7 +430,7 @@
         if (match) subjectKeys[sub] = match;
       });
 
-      let addedCount = 0;
+      let processedCount = 0;
       jsonData.forEach((row, idx) => {
         const nama = row[keyNama];
         if (!nama || String(nama).trim() === '') return;
@@ -367,7 +438,7 @@
         let strId = `ID_${kelas}_${idx}`;
         if (keyId && row[keyId]) strId = String(row[keyId]).replace(/[- ]/g, '').trim();
 
-        let record = { nama: String(nama).trim(), id: strId, kelas: kelas, fasa: fasa, scores: {} };
+        let record = { nama: String(nama).trim(), id: strId, jantina: keyJantina && row[keyJantina] ? String(row[keyJantina]).trim() : '', kelas: kelas, fasa: fasa, scores: {} };
 
         for (let sub in subjectKeys) {
           let val = String(row[subjectKeys[sub]]);
@@ -375,35 +446,51 @@
           if (!isNaN(tpNum) && tpNum >= 1 && tpNum <= 6) record.scores[sub] = tpNum;
         }
 
-        const isDuplicate = appData.find(d => d.fasa === fasa && d.kelas === kelas && (d.id === record.id || d.nama === record.nama));
-        if(!isDuplicate) { appData.push(record); addedCount++; }
+        // Semak sama ada murid ni dah wujud (Fasa yang sama)
+        const existingRecord = appData.find(d => d.fasa === fasa && d.kelas === kelas && (d.id === record.id || d.nama === record.nama));
+        
+        if(existingRecord) {
+           // Ganti data lama dengan markah baru! Cikgu tak perlu risau data berulang.
+           Object.assign(existingRecord, record);
+           processedCount++;
+        } else {
+           appData.push(record); 
+           processedCount++;
+        }
       });
-      return addedCount;
+      return processedCount;
     }
 
-    function clearData() {
-      if(confirm("Padam SEMUA data?")) {
-        localStorage.removeItem('pbdSistemData');
-        appData = [];
+    // --- TAB SWITCHER ---
+    function switchTab(tab) {
+      document.getElementById('dashboard-view').classList.add('hidden');
+      document.getElementById('laporan-view').classList.add('hidden');
+      document.getElementById('admin-view').classList.add('hidden');
+      document.getElementById('global-filters').classList.add('hidden');
+      
+      const navs = ['nav-dashboard', 'nav-laporan', 'nav-admin'];
+      navs.forEach(n => { document.getElementById(n).className = "px-4 py-2 rounded-lg border border-white/20 text-white/70 text-sm font-medium hover:bg-white/10 transition-all"; });
+
+      const activeBtnClass = "px-4 py-2 rounded-lg bg-emerald-500/30 border border-emerald-400/50 text-white text-sm font-medium transition-all";
+
+      if (tab === 'dashboard') {
+        document.getElementById('dashboard-view').classList.remove('hidden');
+        document.getElementById('global-filters').classList.remove('hidden');
+        document.getElementById('nav-dashboard').className = activeBtnClass;
+      } else if (tab === 'laporan') {
+        document.getElementById('laporan-view').classList.remove('hidden');
+        document.getElementById('global-filters').classList.remove('hidden');
+        document.getElementById('nav-laporan').className = activeBtnClass;
+      } else {
+        document.getElementById('admin-view').classList.remove('hidden');
+        document.getElementById('nav-admin').className = activeBtnClass;
+      }
+      
+      if(tab !== 'admin') {
         updateFilterDropdowns();
         processAllViews();
-        alert("Data dipadam.");
       }
-    }
-
-    // Helah Muat Turun Data As JS File
-    function downloadDataJS() {
-      if(appData.length === 0) return alert("Tiada data untuk dimuat turun.");
-      const jsContent = `window.PBD_DATA_GITHUB = ${JSON.stringify(appData)};`;
-      const blob = new Blob([jsContent], { type: 'text/javascript' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = 'data.js';
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
+      showLoading(false); // Pastikan loading tutup bila tab bertukar
     }
 
     // --- ANALISIS & LOGIK PAPARAN ---
@@ -430,14 +517,13 @@
       document.getElementById('stat-total-records').textContent = `${filteredData.length} Murid`;
       
       if(filteredData.length === 0) {
-        // Reset all text to 0
         document.querySelectorAll('h3[id^="dash-"], p[id^="lap-"]').forEach(el => el.textContent = el.id.includes('subjek') ? '-' : '0');
-        document.getElementById('lap-table-intervensi').innerHTML = `<tr><td colspan="4" class="text-center py-4">Tiada data</td></tr>`;
+        document.getElementById('lap-table-intervensi').innerHTML = `<tr><td colspan="4" class="text-center py-4">Tiada data di Pangkalan Data. Sila muat naik di Pengurusan Data.</td></tr>`;
         Object.values(charts).forEach(c => { if(c) c.destroy(); });
+        document.getElementById('lap-ai-insight').innerHTML = "Tiada data untuk dijana.";
         return;
       }
 
-      // 1. Pengiraan Statistik Asas
       let totalSubjects = 0, countLulus = 0, countCemerlang = 0, countIntervensiStud = 0;
       let subjectStats = {}; 
       let tpDist = {1:0, 2:0, 3:0, 4:0, 5:0, 6:0};
@@ -449,7 +535,6 @@
         let studentTotalScore = 0;
         let studentSubjCount = 0;
 
-        // Init class stats
         if(!classStats[student.kelas]) classStats[student.kelas] = { sum:0, count:0, tpDist: {1:0, 2:0, 3:0, 4:0, 5:0, 6:0} };
 
         for (let sub in student.scores) {
@@ -491,7 +576,7 @@
       document.getElementById('lap-total').textContent = filteredData.length;
       document.getElementById('lap-lulus').textContent = ((countLulus / totalSubjects) * 100).toFixed(1) + '%';
       document.getElementById('lap-cemerlang').textContent = ((countCemerlang / totalSubjects) * 100).toFixed(1) + '%';
-      document.getElementById('lap-gagal').textContent = countIntervensiStud; // Jumlah unik murid berisiko
+      document.getElementById('lap-gagal').textContent = countIntervensiStud; 
 
       // 2. Ranking & Susunan Data
       let sortedSubjects = Object.keys(subjectStats).map(sub => {
@@ -509,7 +594,7 @@
       let rankSubHTML = '';
       sortedSubjects.forEach((sub, i) => {
         let color = i === sortedSubjects.length-1 ? 'red' : 'emerald';
-        rankSubHTML += `<div class="flex justify-between items-center p-2 bg-slate-50 rounded"><span class="font-medium text-slate-700">${i+1}. ${sub.name}</span><span class="font-bold text-${color}-600">${sub.avg.toFixed(2)}</span></div>`;
+        rankSubHTML += `<div class="flex justify-between items-center p-2 bg-slate-50 rounded border border-slate-100"><span class="font-medium text-slate-700">${i+1}. ${sub.name}</span><span class="font-bold text-${color}-600">${sub.avg.toFixed(2)}</span></div>`;
       });
       document.getElementById('lap-ranking-subjek').innerHTML = rankSubHTML;
 
@@ -517,7 +602,7 @@
       let pingat = ['🥇', '🥈', '🥉'];
       sortedClasses.forEach((cls, i) => {
         let icon = i < 3 ? pingat[i] : `${i+1}.`;
-        rankClassHTML += `<div class="flex justify-between items-center p-2 bg-slate-50 rounded"><span class="font-medium text-slate-700">${icon} ${cls.name}</span><span class="font-bold text-emerald-600">${cls.avg.toFixed(2)}</span></div>`;
+        rankClassHTML += `<div class="flex justify-between items-center p-2 bg-slate-50 rounded border border-slate-100"><span class="font-medium text-slate-700">${icon} ${cls.name}</span><span class="font-bold text-emerald-600">${cls.avg.toFixed(2)}</span></div>`;
       });
       document.getElementById('lap-ranking-kelas').innerHTML = rankClassHTML;
 
@@ -526,20 +611,20 @@
       let interHTML = '';
       interventionList.forEach(item => {
         let badge = item.failScore === 1 ? 'tp1' : 'tp2';
-        interHTML += `<tr class="border-b"><td class="py-2">${item.nama}</td><td>${item.kelas}</td><td>${item.failedSub}</td><td><span class="tp-badge ${badge}">TP${item.failScore}</span></td></tr>`;
+        interHTML += `<tr class="border-b"><td class="py-2">${item.nama}</td><td>${item.kelas}</td><td class="font-medium text-slate-600">${item.failedSub}</td><td><span class="tp-badge ${badge}">TP${item.failScore}</span></td></tr>`;
       });
-      document.getElementById('lap-table-intervensi').innerHTML = interHTML || `<tr><td colspan="4" class="text-center py-4 text-slate-400">Tiada murid intervensi</td></tr>`;
+      document.getElementById('lap-table-intervensi').innerHTML = interHTML || `<tr><td colspan="4" class="text-center py-6 text-slate-400 font-medium">✨ Tahniah! Tiada murid yang memerlukan intervensi untuk carian ini.</td></tr>`;
 
       // Render AI Insight Generative Text
-      let aiText = `Berdasarkan analisis terkini, pencapaian keseluruhan berada pada tahap <strong>${((countLulus / totalSubjects) * 100).toFixed(1)}% menguasai</strong>. `;
+      let aiText = `Berdasarkan analisis data pangkalan terkini, pencapaian keseluruhan murid berada pada kadar <strong>${((countLulus / totalSubjects) * 100).toFixed(1)}% tahap menguasai (Lulus)</strong>. `;
       if (countIntervensiStud > 0) {
-        aiText += `Walau bagaimanapun, perhatian serius perlu diberikan kepada subjek <strong>${subjekLemah.name}</strong> dengan purata kelas terendah (${subjekLemah.avg.toFixed(2)}). `;
-        aiText += `Terdapat <strong>${countIntervensiStud} murid</strong> yang memerlukan program intervensi/pemulihan segera. `;
+        aiText += `Walau bagaimanapun, tumpuan serius perlu diberikan kepada subjek <strong>${subjekLemah.name}</strong> yang merekodkan purata TP terendah (${subjekLemah.avg.toFixed(2)}). `;
+        aiText += `Terdapat sejumlah <strong>${countIntervensiStud} murid</strong> yang telah dikenal pasti berada pada tahap kritikal dan disyorkan untuk menyertai program pemulihan/intervensi secara berfokus. `;
       } else {
-        aiText += `Syabas! Tiada murid di tahap intervensi. Fokus seterusnya adalah pengayaan bagi mengekalkan prestasi ini. `;
+        aiText += `Kecemerlangan dapat dilihat dengan jelas apabila tiada murid yang berada di tahap intervensi. Guru-guru digalakkan untuk meneruskan modul pengayaan berprestasi tinggi. `;
       }
       if(sortedClasses.length > 1) {
-          aiText += `Kelas <strong>${sortedClasses[0].name}</strong> menunjukkan potensi terbaik manakala sokongan pentadbiran perlu difokuskan pada kelas ${sortedClasses[sortedClasses.length-1].name}.`;
+          aiText += `Penyelarasan amalan terbaik dari kelas <strong>${sortedClasses[0].name}</strong> (purata tertinggi) boleh diaplikasikan kepada kelas-kelas lain bagi menaikkan purata pencapaian seluruh sekolah.`;
       }
       document.getElementById('lap-ai-insight').innerHTML = aiText;
 
@@ -547,7 +632,7 @@
       if(charts.dashSubject) charts.dashSubject.destroy();
       charts.dashSubject = new Chart(document.getElementById('chart-dash-subject'), {
         type: 'bar',
-        data: { labels: sortedSubjects.map(s=>s.name), datasets: [{ label: 'Purata TP', data: sortedSubjects.map(s=>s.avg), backgroundColor: '#10b981', borderRadius: 4 }] },
+        data: { labels: sortedSubjects.map(s=>s.name), datasets: [{ label: 'Purata TP', data: sortedSubjects.map(s=>s.avg), backgroundColor: '#10b981', borderRadius: 6 }] },
         options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { max: 6 } } }
       });
 
@@ -555,7 +640,7 @@
       charts.dashPie = new Chart(document.getElementById('chart-dash-pie'), {
         type: 'doughnut',
         data: { labels: ['TP1', 'TP2', 'TP3', 'TP4', 'TP5', 'TP6'], datasets: [{ data: [tpDist[1], tpDist[2], tpDist[3], tpDist[4], tpDist[5], tpDist[6]], backgroundColor: ['#ef4444', '#f97316', '#f59e0b', '#84cc16', '#10b981', '#059669'], borderWidth: 0 }] },
-        options: { responsive: true, maintainAspectRatio: false, cutout: '60%', plugins: { legend: { position: 'right' } } }
+        options: { responsive: true, maintainAspectRatio: false, cutout: '65%', plugins: { legend: { position: 'right' } } }
       });
 
       if(charts.lapKelas) charts.lapKelas.destroy();
@@ -564,9 +649,9 @@
         data: {
           labels: sortedClasses.map(c=>c.name),
           datasets: [
-            { label: 'Belum Menguasai (TP1-2)', data: sortedClasses.map(c => c.tpData[1]+c.tpData[2]), backgroundColor: '#ef4444' },
-            { label: 'Menguasai (TP3-4)', data: sortedClasses.map(c => c.tpData[3]+c.tpData[4]), backgroundColor: '#f59e0b' },
-            { label: 'Cemerlang (TP5-6)', data: sortedClasses.map(c => c.tpData[5]+c.tpData[6]), backgroundColor: '#10b981' }
+            { label: 'Belum Menguasai (TP1-2)', data: sortedClasses.map(c => c.tpData[1]+c.tpData[2]), backgroundColor: '#ef4444', borderRadius: 4 },
+            { label: 'Menguasai (TP3-4)', data: sortedClasses.map(c => c.tpData[3]+c.tpData[4]), backgroundColor: '#f59e0b', borderRadius: 4 },
+            { label: 'Cemerlang (TP5-6)', data: sortedClasses.map(c => c.tpData[5]+c.tpData[6]), backgroundColor: '#10b981', borderRadius: 4 }
           ]
         },
         options: { responsive: true, maintainAspectRatio: false, scales: { x: { stacked: true }, y: { stacked: true } } }
