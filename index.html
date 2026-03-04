@@ -3,109 +3,173 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Dashboard Analisis PBD</title>
+  <title>Sistem Analisis PBD Sekolah</title>
   <script src="https://cdn.tailwindcss.com/3.4.17"></script>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  
+  <script>window.PBD_DATA_GITHUB = null;</script>
+  <script src="data.js" onerror="console.log('Tiada fail data.js dijumpai di pelayan, menggunakan Local Storage.')"></script>
+
   <style>
     * { font-family: 'Poppins', sans-serif; }
     .card-shadow { box-shadow: 0 4px 20px rgba(0, 51, 102, 0.08); }
+    .card-hover { transition: all 0.3s ease; }
+    .card-hover:hover { transform: translateY(-4px); box-shadow: 0 8px 30px rgba(0, 51, 102, 0.12); }
     .gradient-header { background: linear-gradient(135deg, #0a1628 0%, #1e3a5f 50%, #0d2137 100%); }
+    .gradient-accent { background: linear-gradient(135deg, #10b981 0%, #059669 100%); }
+    .tp-badge { display: inline-block; padding: 0.25rem 0.75rem; border-radius: 9999px; font-weight: bold; font-size: 0.75rem; color: white; }
+    .tp1 { background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%); }
+    .tp2 { background: linear-gradient(135deg, #f97316 0%, #ea580c 100%); }
+    .tp3 { background: linear-gradient(135deg, #eab308 0%, #ca8a04 100%); }
+    .tp4 { background: linear-gradient(135deg, #84cc16 0%, #65a30d 100%); }
+    .tp5 { background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%); }
+    .tp6 { background: linear-gradient(135deg, #10b981 0%, #059669 100%); }
     .scrollbar-thin::-webkit-scrollbar { width: 6px; height: 6px; }
     .scrollbar-thin::-webkit-scrollbar-track { background: #f1f5f9; border-radius: 3px; }
     .scrollbar-thin::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
-    .tp-badge { display: inline-block; padding: 0.25rem 0.75rem; border-radius: 9999px; font-weight: bold; font-size: 0.75rem; color: white; }
-    .tp1, .tp2 { background-color: #ef4444; } /* Merah */
-    .tp3 { background-color: #f59e0b; } /* Oren */
-    .tp4 { background-color: #84cc16; } /* Hijau Muda */
-    .tp5, .tp6 { background-color: #10b981; } /* Zamrud */
   </style>
 </head>
-<body class="h-full bg-slate-50 overflow-auto scrollbar-thin">
-  <div id="app-wrapper" class="w-full min-h-full flex flex-col">
-    
-    <header class="text-white sticky top-0 z-50 gradient-header shadow-lg">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
-          <div class="flex items-center gap-4">
-            <div class="w-12 h-12 bg-white/10 rounded-xl flex items-center justify-center border border-white/20">
-              <svg class="w-7 h-7 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-              </svg>
-            </div>
-            <div>
-              <h1 class="text-xl font-bold tracking-tight">Sistem Analisis PBD Pintar</h1>
-              <p class="text-emerald-300 text-xs">Muat Naik Pukal (Bulk Upload) Excel Automatik</p>
-            </div>
+<body class="h-full bg-slate-50 overflow-auto scrollbar-thin flex flex-col">
+  
+  <header class="text-white sticky top-0 z-50 gradient-header shadow-lg">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+      <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div class="flex items-center gap-4">
+          <div class="w-12 h-12 bg-white/10 rounded-xl flex items-center justify-center border border-white/20">
+            <svg class="w-7 h-7 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+            </svg>
           </div>
-          <div class="flex gap-2">
-            <button id="nav-dashboard" onclick="switchTab('dashboard')" class="px-4 py-2 rounded-lg bg-emerald-500/30 border border-emerald-400/50 text-white text-sm font-medium transition-all">📊 Dashboard</button> 
-            <button id="nav-admin" onclick="switchTab('admin')" class="px-4 py-2 rounded-lg border border-white/20 text-white/70 text-sm font-medium hover:bg-white/10 transition-all">⚙️ Pengurusan Data</button>
-          </div>
-        </div>
-      </div>
-    </header>
-
-    <main id="dashboard-view" class="flex-grow max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full">
-      
-      <div class="bg-white p-4 rounded-xl card-shadow mb-6 flex flex-wrap gap-4 items-end border border-slate-200">
-        <div>
-          <label class="block text-xs font-semibold text-slate-500 mb-1">Tapis Fasa</label>
-          <select id="filter-fasa" onchange="renderDashboard()" class="bg-slate-50 border border-slate-300 text-slate-800 text-sm rounded-lg focus:ring-emerald-500 focus:border-emerald-500 block w-full p-2.5">
-            <option value="Semua">Semua Fasa</option>
-            <option value="Fasa 1">Fasa 1</option>
-            <option value="Fasa 2">Fasa 2</option>
-          </select>
-        </div>
-        <div>
-          <label class="block text-xs font-semibold text-slate-500 mb-1">Tapis Kelas</label>
-          <select id="filter-kelas" onchange="renderDashboard()" class="bg-slate-50 border border-slate-300 text-slate-800 text-sm rounded-lg focus:ring-emerald-500 focus:border-emerald-500 block w-full p-2.5">
-            <option value="Semua">Semua Kelas</option>
-            </select>
-        </div>
-        <div class="ml-auto">
-          <p class="text-xs text-slate-500">Jumlah Rekod Data:</p>
-          <p id="stat-total-records" class="text-xl font-bold text-emerald-600">0 Murid</p>
-        </div>
-      </div>
-
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-        <div class="bg-white rounded-2xl p-5 card-shadow border border-slate-100">
-          <p class="text-sm font-medium text-slate-500">Kadar Menguasai (TP3-TP6)</p>
-          <h3 id="stat-lulus" class="text-3xl font-bold text-emerald-500 mt-2">0%</h3>
-        </div>
-        <div class="bg-white rounded-2xl p-5 card-shadow border border-slate-100">
-          <p class="text-sm font-medium text-slate-500">Kadar Cemerlang (TP5-TP6)</p>
-          <h3 id="stat-cemerlang" class="text-3xl font-bold text-blue-500 mt-2">0%</h3>
-        </div>
-        <div class="bg-white rounded-2xl p-5 card-shadow border border-red-100">
-          <p class="text-sm font-medium text-red-500">Perlu Intervensi (TP1-TP2)</p>
-          <h3 id="stat-gagal" class="text-3xl font-bold text-red-500 mt-2">0</h3>
-        </div>
-        <div class="bg-white rounded-2xl p-5 card-shadow border border-slate-100">
-          <p class="text-sm font-medium text-slate-500">Purata Keseluruhan</p>
-          <h3 id="stat-purata" class="text-3xl font-bold text-slate-700 mt-2">0.00</h3>
-        </div>
-      </div>
-
-      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-        <div class="bg-white p-5 rounded-2xl card-shadow border border-slate-100">
-          <h3 class="text-sm font-bold text-slate-700 mb-4">Analisis Keseluruhan Subjek (Purata TP)</h3>
-          <div class="h-64 relative"><canvas id="chartSubject"></canvas></div>
-        </div>
-        <div class="bg-white p-5 rounded-2xl card-shadow border border-slate-100">
-          <h3 class="text-sm font-bold text-slate-700 mb-4">Agihan Tahap Penguasaan (Semua Subjek)</h3>
-          <div class="h-64 relative"><canvas id="chartPie"></canvas></div>
-        </div>
-      </div>
-
-      <div class="bg-white rounded-2xl card-shadow border border-slate-100 overflow-hidden mb-8">
-        <div class="p-5 border-b border-slate-100 flex justify-between items-center bg-red-50/30">
           <div>
-            <h3 class="text-base font-bold text-slate-800">Senarai Nama Murid Intervensi (TP1 & TP2)</h3>
+            <h1 class="text-xl font-bold tracking-tight">Sistem Analisis PBD Pintar</h1>
+            <p class="text-emerald-300 text-xs">Janaan Automatik Bersepadu</p>
           </div>
         </div>
+        <div class="flex flex-wrap gap-2">
+          <button id="nav-dashboard" onclick="switchTab('dashboard')" class="px-4 py-2 rounded-lg bg-emerald-500/30 border border-emerald-400/50 text-white text-sm font-medium transition-all">📊 Dashboard Ringkas</button> 
+          <button id="nav-laporan" onclick="switchTab('laporan')" class="px-4 py-2 rounded-lg border border-white/20 text-white/70 text-sm font-medium hover:bg-white/10 transition-all">📈 Laporan Lengkap</button>
+          <button id="nav-admin" onclick="switchTab('admin')" class="px-4 py-2 rounded-lg border border-white/20 text-white/70 text-sm font-medium hover:bg-white/10 transition-all">⚙️ Pengurusan Data</button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <div id="global-filters" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 w-full">
+    <div class="bg-white p-4 rounded-xl card-shadow flex flex-wrap gap-4 items-end border border-slate-200">
+      <div>
+        <label class="block text-xs font-semibold text-slate-500 mb-1">Tapis Fasa</label>
+        <select id="filter-fasa" onchange="processAllViews()" class="bg-slate-50 border border-slate-300 text-slate-800 text-sm rounded-lg focus:ring-emerald-500 focus:border-emerald-500 block w-full p-2.5">
+          <option value="Semua">Semua Fasa</option>
+          <option value="Fasa 1">Fasa 1</option>
+          <option value="Fasa 2">Fasa 2</option>
+        </select>
+      </div>
+      <div>
+        <label class="block text-xs font-semibold text-slate-500 mb-1">Tapis Kelas</label>
+        <select id="filter-kelas" onchange="processAllViews()" class="bg-slate-50 border border-slate-300 text-slate-800 text-sm rounded-lg focus:ring-emerald-500 focus:border-emerald-500 block w-full p-2.5">
+          <option value="Semua">Semua Kelas</option>
+        </select>
+      </div>
+      <div class="ml-auto text-right">
+        <p class="text-xs text-slate-500">Jumlah Rekod (Ditapis):</p>
+        <p id="stat-total-records" class="text-xl font-bold text-emerald-600">0 Murid</p>
+      </div>
+    </div>
+  </div>
+
+  <main id="dashboard-view" class="flex-grow max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 w-full">
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+      <div class="bg-white rounded-2xl p-5 card-shadow border border-slate-100">
+        <p class="text-sm font-medium text-slate-500">Kadar Menguasai (TP3-TP6)</p>
+        <h3 id="dash-lulus" class="text-3xl font-bold text-emerald-500 mt-2">0%</h3>
+      </div>
+      <div class="bg-white rounded-2xl p-5 card-shadow border border-slate-100">
+        <p class="text-sm font-medium text-slate-500">Kadar Cemerlang (TP5-TP6)</p>
+        <h3 id="dash-cemerlang" class="text-3xl font-bold text-blue-500 mt-2">0%</h3>
+      </div>
+      <div class="bg-white rounded-2xl p-5 card-shadow border border-red-100">
+        <p class="text-sm font-medium text-red-500">Jumlah Intervensi (Subjek)</p>
+        <h3 id="dash-gagal" class="text-3xl font-bold text-red-500 mt-2">0</h3>
+      </div>
+      <div class="bg-white rounded-2xl p-5 card-shadow border border-slate-100">
+        <p class="text-sm font-medium text-slate-500">Purata Keseluruhan (GPS)</p>
+        <h3 id="dash-purata" class="text-3xl font-bold text-slate-700 mt-2">0.00</h3>
+      </div>
+    </div>
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+      <div class="bg-white p-5 rounded-2xl card-shadow border border-slate-100">
+        <h3 class="text-sm font-bold text-slate-700 mb-4">Purata Tahap Penguasaan Mengikut Subjek</h3>
+        <div class="h-64 relative"><canvas id="chart-dash-subject"></canvas></div>
+      </div>
+      <div class="bg-white p-5 rounded-2xl card-shadow border border-slate-100">
+        <h3 class="text-sm font-bold text-slate-700 mb-4">Agihan TP Keseluruhan</h3>
+        <div class="h-64 relative"><canvas id="chart-dash-pie"></canvas></div>
+      </div>
+    </div>
+  </main>
+
+  <main id="laporan-view" class="hidden flex-grow max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 w-full space-y-8">
+    
+    <section>
+      <div class="flex items-center gap-3 mb-4">
+        <div class="w-1 h-8 rounded-full gradient-accent"></div>
+        <h2 class="text-xl font-bold text-slate-800">Ringkasan Eksekutif</h2>
+      </div>
+      <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+        <div class="bg-white rounded-2xl p-4 card-shadow border border-slate-100 text-center">
+          <p class="text-xs text-slate-500 mb-1">Jumlah Murid Terlibat</p>
+          <p id="lap-total" class="text-2xl font-bold text-slate-800">0</p>
+        </div>
+        <div class="bg-white rounded-2xl p-4 card-shadow border border-slate-100 text-center">
+          <p class="text-xs text-slate-500 mb-1">Peratus Lulus (TP3-TP6)</p>
+          <p id="lap-lulus" class="text-2xl font-bold text-emerald-600">0%</p>
+        </div>
+        <div class="bg-white rounded-2xl p-4 card-shadow border border-slate-100 text-center">
+          <p class="text-xs text-slate-500 mb-1">Peratus Cemerlang (TP5-TP6)</p>
+          <p id="lap-cemerlang" class="text-2xl font-bold text-teal-600">0%</p>
+        </div>
+        <div class="bg-white rounded-2xl p-4 card-shadow border border-red-100 text-center">
+          <p class="text-xs text-slate-500 mb-1">Murid Intervensi (TP1-TP2)</p>
+          <p id="lap-gagal" class="text-2xl font-bold text-red-500">0</p>
+        </div>
+        <div class="bg-white rounded-2xl p-4 card-shadow border border-orange-100 text-center">
+          <p class="text-xs text-slate-500 mb-1">Subjek Paling Lemah</p>
+          <p id="lap-subjek-lemah" class="text-lg font-bold text-orange-600">-</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div class="bg-white rounded-2xl p-5 card-shadow border border-slate-100">
+        <h3 class="text-sm font-semibold text-slate-700 mb-4">Ranking Kelas (Berdasarkan Purata TP)</h3>
+        <div id="lap-ranking-kelas" class="space-y-3">
+          </div>
+      </div>
+      <div class="bg-white rounded-2xl p-5 card-shadow border border-slate-100">
+        <h3 class="text-sm font-semibold text-slate-700 mb-4">Ranking Subjek (Berdasarkan Purata TP)</h3>
+        <div id="lap-ranking-subjek" class="space-y-3">
+          </div>
+      </div>
+    </section>
+
+    <section>
+      <div class="flex items-center gap-3 mb-4">
+        <div class="w-1 h-8 rounded-full gradient-accent"></div>
+        <h2 class="text-xl font-bold text-slate-800">Analisis Agihan Tahap Penguasaan</h2>
+      </div>
+      <div class="bg-white p-5 rounded-2xl card-shadow border border-slate-100">
+        <div class="h-80 relative"><canvas id="chart-lap-kelas"></canvas></div>
+      </div>
+    </section>
+
+    <section>
+      <div class="flex items-center gap-3 mb-4">
+        <div class="w-1 h-8 rounded-full bg-red-500"></div>
+        <h2 class="text-xl font-bold text-slate-800">Senarai Intervensi (TP1 & TP2)</h2>
+      </div>
+      <div class="bg-white rounded-2xl card-shadow border border-slate-100 overflow-hidden">
         <div class="overflow-x-auto">
           <table class="w-full text-left border-collapse">
             <thead>
@@ -114,168 +178,157 @@
                 <th class="px-6 py-3 font-semibold">Kelas</th>
                 <th class="px-6 py-3 font-semibold">Subjek</th>
                 <th class="px-6 py-3 font-semibold">Tahap</th>
-                <th class="px-6 py-3 font-semibold">Fasa</th>
               </tr>
             </thead>
-            <tbody id="table-intervensi" class="text-sm divide-y divide-slate-100">
-              <tr><td colspan="5" class="px-6 py-8 text-center text-slate-400">Tiada data direkodkan.</td></tr>
-            </tbody>
+            <tbody id="lap-table-intervensi" class="text-sm divide-y divide-slate-100">
+              </tbody>
           </table>
         </div>
       </div>
-    </main>
+    </section>
 
-    <main id="admin-view" class="hidden flex-grow max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full">
-      <div class="bg-white rounded-2xl card-shadow p-6 md:p-8 border border-slate-200">
-        <div class="mb-6 pb-6 border-b border-slate-100 flex justify-between items-center">
-          <div>
-            <h2 class="text-xl font-bold text-slate-800">Muat Naik Data Mentah Excel (Pukal)</h2>
-            <p class="text-sm text-slate-500 mt-1">Sistem akan gunakan <strong>Nama Fail</strong> sebagai Nama Kelas secara automatik.</p>
-          </div>
-          <button onclick="clearData()" class="px-4 py-2 bg-red-100 text-red-600 text-xs font-bold rounded-lg hover:bg-red-200 transition">🗑️ Padam Semua Data</button>
+    <section>
+      <div class="bg-gradient-to-br from-slate-800 to-slate-900 rounded-2xl p-6 card-shadow text-white">
+        <h3 class="text-lg font-bold text-emerald-400 mb-3">Ringkasan Analisis Profesional (Janaan Sistem)</h3>
+        <div id="lap-ai-insight" class="space-y-3 text-sm text-slate-200 leading-relaxed">
+          Sila muat naik data untuk menjana ringkasan profesional ini.
         </div>
+      </div>
+    </section>
+  </main>
 
-        <div class="mb-6">
-          <label class="block text-sm font-semibold text-slate-700 mb-2">1. Pilih Fasa untuk Semua Fail Ini</label>
-          <select id="input-fasa" class="bg-slate-50 border border-slate-300 text-slate-800 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full md:w-1/2 p-3">
-            <option value="Fasa 1">Fasa 1</option>
-            <option value="Fasa 2">Fasa 2</option>
-          </select>
+  <main id="admin-view" class="hidden flex-grow max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full">
+    
+    <div class="bg-blue-50 border border-blue-200 rounded-xl p-5 mb-6 flex items-start gap-4">
+      <span class="text-2xl">💾</span>
+      <div>
+        <h3 class="font-bold text-blue-800">Penyimpanan Data Global (Untuk Akses Semua Peranti)</h3>
+        <p class="text-sm text-blue-700 mt-1">Selepas Cikgu siap muat naik fail-fail Excel, klik butang "Muat Turun Fail Data" di bawah. Kemudian, masukkan fail <code>data.js</code> tersebut ke dalam GitHub Cikgu. Data akan terpapar untuk PGB dan rakan guru lain secara automatik!</p>
+        <button onclick="downloadDataJS()" class="mt-3 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold rounded shadow transition">⬇️ Muat Turun Fail Data (data.js)</button>
+      </div>
+    </div>
+
+    <div class="bg-white rounded-2xl card-shadow p-6 md:p-8 border border-slate-200">
+      <div class="mb-6 pb-6 border-b border-slate-100 flex justify-between items-center">
+        <div>
+          <h2 class="text-xl font-bold text-slate-800">Muat Naik Data Mentah Excel (Pukal)</h2>
+          <p class="text-sm text-slate-500 mt-1">Sistem akan gunakan <strong>Nama Fail</strong> sebagai Nama Kelas (Cth: 5 Topaz.xlsx).</p>
         </div>
-
-        <div class="mb-6">
-          <label class="block text-sm font-semibold text-slate-700 mb-2">2. Pilih Fail Excel (Boleh pilih banyak terus)</label>
-          <div class="border-2 border-dashed border-slate-300 rounded-xl p-8 text-center bg-slate-50 hover:bg-slate-100 transition">
-            <input type="file" id="file-upload" accept=".xls,.xlsx,.csv,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" multiple class="hidden" onchange="handleFileSelect(event)">
-            <button onclick="document.getElementById('file-upload').click()" class="inline-flex items-center gap-2 px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition shadow-md">
-              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
-              Klik untuk cari fail-fail Excel
-            </button>
-            <div id="file-name-display" class="text-sm text-slate-500 mt-4">Tiada fail dipilih</div>
-          </div>
-        </div>
-
-        <button onclick="processUpload()" class="w-full py-4 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl shadow-lg transition text-lg flex justify-center items-center gap-2">
-          ⚙️ Proses dan Simpan Semua Data
-        </button>
+        <button onclick="clearData()" class="px-4 py-2 bg-red-100 text-red-600 text-xs font-bold rounded-lg hover:bg-red-200 transition">🗑️ Padam Semua (Reset)</button>
       </div>
 
-      <div class="mt-8 bg-blue-50 rounded-xl p-5 border border-blue-100">
-        <h4 class="font-bold text-blue-800 text-sm mb-2">💡 Tips Penting Untuk Cikgu Naimullah:</h4>
-        <ul class="text-xs text-blue-700 space-y-1 list-disc pl-4">
-          <li><strong>Penting:</strong> Namakan fail Excel mengikut nama kelas sebelum *upload*. Contohnya: rename fail kepada <strong>5 Topaz.xlsx</strong>.</li>
-          <li>Sistem akan baca perkataan "5 Topaz" tersebut dan jadikannya nama kelas di Dashboard.</li>
-          <li>Cikgu boleh <i>highlight</i> (pilih) 5 atau 10 fail kelas sekaligus semasa memilih fail!</li>
-        </ul>
+      <div class="mb-6">
+        <label class="block text-sm font-semibold text-slate-700 mb-2">1. Pilih Fasa untuk Semua Fail Ini</label>
+        <select id="input-fasa" class="bg-slate-50 border border-slate-300 text-slate-800 text-sm rounded-lg focus:ring-emerald-500 focus:border-emerald-500 block w-full md:w-1/2 p-3">
+          <option value="Fasa 1">Fasa 1</option>
+          <option value="Fasa 2">Fasa 2</option>
+        </select>
       </div>
-    </main>
 
-    <footer class="bg-slate-900 text-slate-400 py-6 text-center text-xs mt-auto">
-      <div class="max-w-7xl mx-auto px-4">
-        <p>© <span id="current-year"></span> Sistem Analisis PBD Bersepadu | Dibangunkan untuk Kegunaan Sekolah</p>
+      <div class="mb-6">
+        <label class="block text-sm font-semibold text-slate-700 mb-2">2. Pilih Fail Excel (Sokongan pelbagai fail serentak)</label>
+        <div class="border-2 border-dashed border-slate-300 rounded-xl p-8 text-center bg-slate-50 hover:bg-slate-100 transition">
+          <input type="file" id="file-upload" accept=".xls,.xlsx,.csv" multiple class="hidden" onchange="handleFileSelect(event)">
+          <button onclick="document.getElementById('file-upload').click()" class="inline-flex items-center gap-2 px-6 py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-medium rounded-lg transition shadow-md">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+            Klik untuk cari fail Excel
+          </button>
+          <div id="file-name-display" class="text-sm text-slate-500 mt-4">Tiada fail dipilih</div>
+        </div>
       </div>
-    </footer>
-  </div>
+
+      <button onclick="processUpload()" class="w-full py-4 bg-slate-800 hover:bg-slate-900 text-white font-bold rounded-xl shadow-lg transition text-lg">
+        Sahkan & Proses Ke Dalam Sistem
+      </button>
+    </div>
+  </main>
 
   <script>
-    document.getElementById('current-year').textContent = new Date().getFullYear();
-
-    // Chart instances
-    let chartSubjectInst = null;
-    let chartPieInst = null;
-
-    // Data Storage
-    let appData = JSON.parse(localStorage.getItem('pbdSistemData')) || [];
+    // --- PENYEDIAAN DATA & CARTA ---
+    let appData = [];
     const knownSubjects = ['BM', 'BI', 'MM', 'SAINS', 'SEJ', 'PAI', 'PM', 'BC', 'BT', 'BIN', 'RBT', 'AR', 'PJPK', 'PMZ', 'PSV'];
+    
+    let charts = {
+      dashSubject: null,
+      dashPie: null,
+      lapKelas: null
+    };
 
     window.onload = () => {
+      // Logic keutamaan Data: Guna fail data.js (dari GitHub) jika wujud. Jika tak, guna Local Storage browser.
+      if (window.PBD_DATA_GITHUB && window.PBD_DATA_GITHUB.length > 0) {
+        appData = window.PBD_DATA_GITHUB;
+        console.log("Berjaya memuat turun pangkalan data dari data.js");
+      } else {
+        appData = JSON.parse(localStorage.getItem('pbdSistemData')) || [];
+      }
+
       updateFilterDropdowns();
-      renderDashboard();
+      processAllViews();
     };
 
     function switchTab(tab) {
+      document.getElementById('dashboard-view').classList.add('hidden');
+      document.getElementById('laporan-view').classList.add('hidden');
+      document.getElementById('admin-view').classList.add('hidden');
+      document.getElementById('global-filters').classList.add('hidden');
+      
+      const navs = ['nav-dashboard', 'nav-laporan', 'nav-admin'];
+      navs.forEach(n => {
+        document.getElementById(n).className = "px-4 py-2 rounded-lg border border-white/20 text-white/70 text-sm font-medium hover:bg-white/10 transition-all";
+      });
+
+      const activeBtnClass = "px-4 py-2 rounded-lg bg-emerald-500/30 border border-emerald-400/50 text-white text-sm font-medium transition-all";
+
       if (tab === 'dashboard') {
         document.getElementById('dashboard-view').classList.remove('hidden');
-        document.getElementById('admin-view').classList.add('hidden');
-        document.getElementById('nav-dashboard').classList.add('bg-emerald-500/30', 'border-emerald-400/50', 'text-white');
-        document.getElementById('nav-dashboard').classList.remove('border-white/20', 'text-white/70');
-        document.getElementById('nav-admin').classList.remove('bg-emerald-500/30', 'border-emerald-400/50', 'text-white');
-        document.getElementById('nav-admin').classList.add('border-white/20', 'text-white/70');
-        updateFilterDropdowns();
-        renderDashboard();
+        document.getElementById('global-filters').classList.remove('hidden');
+        document.getElementById('nav-dashboard').className = activeBtnClass;
+      } else if (tab === 'laporan') {
+        document.getElementById('laporan-view').classList.remove('hidden');
+        document.getElementById('global-filters').classList.remove('hidden');
+        document.getElementById('nav-laporan').className = activeBtnClass;
       } else {
-        document.getElementById('dashboard-view').classList.add('hidden');
         document.getElementById('admin-view').classList.remove('hidden');
-        document.getElementById('nav-admin').classList.add('bg-emerald-500/30', 'border-emerald-400/50', 'text-white');
-        document.getElementById('nav-admin').classList.remove('border-white/20', 'text-white/70');
-        document.getElementById('nav-dashboard').classList.remove('bg-emerald-500/30', 'border-emerald-400/50', 'text-white');
-        document.getElementById('nav-dashboard').classList.add('border-white/20', 'text-white/70');
+        document.getElementById('nav-admin').className = activeBtnClass;
       }
+      
+      if(tab !== 'admin') processAllViews();
     }
 
-    // --- ADMIN / UPLOAD PUKAL LOGIC ---
+    // --- UPLOAD LOGIC ---
     let selectedFiles = [];
-
     function handleFileSelect(event) {
       selectedFiles = Array.from(event.target.files);
       if (selectedFiles.length > 0) {
-        let fileNames = selectedFiles.map(f => f.name).join(', ');
-        document.getElementById('file-name-display').innerHTML = `
-          <strong class="text-blue-600">${selectedFiles.length} fail sedia diproses:</strong><br>
-          <span class="text-xs text-slate-500">${fileNames}</span>
-        `;
-      } else {
-        document.getElementById('file-name-display').textContent = 'Tiada fail dipilih';
+        document.getElementById('file-name-display').innerHTML = `<strong class="text-emerald-600">${selectedFiles.length} fail sedia diproses:</strong><br><span class="text-xs">${selectedFiles.map(f=>f.name).join(', ')}</span>`;
       }
     }
 
-    function clearData() {
-      if(confirm("AWAS! Anda pasti mahu padam SEMUA data PBD yang telah dimuat naik sebelum ini? Tindakan ini tidak boleh dipulihkan.")){
-        localStorage.removeItem('pbdSistemData');
-        appData = [];
-        alert("Data berjaya dipadamkan.");
-        updateFilterDropdowns();
-        renderDashboard();
-      }
-    }
-
-    // Fungsi Asynchronous untuk membaca pelbagai fail
     async function processUpload() {
       const fasa = document.getElementById('input-fasa').value;
-
       if (selectedFiles.length === 0) return alert("Sila pilih fail-fail Excel terlebih dahulu.");
 
       let totalAdded = 0;
-      let senaraiKelasDiproses = [];
-
       for (let file of selectedFiles) {
-        // Ekstrak nama kelas dari nama fail (Buang format .xlsx / .xls)
-        let kelas = file.name.replace(/\.[^/.]+$/, "").trim();
-        senaraiKelasDiproses.push(kelas);
-
+        let kelas = file.name.replace(/\.[^/.]+$/, "").trim(); // Buang .xlsx
         try {
           let jsonData = await readExcelAsync(file);
-          let added = parseExcelJSONBulk(jsonData, fasa, kelas);
-          totalAdded += added;
-        } catch (error) {
-          console.error("Gagal membaca fail " + file.name, error);
-        }
+          totalAdded += parseExcelJSONBulk(jsonData, fasa, kelas);
+        } catch (error) { console.error("Ralat fail " + file.name, error); }
       }
 
-      // Selepas semua fail diproses, simpan data ke storage
       localStorage.setItem('pbdSistemData', JSON.stringify(appData));
+      alert(`Selesai! ${totalAdded} rekod baharu berjaya disimpan.\nJangan lupa muat turun fail data.js jika ingin update ke GitHub.`);
       
-      alert(`Selesai! ${totalAdded} rekod baharu berjaya disimpan.\n\nKelas yang dimuat naik:\n${senaraiKelasDiproses.join(', ')}\nFasa: ${fasa}`);
-      
-      // Reset form
       document.getElementById('file-upload').value = '';
       selectedFiles = [];
       document.getElementById('file-name-display').textContent = 'Tiada fail dipilih';
-
+      
+      updateFilterDropdowns();
       switchTab('dashboard');
     }
 
-    // Tukar FileReader menjadi Promise supaya kita boleh guna 'await' di atas
     function readExcelAsync(file) {
       return new Promise((resolve, reject) => {
         const reader = new FileReader();
@@ -283,13 +336,9 @@
           try {
             const data = new Uint8Array(e.target.result);
             const workbook = XLSX.read(data, {type: 'array'});
-            const firstSheetName = workbook.SheetNames[0];
-            const worksheet = workbook.Sheets[firstSheetName];
-            const jsonData = XLSX.utils.sheet_to_json(worksheet, {raw: true, defval: ""});
-            resolve(jsonData);
-          } catch (err) {
-            reject(err);
-          }
+            const worksheet = workbook.Sheets[workbook.SheetNames[0]];
+            resolve(XLSX.utils.sheet_to_json(worksheet, {raw: true, defval: ""}));
+          } catch (err) { reject(err); }
         };
         reader.onerror = reject;
         reader.readAsArrayBuffer(file);
@@ -298,14 +347,12 @@
 
     function parseExcelJSONBulk(jsonData, fasa, kelas) {
       if (!jsonData || jsonData.length === 0) return 0;
-
       const keys = Object.keys(jsonData[0]);
       const keyNama = keys.find(k => k.toUpperCase().includes('NAMA'));
-      const keyId = keys.find(k => k.toUpperCase().includes('KID') || k.toUpperCase().includes('PENGENALAN') || k.toUpperCase().includes('ID'));
-      const keyJantina = keys.find(k => k.toUpperCase().includes('JANTINA'));
-
-      if (!keyNama) return 0; // Skip jika tiada nama dijumpai
-
+      const keyId = keys.find(k => k.toUpperCase().includes('KID') || k.toUpperCase().includes('ID'));
+      
+      if (!keyNama) return 0;
+      
       const subjectKeys = {};
       knownSubjects.forEach(sub => {
         const match = keys.find(k => k.toUpperCase().trim() === sub);
@@ -313,198 +360,216 @@
       });
 
       let addedCount = 0;
-
-      jsonData.forEach((row, index) => {
+      jsonData.forEach((row, idx) => {
         const nama = row[keyNama];
         if (!nama || String(nama).trim() === '') return;
 
-        let strId = `TIADA_ID_${index}`;
-        if (keyId && row[keyId]) {
-            strId = String(row[keyId]).replace(/[- ]/g, '').trim(); 
-        }
+        let strId = `ID_${kelas}_${idx}`;
+        if (keyId && row[keyId]) strId = String(row[keyId]).replace(/[- ]/g, '').trim();
 
-        let record = {
-          nama: String(nama).trim(),
-          id: strId,
-          jantina: keyJantina && row[keyJantina] ? String(row[keyJantina]).trim() : '',
-          kelas: kelas,
-          fasa: fasa,
-          scores: {}
-        };
+        let record = { nama: String(nama).trim(), id: strId, kelas: kelas, fasa: fasa, scores: {} };
 
         for (let sub in subjectKeys) {
           let val = String(row[subjectKeys[sub]]);
           let tpNum = parseInt(val.replace(/\D/g, ''));
-          if (!isNaN(tpNum) && tpNum >= 1 && tpNum <= 6) {
-            record.scores[sub] = tpNum;
-          }
+          if (!isNaN(tpNum) && tpNum >= 1 && tpNum <= 6) record.scores[sub] = tpNum;
         }
 
         const isDuplicate = appData.find(d => d.fasa === fasa && d.kelas === kelas && (d.id === record.id || d.nama === record.nama));
-        if(!isDuplicate) {
-           appData.push(record);
-           addedCount++;
-        }
+        if(!isDuplicate) { appData.push(record); addedCount++; }
       });
-
       return addedCount;
     }
 
-    // --- DASHBOARD LOGIC ---
+    function clearData() {
+      if(confirm("Padam SEMUA data?")) {
+        localStorage.removeItem('pbdSistemData');
+        appData = [];
+        updateFilterDropdowns();
+        processAllViews();
+        alert("Data dipadam.");
+      }
+    }
+
+    // Helah Muat Turun Data As JS File
+    function downloadDataJS() {
+      if(appData.length === 0) return alert("Tiada data untuk dimuat turun.");
+      const jsContent = `window.PBD_DATA_GITHUB = ${JSON.stringify(appData)};`;
+      const blob = new Blob([jsContent], { type: 'text/javascript' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'data.js';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }
+
+    // --- ANALISIS & LOGIK PAPARAN ---
     function updateFilterDropdowns() {
       const kelasSelect = document.getElementById('filter-kelas');
       const uniqueKelas = [...new Set(appData.map(d => d.kelas))].sort();
       const currentVal = kelasSelect.value;
       
       let html = `<option value="Semua">Semua Kelas</option>`;
-      uniqueKelas.forEach(k => {
-        html += `<option value="${k}">${k}</option>`;
-      });
+      uniqueKelas.forEach(k => html += `<option value="${k}">${k}</option>`);
       kelasSelect.innerHTML = html;
       if(uniqueKelas.includes(currentVal)) kelasSelect.value = currentVal;
     }
 
-    function renderDashboard() {
+    function processAllViews() {
       const fasaFilter = document.getElementById('filter-fasa').value;
       const kelasFilter = document.getElementById('filter-kelas').value;
 
       let filteredData = appData.filter(d => {
-        const matchFasa = fasaFilter === 'Semua' || d.fasa === fasaFilter;
-        const matchKelas = kelasFilter === 'Semua' || d.kelas === kelasFilter;
-        return matchFasa && matchKelas;
+        return (fasaFilter === 'Semua' || d.fasa === fasaFilter) && 
+               (kelasFilter === 'Semua' || d.kelas === kelasFilter);
       });
 
       document.getElementById('stat-total-records').textContent = `${filteredData.length} Murid`;
-
+      
       if(filteredData.length === 0) {
-        resetDashboardUI();
+        // Reset all text to 0
+        document.querySelectorAll('h3[id^="dash-"], p[id^="lap-"]').forEach(el => el.textContent = el.id.includes('subjek') ? '-' : '0');
+        document.getElementById('lap-table-intervensi').innerHTML = `<tr><td colspan="4" class="text-center py-4">Tiada data</td></tr>`;
+        Object.values(charts).forEach(c => { if(c) c.destroy(); });
         return;
       }
 
-      let totalSubjectsRecorded = 0;
-      let countLulus = 0; 
-      let countCemerlang = 0; 
-      let countGagal = 0; 
-      let totalTPScore = 0;
-
-      let subjectTotals = {}; 
-      let tpDistribution = {1:0, 2:0, 3:0, 4:0, 5:0, 6:0};
+      // 1. Pengiraan Statistik Asas
+      let totalSubjects = 0, countLulus = 0, countCemerlang = 0, countIntervensiStud = 0;
+      let subjectStats = {}; 
+      let tpDist = {1:0, 2:0, 3:0, 4:0, 5:0, 6:0};
+      let classStats = {};
       let interventionList = [];
 
       filteredData.forEach(student => {
+        let hasIntervensi = false;
+        let studentTotalScore = 0;
+        let studentSubjCount = 0;
+
+        // Init class stats
+        if(!classStats[student.kelas]) classStats[student.kelas] = { sum:0, count:0, tpDist: {1:0, 2:0, 3:0, 4:0, 5:0, 6:0} };
+
         for (let sub in student.scores) {
           let score = student.scores[sub];
-          totalSubjectsRecorded++;
-          totalTPScore += score;
-          tpDistribution[score]++;
+          totalSubjects++;
+          studentTotalScore += score;
+          studentSubjCount++;
+          tpDist[score]++;
+          classStats[student.kelas].tpDist[score]++;
+
+          if(!subjectStats[sub]) subjectStats[sub] = {sum: 0, count: 0};
+          subjectStats[sub].sum += score;
+          subjectStats[sub].count++;
 
           if (score >= 3) countLulus++;
           if (score >= 5) countCemerlang++;
           if (score <= 2) {
-            countGagal++;
+            hasIntervensi = true;
             interventionList.push({ ...student, failedSub: sub, failScore: score });
           }
-
-          if(!subjectTotals[sub]) subjectTotals[sub] = {sum: 0, count: 0};
-          subjectTotals[sub].sum += score;
-          subjectTotals[sub].count++;
+        }
+        
+        if(hasIntervensi) countIntervensiStud++;
+        if(studentSubjCount > 0) {
+            classStats[student.kelas].sum += (studentTotalScore / studentSubjCount);
+            classStats[student.kelas].count++;
         }
       });
 
-      if(totalSubjectsRecorded > 0) {
-        document.getElementById('stat-lulus').textContent = ((countLulus / totalSubjectsRecorded) * 100).toFixed(1) + '%';
-        document.getElementById('stat-cemerlang').textContent = ((countCemerlang / totalSubjectsRecorded) * 100).toFixed(1) + '%';
-        document.getElementById('stat-gagal').textContent = countGagal;
-        document.getElementById('stat-purata').textContent = (totalTPScore / totalSubjectsRecorded).toFixed(2);
-      } else {
-        resetDashboardUI();
-      }
-
-      renderInterventionTable(interventionList);
-      renderCharts(subjectTotals, tpDistribution);
-    }
-
-    function resetDashboardUI() {
-      document.getElementById('stat-lulus').textContent = '0%';
-      document.getElementById('stat-cemerlang').textContent = '0%';
-      document.getElementById('stat-gagal').textContent = '0';
-      document.getElementById('stat-purata').textContent = '0.00';
-      document.getElementById('table-intervensi').innerHTML = `<tr><td colspan="5" class="px-6 py-8 text-center text-slate-400">Tiada rekod ditemui untuk tapisan ini.</td></tr>`;
+      let totalPurata = Object.values(subjectStats).reduce((a,b)=>a+b.sum,0) / Object.values(subjectStats).reduce((a,b)=>a+b.count,0);
       
-      if(chartSubjectInst) chartSubjectInst.destroy();
-      if(chartPieInst) chartPieInst.destroy();
-    }
+      // Update DOM: Dashboard
+      document.getElementById('dash-lulus').textContent = ((countLulus / totalSubjects) * 100).toFixed(1) + '%';
+      document.getElementById('dash-cemerlang').textContent = ((countCemerlang / totalSubjects) * 100).toFixed(1) + '%';
+      document.getElementById('dash-gagal').textContent = interventionList.length;
+      document.getElementById('dash-purata').textContent = totalPurata.toFixed(2);
 
-    function renderInterventionTable(list) {
-      const tbody = document.getElementById('table-intervensi');
-      if(list.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="5" class="px-6 py-8 text-center text-slate-400">Tahniah! Tiada murid di tahap intervensi untuk tapisan ini.</td></tr>`;
-        return;
-      }
+      // Update DOM: Laporan Lengkap
+      document.getElementById('lap-total').textContent = filteredData.length;
+      document.getElementById('lap-lulus').textContent = ((countLulus / totalSubjects) * 100).toFixed(1) + '%';
+      document.getElementById('lap-cemerlang').textContent = ((countCemerlang / totalSubjects) * 100).toFixed(1) + '%';
+      document.getElementById('lap-gagal').textContent = countIntervensiStud; // Jumlah unik murid berisiko
 
-      list.sort((a,b) => a.failScore - b.failScore || a.kelas.localeCompare(b.kelas));
+      // 2. Ranking & Susunan Data
+      let sortedSubjects = Object.keys(subjectStats).map(sub => {
+        return { name: sub, avg: subjectStats[sub].sum / subjectStats[sub].count };
+      }).sort((a,b) => b.avg - a.avg);
 
-      let html = '';
-      list.forEach(item => {
-        let badgeClass = item.failScore === 1 ? 'tp1' : 'tp2';
-        html += `
-          <tr class="hover:bg-slate-50 transition">
-            <td class="px-6 py-3 font-medium text-slate-800">${item.nama}</td>
-            <td class="px-6 py-3">${item.kelas}</td>
-            <td class="px-6 py-3 font-semibold text-slate-600">${item.failedSub}</td>
-            <td class="px-6 py-3"><span class="tp-badge ${badgeClass}">TP${item.failScore}</span></td>
-            <td class="px-6 py-3 text-slate-500">${item.fasa}</td>
-          </tr>
-        `;
+      let sortedClasses = Object.keys(classStats).map(cls => {
+        return { name: cls, avg: classStats[cls].sum / classStats[cls].count, tpData: classStats[cls].tpDist };
+      }).sort((a,b) => b.avg - a.avg);
+
+      let subjekLemah = sortedSubjects.length > 0 ? sortedSubjects[sortedSubjects.length-1] : {name: '-', avg:0};
+      document.getElementById('lap-subjek-lemah').textContent = subjekLemah.name;
+
+      // Render Ranking Lists
+      let rankSubHTML = '';
+      sortedSubjects.forEach((sub, i) => {
+        let color = i === sortedSubjects.length-1 ? 'red' : 'emerald';
+        rankSubHTML += `<div class="flex justify-between items-center p-2 bg-slate-50 rounded"><span class="font-medium text-slate-700">${i+1}. ${sub.name}</span><span class="font-bold text-${color}-600">${sub.avg.toFixed(2)}</span></div>`;
       });
-      tbody.innerHTML = html;
-    }
+      document.getElementById('lap-ranking-subjek').innerHTML = rankSubHTML;
 
-    function renderCharts(subjectTotals, tpDist) {
-      const subLabels = [];
-      const subAverages = [];
-      
-      for(let sub in subjectTotals) {
-        subLabels.push(sub);
-        subAverages.push((subjectTotals[sub].sum / subjectTotals[sub].count).toFixed(2));
+      let rankClassHTML = '';
+      let pingat = ['🥇', '🥈', '🥉'];
+      sortedClasses.forEach((cls, i) => {
+        let icon = i < 3 ? pingat[i] : `${i+1}.`;
+        rankClassHTML += `<div class="flex justify-between items-center p-2 bg-slate-50 rounded"><span class="font-medium text-slate-700">${icon} ${cls.name}</span><span class="font-bold text-emerald-600">${cls.avg.toFixed(2)}</span></div>`;
+      });
+      document.getElementById('lap-ranking-kelas').innerHTML = rankClassHTML;
+
+      // Render Senarai Intervensi
+      interventionList.sort((a,b) => a.failScore - b.failScore || a.kelas.localeCompare(b.kelas));
+      let interHTML = '';
+      interventionList.forEach(item => {
+        let badge = item.failScore === 1 ? 'tp1' : 'tp2';
+        interHTML += `<tr class="border-b"><td class="py-2">${item.nama}</td><td>${item.kelas}</td><td>${item.failedSub}</td><td><span class="tp-badge ${badge}">TP${item.failScore}</span></td></tr>`;
+      });
+      document.getElementById('lap-table-intervensi').innerHTML = interHTML || `<tr><td colspan="4" class="text-center py-4 text-slate-400">Tiada murid intervensi</td></tr>`;
+
+      // Render AI Insight Generative Text
+      let aiText = `Berdasarkan analisis terkini, pencapaian keseluruhan berada pada tahap <strong>${((countLulus / totalSubjects) * 100).toFixed(1)}% menguasai</strong>. `;
+      if (countIntervensiStud > 0) {
+        aiText += `Walau bagaimanapun, perhatian serius perlu diberikan kepada subjek <strong>${subjekLemah.name}</strong> dengan purata kelas terendah (${subjekLemah.avg.toFixed(2)}). `;
+        aiText += `Terdapat <strong>${countIntervensiStud} murid</strong> yang memerlukan program intervensi/pemulihan segera. `;
+      } else {
+        aiText += `Syabas! Tiada murid di tahap intervensi. Fokus seterusnya adalah pengayaan bagi mengekalkan prestasi ini. `;
       }
+      if(sortedClasses.length > 1) {
+          aiText += `Kelas <strong>${sortedClasses[0].name}</strong> menunjukkan potensi terbaik manakala sokongan pentadbiran perlu difokuskan pada kelas ${sortedClasses[sortedClasses.length-1].name}.`;
+      }
+      document.getElementById('lap-ai-insight').innerHTML = aiText;
 
-      if(chartSubjectInst) chartSubjectInst.destroy();
-      chartSubjectInst = new Chart(document.getElementById('chartSubject'), {
+      // 3. Render Carta Chart.js
+      if(charts.dashSubject) charts.dashSubject.destroy();
+      charts.dashSubject = new Chart(document.getElementById('chart-dash-subject'), {
+        type: 'bar',
+        data: { labels: sortedSubjects.map(s=>s.name), datasets: [{ label: 'Purata TP', data: sortedSubjects.map(s=>s.avg), backgroundColor: '#10b981', borderRadius: 4 }] },
+        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { max: 6 } } }
+      });
+
+      if(charts.dashPie) charts.dashPie.destroy();
+      charts.dashPie = new Chart(document.getElementById('chart-dash-pie'), {
+        type: 'doughnut',
+        data: { labels: ['TP1', 'TP2', 'TP3', 'TP4', 'TP5', 'TP6'], datasets: [{ data: [tpDist[1], tpDist[2], tpDist[3], tpDist[4], tpDist[5], tpDist[6]], backgroundColor: ['#ef4444', '#f97316', '#f59e0b', '#84cc16', '#10b981', '#059669'], borderWidth: 0 }] },
+        options: { responsive: true, maintainAspectRatio: false, cutout: '60%', plugins: { legend: { position: 'right' } } }
+      });
+
+      if(charts.lapKelas) charts.lapKelas.destroy();
+      charts.lapKelas = new Chart(document.getElementById('chart-lap-kelas'), {
         type: 'bar',
         data: {
-          labels: subLabels,
-          datasets: [{
-            label: 'Purata TP',
-            data: subAverages,
-            backgroundColor: '#3b82f6',
-            borderRadius: 6
-          }]
+          labels: sortedClasses.map(c=>c.name),
+          datasets: [
+            { label: 'Belum Menguasai (TP1-2)', data: sortedClasses.map(c => c.tpData[1]+c.tpData[2]), backgroundColor: '#ef4444' },
+            { label: 'Menguasai (TP3-4)', data: sortedClasses.map(c => c.tpData[3]+c.tpData[4]), backgroundColor: '#f59e0b' },
+            { label: 'Cemerlang (TP5-6)', data: sortedClasses.map(c => c.tpData[5]+c.tpData[6]), backgroundColor: '#10b981' }
+          ]
         },
-        options: {
-          responsive: true, maintainAspectRatio: false,
-          plugins: { legend: { display: false } },
-          scales: { y: { beginAtZero: true, max: 6 } }
-        }
-      });
-
-      const distData = [tpDist[1], tpDist[2], tpDist[3], tpDist[4], tpDist[5], tpDist[6]];
-      
-      if(chartPieInst) chartPieInst.destroy();
-      chartPieInst = new Chart(document.getElementById('chartPie'), {
-        type: 'doughnut',
-        data: {
-          labels: ['TP1', 'TP2', 'TP3', 'TP4', 'TP5', 'TP6'],
-          datasets: [{
-            data: distData,
-            backgroundColor: ['#ef4444', '#f97316', '#f59e0b', '#84cc16', '#10b981', '#059669'],
-            borderWidth: 0
-          }]
-        },
-        options: {
-          responsive: true, maintainAspectRatio: false, cutout: '60%',
-          plugins: { legend: { position: 'right' } }
-        }
+        options: { responsive: true, maintainAspectRatio: false, scales: { x: { stacked: true }, y: { stacked: true } } }
       });
     }
   </script>
