@@ -1,0 +1,1016 @@
+<!doctype html>
+<html lang="ms" class="h-full">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard PBD Sekolah</title>
+  <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    * { font-family: 'Poppins', sans-serif; }
+    .card-shadow { box-shadow: 0 4px 20px rgba(0, 51, 102, 0.08); }
+    .card-hover { transition: all 0.3s ease; }
+    .card-hover:hover { transform: translateY(-4px); box-shadow: 0 8px 30px rgba(0, 51, 102, 0.12); }
+    .gradient-header { background: linear-gradient(135deg, #0a1628 0%, #1e3a5f 50%, #0d2137 100%); }
+    .gradient-accent { background: linear-gradient(135deg, #10b981 0%, #059669 100%); }
+    .stat-glow { box-shadow: 0 0 30px rgba(16, 185, 129, 0.15); }
+    @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes slideIn { from { opacity: 0; transform: translateX(-20px); } to { opacity: 1; transform: translateX(0); } }
+    .animate-fade { animation: fadeInUp 0.6s ease forwards; }
+    .animate-slide { animation: slideIn 0.5s ease forwards; }
+    .tp1 { background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%); }
+    .tp2 { background: linear-gradient(135deg, #f97316 0%, #ea580c 100%); }
+    .tp3 { background: linear-gradient(135deg, #eab308 0%, #ca8a04 100%); }
+    .tp4 { background: linear-gradient(135deg, #84cc16 0%, #65a30d 100%); }
+    .tp5 { background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%); }
+    .tp6 { background: linear-gradient(135deg, #10b981 0%, #059669 100%); }
+    .scrollbar-thin::-webkit-scrollbar { width: 6px; height: 6px; }
+    .scrollbar-thin::-webkit-scrollbar-track { background: #f1f5f9; border-radius: 3px; }
+    .scrollbar-thin::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+    .scrollbar-thin::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+    .pattern-dots { background-image: radial-gradient(circle, rgba(255,255,255,0.1) 1px, transparent 1px); background-size: 20px 20px; }
+    body { box-sizing: border-box; }
+  </style>
+</head>
+<body class="h-full bg-slate-50 overflow-auto scrollbar-thin">
+  <div id="app-wrapper" class="w-full min-h-full">
+    <header id="main-header" class="text-white sticky top-0 z-50" style="background: linear-gradient(135deg, #0f172a 0%, #1e3a5f 50%, #0f172a 100%);">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-5">
+        <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+          <div class="flex items-center gap-4">
+            <div class="w-16 h-16 bg-gradient-to-br from-emerald-400 to-teal-500 rounded-2xl flex items-center justify-center border-2 border-emerald-300/30 shadow-lg shadow-emerald-400/20">
+              <svg class="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+              </svg>
+            </div>
+            <div>
+              <h1 id="main-title" class="text-xl sm:text-2xl lg:text-3xl font-bold tracking-tight">Dashboard Pentaksiran Bilik Darjah (PBD)</h1>
+              <p id="subtitle" class="text-emerald-300 text-sm sm:text-base font-light mt-1">Analisis Prestasi Murid Berasaskan Data Sekolah</p>
+            </div>
+          </div>
+          <div class="flex flex-col sm:flex-row gap-3 items-start sm:items-center">
+            <div class="flex gap-2">
+              <button id="nav-dashboard" class="nav-btn px-4 py-2 rounded-lg bg-emerald-500/20 border border-emerald-400/50 text-emerald-100 text-sm font-medium hover:bg-emerald-500/30 transition-all" onclick="switchPage('dashboard')">📊 Dashboard</button> 
+              <button id="nav-admin" class="nav-btn px-4 py-2 rounded-lg border border-white/20 text-white/70 text-sm font-medium hover:bg-white/10 transition-all" onclick="switchPage('admin')">⚙️ Data Admin</button>
+            </div>
+            <div class="flex flex-wrap gap-2 sm:gap-3">
+              <select id="filter-year" class="bg-white/10 backdrop-blur border border-white/20 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-emerald-400"> 
+                <option value="2024" class="text-slate-800">2024</option> 
+                <option value="2023" class="text-slate-800">2023</option> 
+                <option value="2022" class="text-slate-800">2022</option> 
+              </select> 
+              <select id="filter-term" class="bg-white/10 backdrop-blur border border-white/20 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-emerald-400"> 
+                <option value="all" class="text-slate-800">Semua Penggal</option> 
+                <option value="1" class="text-slate-800">Penggal 1</option> 
+                <option value="2" class="text-slate-800">Penggal 2</option> 
+              </select> 
+              <select id="filter-class" class="bg-white/10 backdrop-blur border border-white/20 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-emerald-400"> 
+                <option value="all" class="text-slate-800">Semua Kelas</option> 
+                <option value="4A" class="text-slate-800">4 Arif</option> 
+                <option value="4B" class="text-slate-800">4 Bestari</option> 
+                <option value="4C" class="text-slate-800">4 Cemerlang</option> 
+                <option value="5A" class="text-slate-800">5 Arif</option> 
+                <option value="5B" class="text-slate-800">5 Bestari</option> 
+              </select> 
+              <select id="filter-subject" class="bg-white/10 backdrop-blur border border-white/20 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-emerald-400"> 
+                <option value="all" class="text-slate-800">Semua Subjek</option> 
+                <option value="bm" class="text-slate-800">Bahasa Melayu</option> 
+                <option value="bi" class="text-slate-800">Bahasa Inggeris</option> 
+                <option value="math" class="text-slate-800">Matematik</option> 
+                <option value="sains" class="text-slate-800">Sains</option> 
+              </select>
+            </div>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <main id="dashboard-page" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-8">
+      <section class="animate-fade" style="animation-delay: 0.1s">
+        <div class="flex items-center gap-3 mb-4">
+          <div class="w-1 h-8 rounded-full gradient-accent"></div>
+          <h2 class="text-xl font-bold text-slate-800">Ringkasan Eksekutif</h2>
+        </div>
+        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+          <div class="bg-white rounded-2xl p-4 card-shadow card-hover border border-slate-100">
+            <div class="flex items-center justify-between mb-3">
+              <div class="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center">
+                <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                </svg>
+              </div>
+              <span class="text-xs text-emerald-600 font-medium bg-emerald-50 px-2 py-1 rounded-full">+12</span>
+            </div>
+            <p class="text-2xl font-bold text-slate-800">248</p>
+            <p class="text-xs text-slate-500 mt-1">Jumlah Murid Aktif</p>
+          </div>
+          <div class="bg-white rounded-2xl p-4 card-shadow card-hover border border-slate-100">
+            <div class="flex items-center justify-between mb-3">
+              <div class="w-10 h-10 rounded-xl bg-emerald-50 flex items-center justify-center">
+                <svg class="w-5 h-5 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </div>
+              <span class="text-xs text-emerald-600 font-medium bg-emerald-50 px-2 py-1 rounded-full">↑ 5%</span>
+            </div>
+            <p class="text-2xl font-bold text-emerald-600">87.5%</p>
+            <p class="text-xs text-slate-500 mt-1">Peratus Lulus (TP3-TP6)</p>
+          </div>
+          <div class="bg-white rounded-2xl p-4 card-shadow card-hover border border-slate-100 stat-glow">
+            <div class="flex items-center justify-between mb-3">
+              <div class="w-10 h-10 rounded-xl bg-teal-50 flex items-center justify-center">
+                <svg class="w-5 h-5 text-teal-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
+                </svg>
+              </div>
+              <span class="text-xs text-teal-600 font-medium bg-teal-50 px-2 py-1 rounded-full">Cemerlang</span>
+            </div>
+            <p class="text-2xl font-bold text-teal-600">42.3%</p>
+            <p class="text-xs text-slate-500 mt-1">Peratus TP5 & TP6</p>
+          </div>
+          <div class="bg-white rounded-2xl p-4 card-shadow card-hover border border-red-100">
+            <div class="flex items-center justify-between mb-3">
+              <div class="w-10 h-10 rounded-xl bg-red-50 flex items-center justify-center">
+                <svg class="w-5 h-5 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                </svg>
+              </div>
+              <span class="text-xs text-red-500 font-medium bg-red-50 px-2 py-1 rounded-full">Perhatian</span>
+            </div>
+            <p class="text-2xl font-bold text-red-500">31</p>
+            <p class="text-xs text-slate-500 mt-1">Murid Intervensi (TP1-TP2)</p>
+          </div>
+          <div class="bg-white rounded-2xl p-4 card-shadow card-hover border border-orange-100">
+            <div class="flex items-center justify-between mb-3">
+              <div class="w-10 h-10 rounded-xl bg-orange-50 flex items-center justify-center">
+                <svg class="w-5 h-5 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                </svg>
+              </div>
+              <span class="text-xs text-orange-500 font-medium bg-orange-50 px-2 py-1 rounded-full">Fokus</span>
+            </div>
+            <p class="text-lg font-bold text-orange-600">B. Inggeris</p>
+            <p class="text-xs text-slate-500 mt-1">Subjek Paling Lemah</p>
+          </div>
+          <div class="bg-white rounded-2xl p-4 card-shadow card-hover border border-emerald-100">
+            <div class="flex items-center justify-between mb-3">
+              <div class="w-10 h-10 rounded-xl bg-emerald-50 flex items-center justify-center">
+                <svg class="w-5 h-5 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" />
+                </svg>
+              </div>
+              <span class="text-xs text-emerald-600 font-medium bg-emerald-50 px-2 py-1 rounded-full">🏆</span>
+            </div>
+            <p class="text-lg font-bold text-emerald-600">4 Arif</p>
+            <p class="text-xs text-slate-500 mt-1">Kelas Paling Cemerlang</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="animate-fade" style="animation-delay: 0.2s">
+        <div class="flex items-center gap-3 mb-4">
+          <div class="w-1 h-8 rounded-full gradient-accent"></div>
+          <h2 class="text-xl font-bold text-slate-800">Analisis Agihan Tahap Penguasaan</h2>
+        </div>
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div class="bg-white rounded-2xl p-5 card-shadow border border-slate-100">
+            <h3 class="text-sm font-semibold text-slate-700 mb-4">Agihan TP Keseluruhan</h3>
+            <div class="relative h-64">
+              <canvas id="pieChart"></canvas>
+            </div>
+            <div class="grid grid-cols-3 gap-2 mt-4">
+              <div class="text-center p-2 rounded-lg bg-red-50">
+                <span class="block text-xs font-bold text-red-600">TP1</span><span class="text-xs text-slate-600">5.2%</span>
+              </div>
+              <div class="text-center p-2 rounded-lg bg-orange-50">
+                <span class="block text-xs font-bold text-orange-600">TP2</span><span class="text-xs text-slate-600">7.3%</span>
+              </div>
+              <div class="text-center p-2 rounded-lg bg-yellow-50">
+                <span class="block text-xs font-bold text-yellow-600">TP3</span><span class="text-xs text-slate-600">15.7%</span>
+              </div>
+              <div class="text-center p-2 rounded-lg bg-lime-50">
+                <span class="block text-xs font-bold text-lime-600">TP4</span><span class="text-xs text-slate-600">29.4%</span>
+              </div>
+              <div class="text-center p-2 rounded-lg bg-green-50">
+                <span class="block text-xs font-bold text-green-600">TP5</span><span class="text-xs text-slate-600">26.2%</span>
+              </div>
+              <div class="text-center p-2 rounded-lg bg-emerald-50">
+                <span class="block text-xs font-bold text-emerald-600">TP6</span><span class="text-xs text-slate-600">16.1%</span>
+              </div>
+            </div>
+          </div>
+          <div class="bg-white rounded-2xl p-5 card-shadow border border-slate-100">
+            <h3 class="text-sm font-semibold text-slate-700 mb-4">Perbandingan TP Keseluruhan</h3>
+            <div class="h-64">
+              <canvas id="columnChart"></canvas>
+            </div>
+          </div>
+          <div class="bg-white rounded-2xl p-5 card-shadow border border-slate-100">
+            <h3 class="text-sm font-semibold text-slate-700 mb-4">Perbandingan TP Mengikut Kelas</h3>
+            <div class="h-64">
+              <canvas id="stackedBar"></canvas>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="animate-fade" style="animation-delay: 0.3s">
+        <div class="flex items-center gap-3 mb-4">
+          <div class="w-1 h-8 rounded-full gradient-accent"></div>
+          <h2 class="text-xl font-bold text-slate-800">Analisis Subjek</h2>
+        </div>
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div class="lg:col-span-2 bg-white rounded-2xl p-5 card-shadow border border-slate-100">
+            <h3 class="text-sm font-semibold text-slate-700 mb-4">Purata TP Setiap Subjek</h3>
+            <div class="h-72">
+              <canvas id="subjectBar"></canvas>
+            </div>
+          </div>
+          <div class="space-y-4">
+            <div class="bg-white rounded-2xl p-5 card-shadow border border-slate-100">
+              <h3 class="text-sm font-semibold text-slate-700 mb-3">Ranking Subjek</h3>
+              <div class="space-y-2">
+                <div class="flex items-center gap-3 p-2 rounded-lg bg-emerald-50 border-l-4 border-emerald-500">
+                  <span class="text-xs font-bold text-emerald-600 bg-emerald-100 w-6 h-6 rounded-full flex items-center justify-center">1</span> 
+                  <span class="text-sm font-medium text-slate-700 flex-1">Bahasa Melayu</span> 
+                  <span class="text-sm font-bold text-emerald-600">4.2</span>
+                </div>
+                <div class="flex items-center gap-3 p-2 rounded-lg bg-slate-50">
+                  <span class="text-xs font-bold text-slate-500 bg-slate-200 w-6 h-6 rounded-full flex items-center justify-center">2</span> 
+                  <span class="text-sm font-medium text-slate-700 flex-1">Matematik</span> 
+                  <span class="text-sm font-bold text-slate-600">4.0</span>
+                </div>
+                <div class="flex items-center gap-3 p-2 rounded-lg bg-slate-50">
+                  <span class="text-xs font-bold text-slate-500 bg-slate-200 w-6 h-6 rounded-full flex items-center justify-center">3</span> 
+                  <span class="text-sm font-medium text-slate-700 flex-1">Sains</span> 
+                  <span class="text-sm font-bold text-slate-600">3.8</span>
+                </div>
+                <div class="flex items-center gap-3 p-2 rounded-lg bg-red-50 border-l-4 border-red-400">
+                  <span class="text-xs font-bold text-red-500 bg-red-100 w-6 h-6 rounded-full flex items-center justify-center">4</span> 
+                  <span class="text-sm font-medium text-slate-700 flex-1">B. Inggeris</span> 
+                  <span class="text-sm font-bold text-red-500">3.2</span>
+                </div>
+              </div>
+            </div>
+            <div class="bg-gradient-to-br from-slate-800 to-slate-900 rounded-2xl p-5 card-shadow text-white">
+              <div class="flex items-center gap-2 mb-3">
+                <svg class="w-5 h-5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+                </svg>
+                <h3 class="text-sm font-semibold">AI Insight Summary</h3>
+              </div>
+              <p class="text-xs text-slate-300 leading-relaxed">Bahasa Inggeris memerlukan perhatian segera dengan 23% murid di bawah TP3. Disyorkan program intervensi intensif untuk Tahun 4 dan 5. Kelas 4C menunjukkan trend peningkatan positif dalam Matematik.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="animate-fade" style="animation-delay: 0.4s">
+        <div class="flex items-center gap-3 mb-4">
+          <div class="w-1 h-8 rounded-full gradient-accent"></div>
+          <h2 class="text-xl font-bold text-slate-800">Analisis Kelas</h2>
+        </div>
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div class="bg-white rounded-2xl p-5 card-shadow border border-slate-100">
+            <h3 class="text-sm font-semibold text-slate-700 mb-4">Ranking Kelas (Purata TP)</h3>
+            <div class="space-y-3">
+              <div class="relative">
+                <div class="flex items-center justify-between mb-1">
+                  <div class="flex items-center gap-2"><span class="text-lg">🥇</span> <span class="text-sm font-semibold text-slate-700">4 Arif</span></div>
+                  <span class="text-sm font-bold text-emerald-600">4.5</span>
+                </div>
+                <div class="h-2 bg-slate-100 rounded-full overflow-hidden">
+                  <div class="h-full tp6 rounded-full" style="width: 90%"></div>
+                </div>
+              </div>
+              <div class="relative">
+                <div class="flex items-center justify-between mb-1">
+                  <div class="flex items-center gap-2"><span class="text-lg">🥈</span> <span class="text-sm font-semibold text-slate-700">5 Arif</span></div>
+                  <span class="text-sm font-bold text-emerald-600">4.3</span>
+                </div>
+                <div class="h-2 bg-slate-100 rounded-full overflow-hidden">
+                  <div class="h-full tp5 rounded-full" style="width: 86%"></div>
+                </div>
+              </div>
+              <div class="relative">
+                <div class="flex items-center justify-between mb-1">
+                  <div class="flex items-center gap-2"><span class="text-lg">🥉</span> <span class="text-sm font-semibold text-slate-700">4 Bestari</span></div>
+                  <span class="text-sm font-bold text-slate-600">4.0</span>
+                </div>
+                <div class="h-2 bg-slate-100 rounded-full overflow-hidden">
+                  <div class="h-full tp4 rounded-full" style="width: 80%"></div>
+                </div>
+              </div>
+              <div class="relative">
+                <div class="flex items-center justify-between mb-1">
+                  <div class="flex items-center gap-2"><span class="text-sm text-slate-400 w-6 text-center">4</span> <span class="text-sm font-semibold text-slate-700">5 Bestari</span></div>
+                  <span class="text-sm font-bold text-slate-600">3.7</span>
+                </div>
+                <div class="h-2 bg-slate-100 rounded-full overflow-hidden">
+                  <div class="h-full tp3 rounded-full" style="width: 74%"></div>
+                </div>
+              </div>
+              <div class="relative">
+                <div class="flex items-center justify-between mb-1">
+                  <div class="flex items-center gap-2"><span class="text-sm text-slate-400 w-6 text-center">5</span> <span class="text-sm font-semibold text-slate-700">4 Cemerlang</span></div>
+                  <span class="text-sm font-bold text-orange-500">3.4</span>
+                </div>
+                <div class="h-2 bg-slate-100 rounded-full overflow-hidden">
+                  <div class="h-full tp2 rounded-full" style="width: 68%"></div>
+                </div>
+              </div>
+            </div>
+            <div class="mt-4 p-3 bg-emerald-50 rounded-xl border border-emerald-100">
+              <p class="text-xs text-emerald-700"><span class="font-semibold">📊 Kelas Paling Stabil:</span> 4 Arif - Varians rendah, konsistensi tinggi merentas semua subjek</p>
+            </div>
+          </div>
+          <div class="lg:col-span-2 bg-white rounded-2xl p-5 card-shadow border border-slate-100">
+            <h3 class="text-sm font-semibold text-slate-700 mb-4">Agihan TP Mengikut Kelas</h3>
+            <div class="h-72">
+              <canvas id="classStackedBar"></canvas>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="animate-fade" style="animation-delay: 0.5s">
+        <div class="flex items-center gap-3 mb-4">
+          <div class="w-1 h-8 rounded-full bg-gradient-to-b from-red-500 to-orange-500"></div>
+          <h2 class="text-xl font-bold text-slate-800">Senarai Intervensi</h2>
+          <span class="bg-red-100 text-red-600 text-xs font-semibold px-3 py-1 rounded-full">31 Murid</span>
+        </div>
+        <div class="bg-white rounded-2xl card-shadow border border-slate-100 overflow-hidden">
+          <div class="overflow-x-auto">
+            <table class="w-full">
+              <thead class="bg-slate-50 border-b border-slate-200">
+                <tr>
+                  <th class="text-left text-xs font-semibold text-slate-600 px-5 py-3">Bil</th>
+                  <th class="text-left text-xs font-semibold text-slate-600 px-5 py-3">Nama Murid</th>
+                  <th class="text-left text-xs font-semibold text-slate-600 px-5 py-3">Kelas</th>
+                  <th class="text-left text-xs font-semibold text-slate-600 px-5 py-3">Subjek</th>
+                  <th class="text-center text-xs font-semibold text-slate-600 px-5 py-3">Tahap Penguasaan</th>
+                  <th class="text-center text-xs font-semibold text-slate-600 px-5 py-3">Tindakan</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-slate-100">
+                <tr class="hover:bg-red-50/50 transition-colors">
+                  <td class="px-5 py-3 text-sm text-slate-600">1</td>
+                  <td class="px-5 py-3 text-sm font-medium text-slate-800">Ahmad bin Ibrahim</td>
+                  <td class="px-5 py-3 text-sm text-slate-600">4 Cemerlang</td>
+                  <td class="px-5 py-3 text-sm text-slate-600">Bahasa Inggeris</td>
+                  <td class="px-5 py-3 text-center"><span class="tp1 text-white text-xs font-bold px-3 py-1 rounded-full">TP1</span></td>
+                  <td class="px-5 py-3 text-center"><button class="text-xs bg-blue-50 text-blue-600 font-medium px-3 py-1 rounded-lg hover:bg-blue-100 transition-colors">Lihat Profil</button></td>
+                </tr>
+                <tr class="hover:bg-red-50/50 transition-colors">
+                  <td class="px-5 py-3 text-sm text-slate-600">2</td>
+                  <td class="px-5 py-3 text-sm font-medium text-slate-800">Nurul Aisyah binti Hassan</td>
+                  <td class="px-5 py-3 text-sm text-slate-600">5 Bestari</td>
+                  <td class="px-5 py-3 text-sm text-slate-600">Matematik</td>
+                  <td class="px-5 py-3 text-center"><span class="tp1 text-white text-xs font-bold px-3 py-1 rounded-full">TP1</span></td>
+                  <td class="px-5 py-3 text-center"><button class="text-xs bg-blue-50 text-blue-600 font-medium px-3 py-1 rounded-lg hover:bg-blue-100 transition-colors">Lihat Profil</button></td>
+                </tr>
+                <tr class="hover:bg-orange-50/50 transition-colors">
+                  <td class="px-5 py-3 text-sm text-slate-600">3</td>
+                  <td class="px-5 py-3 text-sm font-medium text-slate-800">Muhammad Danial bin Razak</td>
+                  <td class="px-5 py-3 text-sm text-slate-600">4 Cemerlang</td>
+                  <td class="px-5 py-3 text-sm text-slate-600">Sains</td>
+                  <td class="px-5 py-3 text-center"><span class="tp2 text-white text-xs font-bold px-3 py-1 rounded-full">TP2</span></td>
+                  <td class="px-5 py-3 text-center"><button class="text-xs bg-blue-50 text-blue-600 font-medium px-3 py-1 rounded-lg hover:bg-blue-100 transition-colors">Lihat Profil</button></td>
+                </tr>
+                <tr class="hover:bg-orange-50/50 transition-colors">
+                  <td class="px-5 py-3 text-sm text-slate-600">4</td>
+                  <td class="px-5 py-3 text-sm font-medium text-slate-800">Siti Mariam binti Abdullah</td>
+                  <td class="px-5 py-3 text-sm text-slate-600">5 Bestari</td>
+                  <td class="px-5 py-3 text-sm text-slate-600">Bahasa Inggeris</td>
+                  <td class="px-5 py-3 text-center"><span class="tp2 text-white text-xs font-bold px-3 py-1 rounded-full">TP2</span></td>
+                  <td class="px-5 py-3 text-center"><button class="text-xs bg-blue-50 text-blue-600 font-medium px-3 py-1 rounded-lg hover:bg-blue-100 transition-colors">Lihat Profil</button></td>
+                </tr>
+                <tr class="hover:bg-red-50/50 transition-colors">
+                  <td class="px-5 py-3 text-sm text-slate-600">5</td>
+                  <td class="px-5 py-3 text-sm font-medium text-slate-800">Lee Wei Ming</td>
+                  <td class="px-5 py-3 text-sm text-slate-600">4 Bestari</td>
+                  <td class="px-5 py-3 text-sm text-slate-600">Bahasa Melayu</td>
+                  <td class="px-5 py-3 text-center"><span class="tp1 text-white text-xs font-bold px-3 py-1 rounded-full">TP1</span></td>
+                  <td class="px-5 py-3 text-center"><button class="text-xs bg-blue-50 text-blue-600 font-medium px-3 py-1 rounded-lg hover:bg-blue-100 transition-colors">Lihat Profil</button></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="px-5 py-3 bg-slate-50 border-t border-slate-200 flex items-center justify-between">
+            <p class="text-xs text-slate-500">Memaparkan 5 daripada 31 rekod</p>
+            <div class="flex gap-2">
+              <button class="px-3 py-1 text-xs bg-white border border-slate-200 rounded-lg text-slate-600 hover:bg-slate-50 transition-colors">← Sebelum</button> 
+              <button class="px-3 py-1 text-xs bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">Seterusnya →</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="animate-fade" style="animation-delay: 0.6s">
+        <div class="flex items-center gap-3 mb-4">
+          <div class="w-1 h-8 rounded-full gradient-accent"></div>
+          <h2 class="text-xl font-bold text-slate-800">Ringkasan Analisis Profesional</h2>
+        </div>
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div class="lg:col-span-2 bg-gradient-to-br from-slate-800 to-slate-900 rounded-2xl p-6 card-shadow text-white">
+            <div class="flex items-start gap-4 mb-6">
+              <div class="w-12 h-12 bg-white/10 backdrop-blur rounded-xl flex items-center justify-center border border-white/20">
+                <svg class="w-6 h-6 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" />
+                </svg>
+              </div>
+              <div>
+                <h3 class="text-lg font-bold">Laporan Analisis Pentaksiran Bilik Darjah (PBD)</h3>
+                <p class="text-emerald-300 text-sm mt-1">Sesi Akademik 2024 | Ringkasan Holistik Prestasi Murid</p>
+              </div>
+            </div>
+            <div class="space-y-5">
+              <div class="border-l-4 border-emerald-400 pl-4">
+                <h4 class="font-semibold text-base mb-2 text-emerald-300">1. PERATUS KESELURUHAN PENCAPAIAN</h4>
+                <div class="space-y-3 text-sm leading-relaxed text-slate-200">
+                  <p>Berdasarkan analisis data pentaksiran murid seluruh sekolah, pencapaian akademik menunjukkan trend positif dengan peratus pencapaian keseluruhan:</p>
+                  <div class="bg-white/10 backdrop-blur border border-emerald-400/30 rounded-lg p-4 my-3">
+                    <div class="grid grid-cols-3 gap-4">
+                      <div class="text-center">
+                        <p class="text-emerald-300 text-xs font-semibold mb-1">LULUS (TP3-TP6)</p>
+                        <p class="text-3xl font-bold text-emerald-400">87.5%</p>
+                        <p class="text-xs text-slate-400 mt-1">217 murid</p>
+                      </div>
+                      <div class="text-center border-l border-r border-white/10">
+                        <p class="text-yellow-300 text-xs font-semibold mb-1">MEMERLUKAN SOKONGAN (TP1-TP2)</p>
+                        <p class="text-3xl font-bold text-yellow-400">12.5%</p>
+                        <p class="text-xs text-slate-400 mt-1">31 murid</p>
+                      </div>
+                      <div class="text-center">
+                        <p class="text-emerald-300 text-xs font-semibold mb-1">CEMERLANG (TP5-TP6)</p>
+                        <p class="text-3xl font-bold text-emerald-400">42.3%</p>
+                        <p class="text-xs text-slate-400 mt-1">105 murid</p>
+                      </div>
+                    </div>
+                  </div>
+                  <p><span class="text-emerald-300 font-semibold">Analisis:</span> Pencapaian 87.5% dalam kategori lulus menunjukkan prestasi yang memuaskan. Walau bagaimanapun, 12.5% murid yang memerlukan sokongan memerlukan perhatian pentadbiran untuk memastikan tiada murid tertinggal.</p>
+                </div>
+              </div>
+              <div class="border-l-4 border-orange-400 pl-4">
+                <h4 class="font-semibold text-base mb-2 text-orange-300">2. SUBJEK PALING MEMERLUKAN INTERVENSI</h4>
+                <div class="space-y-3 text-sm leading-relaxed text-slate-200">
+                  <p>Analisis menunjukkan Bahasa Inggeris memerlukan perhatian prioritas tinggi dengan metrik berikut:</p>
+                  <div class="bg-white/10 backdrop-blur border border-orange-400/30 rounded-lg p-4 my-3 space-y-2">
+                    <div class="flex justify-between items-center"><span class="text-slate-300">Purata TP Subjek</span><span class="font-semibold text-orange-300">3.2 (Terendah)</span></div>
+                    <div class="flex justify-between items-center"><span class="text-slate-300">Peratus Di Bawah TP3</span><span class="font-semibold text-orange-300">23% (57 murid)</span></div>
+                    <div class="flex justify-between items-center"><span class="text-slate-300">Trend Konsistensi</span><span class="font-semibold text-red-300">Meningkat Perlahan</span></div>
+                    <div class="flex justify-between items-center"><span class="text-slate-300">Kelas Paling Terjejas</span><span class="font-semibold text-orange-300">4 Cemerlang, 5 Bestari</span></div>
+                  </div>
+                  <p><span class="text-emerald-300 font-semibold">Faktor Identifikasi:</span> Kesukaran memahami kemahiran berbahasa Inggeris, rendahnya penglibatan dalam aktiviti pembelajaran interaktif, dan perlu peningkatan kadar penugasan.</p>
+                </div>
+              </div>
+              <div class="border-l-4 border-emerald-400 pl-4">
+                <h4 class="font-semibold text-base mb-2 text-emerald-300">3. KELAS PALING CEMERLANG</h4>
+                <div class="space-y-3 text-sm leading-relaxed text-slate-200">
+                  <p>Berdasarkan ranking purata TP keseluruhan, berikut adalah prestasi kelas terbaik:</p>
+                  <div class="bg-white/10 backdrop-blur border border-emerald-400/30 rounded-lg p-4 my-3 space-y-2">
+                    <div class="flex justify-between items-start pb-2 border-b border-white/10">
+                      <div>
+                        <p class="text-emerald-300 font-semibold">🥇 4 Arif</p>
+                        <p class="text-xs text-slate-400 mt-1">Purata TP: 4.5 | Konsistensi: Sangat Tinggi</p>
+                      </div>
+                      <p class="text-emerald-400 font-bold text-lg">4.5/6.0</p>
+                    </div>
+                    <div class="flex justify-between items-start pb-2 border-b border-white/10">
+                      <div>
+                        <p class="text-blue-300 font-semibold">🥈 5 Arif</p>
+                        <p class="text-xs text-slate-400 mt-1">Purata TP: 4.3 | Konsistensi: Tinggi</p>
+                      </div>
+                      <p class="text-blue-400 font-bold text-lg">4.3/6.0</p>
+                    </div>
+                    <div class="flex justify-between items-start">
+                      <div>
+                        <p class="text-yellow-300 font-semibold">🥉 4 Bestari</p>
+                        <p class="text-xs text-slate-400 mt-1">Purata TP: 4.0 | Konsistensi: Baik</p>
+                      </div>
+                      <p class="text-yellow-400 font-bold text-lg">4.0/6.0</p>
+                    </div>
+                  </div>
+                  <p><span class="text-emerald-300 font-semibold">Keistimewaan 4 Arif:</span> Pengurusan kelas yang cemerlang, tahap penglibatan murid tinggi, disiplin akademik konsisten, dan sokongan guru yang intensif dalam semua subjek.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="bg-white rounded-2xl p-5 card-shadow border border-slate-100">
+            <h4 class="text-sm font-semibold text-slate-700 mb-4">📈 Dapatan Utama</h4>
+            <div class="space-y-3">
+              <div class="p-3 bg-emerald-50 rounded-lg border-l-4 border-emerald-500">
+                <p class="text-xs font-semibold text-emerald-700">Kekuatan</p>
+                <p class="text-xs text-slate-600 mt-1">Kepimpinan kelas berkesan dan keterlibatan murid yang tinggi dalam suasana pembelajaran positif.</p>
+              </div>
+              <div class="p-3 bg-yellow-50 rounded-lg border-l-4 border-yellow-500">
+                <p class="text-xs font-semibold text-yellow-700">Peluang</p>
+                <p class="text-xs text-slate-600 mt-1">Perlaksanaan teknologi pembelajaran untuk meningkatkan pencapaian subjek kurang cemerlang.</p>
+              </div>
+              <div class="p-3 bg-blue-50 rounded-lg border-l-4 border-blue-500">
+                <p class="text-xs font-semibold text-blue-700">Cabaran</p>
+                <p class="text-xs text-slate-600 mt-1">23% murid dalam B. Inggeris memerlukan sokongan intensif dan strategi pembelajaran disesuaikan.</p>
+              </div>
+            </div>
+          </div>
+          <div class="bg-white rounded-2xl p-5 card-shadow border border-slate-100">
+            <h4 class="text-sm font-semibold text-slate-700 mb-4">⚡ Prioriti Tindakan</h4>
+            <div class="space-y-2">
+              <div class="flex items-center gap-3 p-3 bg-red-50 rounded-lg">
+                <span class="text-lg">🔴</span>
+                <div class="flex-1">
+                  <p class="text-xs font-semibold text-slate-700">Intervensi B. Inggeris</p>
+                  <p class="text-xs text-slate-500">57 murid | Segera</p>
+                </div>
+                <span class="text-xs font-bold text-red-600">P1</span>
+              </div>
+              <div class="flex items-center gap-3 p-3 bg-orange-50 rounded-lg">
+                <span class="text-lg">🟠</span>
+                <div class="flex-1">
+                  <p class="text-xs font-semibold text-slate-700">Sokongan Rakan Sebaya</p>
+                  <p class="text-xs text-slate-500">31 murid | 1-2 Minggu</p>
+                </div>
+                <span class="text-xs font-bold text-orange-600">P2</span>
+              </div>
+              <div class="flex items-center gap-3 p-3 bg-yellow-50 rounded-lg">
+                <span class="text-lg">🟡</span>
+                <div class="flex-1">
+                  <p class="text-xs font-semibold text-slate-700">Pelatihan Guru PD</p>
+                  <p class="text-xs text-slate-500">Semua guru | 3 Bulan</p>
+                </div>
+                <span class="text-xs font-bold text-yellow-600">P3</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="mt-6 p-4 bg-slate-50 rounded-lg border border-slate-200">
+          <p class="text-xs text-slate-600 text-center"><span class="font-semibold">Nota Pentadbiran:</span> Laporan ini disediakan berdasarkan data PBD yang sah dan objektif. Keputusan penambahbaikan hendaklah disemak bersama Jawatankuasa PBD Sekolah dan ditindaklanjuti mengikut garis panduan KPM yang terkini.</p>
+        </div>
+      </section>
+
+      <section class="animate-fade" style="animation-delay: 0.7s">
+        <div class="flex items-center gap-3 mb-4">
+          <div class="w-1 h-8 rounded-full gradient-accent"></div>
+          <h2 class="text-xl font-bold text-slate-800">Analisis Individu</h2>
+        </div>
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div class="bg-white rounded-2xl p-5 card-shadow border border-slate-100">
+            <div class="flex items-center gap-4 mb-4">
+              <div class="w-16 h-16 bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl flex items-center justify-center text-white text-xl font-bold">
+                AI
+              </div>
+              <div>
+                <h3 class="font-semibold text-slate-800">Ahmad bin Ibrahim</h3>
+                <p class="text-sm text-slate-500">4 Cemerlang | No. Pendaftaran: 2024001</p>
+              </div>
+            </div>
+            <div class="space-y-3">
+              <div class="flex justify-between items-center p-3 bg-slate-50 rounded-xl">
+                <span class="text-sm text-slate-600">Purata TP</span> <span class="text-lg font-bold text-slate-800">2.8</span>
+              </div>
+              <div class="flex justify-between items-center p-3 bg-red-50 rounded-xl">
+                <span class="text-sm text-slate-600">Subjek Lemah</span> <span class="text-sm font-semibold text-red-600">B. Inggeris, Sains</span>
+              </div>
+              <div class="flex justify-between items-center p-3 bg-emerald-50 rounded-xl">
+                <span class="text-sm text-slate-600">Subjek Kuat</span> <span class="text-sm font-semibold text-emerald-600">Matematik</span>
+              </div>
+            </div>
+          </div>
+          <div class="lg:col-span-2 bg-white rounded-2xl p-5 card-shadow border border-slate-100">
+            <h3 class="text-sm font-semibold text-slate-700 mb-4">Prestasi Mengikut Penggal</h3>
+            <div class="h-64">
+              <canvas id="studentChart"></canvas>
+            </div>
+            <div class="mt-4 grid grid-cols-4 gap-3">
+              <div class="text-center p-3 bg-blue-50 rounded-xl">
+                <p class="text-xs text-slate-500">B. Melayu</p>
+                <p class="text-lg font-bold text-blue-600">TP4</p>
+              </div>
+              <div class="text-center p-3 bg-red-50 rounded-xl">
+                <p class="text-xs text-slate-500">B. Inggeris</p>
+                <p class="text-lg font-bold text-red-500">TP1</p>
+              </div>
+              <div class="text-center p-3 bg-emerald-50 rounded-xl">
+                <p class="text-xs text-slate-500">Matematik</p>
+                <p class="text-lg font-bold text-emerald-600">TP5</p>
+              </div>
+              <div class="text-center p-3 bg-orange-50 rounded-xl">
+                <p class="text-xs text-slate-500">Sains</p>
+                <p class="text-lg font-bold text-orange-500">TP2</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <div id="admin-page" class="hidden max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div class="space-y-8">
+        <section class="animate-fade">
+          <div class="flex items-center gap-3 mb-4">
+            <div class="w-1 h-8 rounded-full gradient-accent"></div>
+            <h2 class="text-2xl font-bold text-slate-800">Pengurusan Data PBD</h2>
+          </div>
+          <p class="text-slate-600 text-sm">Muat naik data murid dan pentaksiran dalam format yang betul untuk analisis sistem.</p>
+        </section>
+        
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div class="bg-white rounded-2xl p-6 card-shadow border border-slate-100">
+            <div class="flex items-center gap-3 mb-6">
+              <div class="w-10 h-10 rounded-lg bg-blue-100 flex items-center justify-center">
+                <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                </svg>
+              </div>
+              <div>
+                <h3 class="font-semibold text-slate-800">Data Murid</h3>
+                <p class="text-xs text-slate-500">Maklumat Pendaftaran Murid</p>
+              </div>
+            </div>
+            <div class="space-y-4">
+              <div class="p-4 bg-blue-50 rounded-xl border border-blue-200">
+                <p class="text-xs font-semibold text-slate-700 mb-3">📥 Langkah 1: Muat Turun Template</p>
+                <button onclick="downloadTemplate('murid')" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2.5 px-4 rounded-lg transition-colors flex items-center justify-center gap-2">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                  </svg> Muat Turun Template Data Murid 
+                </button>
+                <p class="text-xs text-blue-600 mt-2">Format: CSV | Saiz: ~2KB | Nama fail: template_murid.csv</p>
+              </div>
+              <div class="p-4 bg-slate-50 rounded-xl border-2 border-dashed border-slate-300">
+                <p class="text-xs font-semibold text-slate-700 mb-3">📤 Langkah 2: Muat Naik Fail Data Murid</p>
+                <div class="relative">
+                  <input type="file" id="upload-murid" accept=".csv" class="hidden" onchange="handleFileUpload('murid', this)"> 
+                  <button onclick="document.getElementById('upload-murid').click()" class="w-full py-3 px-4 border-2 border-dashed border-slate-400 rounded-lg text-center hover:border-blue-500 hover:bg-blue-50 transition-colors cursor-pointer">
+                    <svg class="w-8 h-8 mx-auto text-slate-400 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 4v16m8-8H4" />
+                    </svg>
+                    <p class="text-sm font-medium text-slate-700">Klik atau seret fail di sini</p>
+                    <p class="text-xs text-slate-500 mt-1">Format: CSV | Saiz maksimum: 10MB</p>
+                  </button>
+                </div>
+                <div id="murid-status" class="mt-3"></div>
+              </div>
+              <div class="p-3 bg-amber-50 rounded-lg border border-amber-200">
+                <p class="text-xs font-semibold text-amber-800 mb-2">⚠️ Arahan Penting:</p>
+                <ul class="text-xs text-amber-700 space-y-1 ml-3">
+                  <li>• Gunakan template yang disediakan tanpa mengubah struktur lajur</li>
+                  <li>• Pastikan semua medan wajib diisi (No. Pendaftaran, Nama, Kelas)</li>
+                  <li>• Simpan dalam format CSV (UTF-8) sebelum muat naik</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+
+          <div class="bg-white rounded-2xl p-6 card-shadow border border-slate-100">
+            <div class="flex items-center gap-3 mb-6">
+              <div class="w-10 h-10 rounded-lg bg-emerald-100 flex items-center justify-center">
+                <svg class="w-6 h-6 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                </svg>
+              </div>
+              <div>
+                <h3 class="font-semibold text-slate-800">Data Pentaksiran PBD</h3>
+                <p class="text-xs text-slate-500">Tahap Penguasaan & Penilaian Murid</p>
+              </div>
+            </div>
+            <div class="space-y-4">
+              <div class="p-4 bg-emerald-50 rounded-xl border border-emerald-200">
+                <p class="text-xs font-semibold text-slate-700 mb-3">📥 Langkah 1: Muat Turun Template</p>
+                <button onclick="downloadTemplate('pbd')" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-medium py-2.5 px-4 rounded-lg transition-colors flex items-center justify-center gap-2">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                  </svg> Muat Turun Template Data PBD 
+                </button>
+                <p class="text-xs text-emerald-600 mt-2">Format: CSV | Saiz: ~3KB | Nama fail: template_pbd.csv</p>
+              </div>
+              <div class="p-4 bg-slate-50 rounded-xl border-2 border-dashed border-slate-300">
+                <p class="text-xs font-semibold text-slate-700 mb-3">📤 Langkah 2: Muat Naik Fail Data PBD</p>
+                <div class="relative">
+                  <input type="file" id="upload-pbd" accept=".csv" class="hidden" onchange="handleFileUpload('pbd', this)"> 
+                  <button onclick="document.getElementById('upload-pbd').click()" class="w-full py-3 px-4 border-2 border-dashed border-slate-400 rounded-lg text-center hover:border-emerald-500 hover:bg-emerald-50 transition-colors cursor-pointer">
+                    <svg class="w-8 h-8 mx-auto text-slate-400 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 4v16m8-8H4" />
+                    </svg>
+                    <p class="text-sm font-medium text-slate-700">Klik atau seret fail di sini</p>
+                    <p class="text-xs text-slate-500 mt-1">Format: CSV | Saiz maksimum: 10MB</p>
+                  </button>
+                </div>
+                <div id="pbd-status" class="mt-3"></div>
+              </div>
+              <div class="p-3 bg-amber-50 rounded-lg border border-amber-200">
+                <p class="text-xs font-semibold text-amber-800 mb-2">⚠️ Arahan Penting:</p>
+                <ul class="text-xs text-amber-700 space-y-1 ml-3">
+                  <li>• Tahap Penguasaan (TP) hanya 1-6, jangan ubah format</li>
+                  <li>• Pastikan No. Pendaftaran murid sepadan dengan senarai data murid</li>
+                  <li>• Simpan dalam format CSV (UTF-8) sebelum muat naik</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="bg-gradient-to-r from-blue-600 to-emerald-600 rounded-2xl p-6 text-white card-shadow">
+          <div class="flex items-start gap-4">
+            <div class="w-12 h-12 bg-white/20 rounded-lg flex items-center justify-center flex-shrink-0">
+              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            </div>
+            <div>
+              <h4 class="font-semibold mb-2">Status Pemindahan Data</h4>
+              <div class="grid grid-cols-2 gap-4 mt-3 text-sm">
+                <div>
+                  <p class="text-white/80">Data Murid:</p>
+                  <p id="murid-count" class="font-bold text-lg">0 rekod</p>
+                </div>
+                <div>
+                  <p class="text-white/80">Data PBD:</p>
+                  <p id="pbd-count" class="font-bold text-lg">0 rekod</p>
+                </div>
+              </div>
+              <p class="text-white/70 text-xs mt-3">Sebaik sahaja kedua-dua fail dimuat naik dengan berjaya, sistem akan memproses data secara automatik.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="flex flex-col sm:flex-row gap-3 justify-end">
+          <button onclick="switchPage('dashboard')" class="px-6 py-2.5 rounded-lg border border-slate-300 text-slate-700 font-medium hover:bg-slate-50 transition-colors"> ← Kembali ke Dashboard </button> 
+          <button onclick="processData()" class="px-6 py-2.5 rounded-lg bg-emerald-600 text-white font-medium hover:bg-emerald-700 transition-colors flex items-center justify-center gap-2">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+            </svg> Proses & Simpan Data 
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <footer class="gradient-header pattern-dots text-white mt-12">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+          <div class="flex items-center gap-4">
+            <div class="w-12 h-12 bg-white/10 backdrop-blur rounded-xl flex items-center justify-center border border-white/20">
+              <svg class="w-7 h-7 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+              </svg>
+            </div>
+            <div>
+              <h3 id="school-name" class="font-semibold text-lg">SK Taman Maju</h3>
+              <p class="text-emerald-300 text-sm">Selangor Darul Ehsan</p>
+            </div>
+          </div>
+          <div class="text-sm text-slate-300 text-right">
+            <p>Tahun Analisis: <span id="analysis-year" class="font-semibold text-white">2024</span></p>
+            <p>Disediakan oleh: <span id="coordinator-name" class="font-semibold text-emerald-300">Pn. Siti Aminah</span></p>
+            <p class="text-xs mt-1 text-slate-400">Penyelaras PBD</p>
+          </div>
+        </div>
+        <div class="mt-6 pt-6 border-t border-white/10 text-center">
+          <p class="text-xs text-slate-400">© 2024 Dashboard Pentaksiran Bilik Darjah (PBD) | Sistem Analisis Data Pendidikan</p>
+        </div>
+      </div>
+    </footer>
+  </div>
+
+  <script>
+    // Chart.js configurations
+    const chartColors = {
+      tp1: '#dc2626', tp2: '#f97316', tp3: '#eab308',
+      tp4: '#84cc16', tp5: '#22c55e', tp6: '#10b981'
+    };
+
+    // Pie Chart - TP Distribution
+    new Chart(document.getElementById('pieChart'), {
+      type: 'doughnut',
+      data: {
+        labels: ['TP1', 'TP2', 'TP3', 'TP4', 'TP5', 'TP6'],
+        datasets: [{
+          data: [5.2, 7.3, 15.7, 29.4, 26.2, 16.1],
+          backgroundColor: [chartColors.tp1, chartColors.tp2, chartColors.tp3, chartColors.tp4, chartColors.tp5, chartColors.tp6],
+          borderWidth: 0, hoverOffset: 10
+        }]
+      },
+      options: { responsive: true, maintainAspectRatio: false, cutout: '60%', plugins: { legend: { display: false } } }
+    });
+
+    // Column Chart - Overall TP
+    new Chart(document.getElementById('columnChart'), {
+      type: 'bar',
+      data: {
+        labels: ['TP1', 'TP2', 'TP3', 'TP4', 'TP5', 'TP6'],
+        datasets: [{
+          data: [13, 18, 39, 73, 65, 40],
+          backgroundColor: [chartColors.tp1, chartColors.tp2, chartColors.tp3, chartColors.tp4, chartColors.tp5, chartColors.tp6],
+          borderRadius: 8, borderSkipped: false
+        }]
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } },
+        scales: { y: { beginAtZero: true, grid: { color: '#f1f5f9' } }, x: { grid: { display: false } } }
+      }
+    });
+
+    // Stacked Bar - TP by Class
+    new Chart(document.getElementById('stackedBar'), {
+      type: 'bar',
+      data: {
+        labels: ['4A', '4B', '4C', '5A', '5B'],
+        datasets: [
+          { label: 'TP1', data: [2, 3, 5, 1, 2], backgroundColor: chartColors.tp1 },
+          { label: 'TP2', data: [3, 4, 6, 2, 3], backgroundColor: chartColors.tp2 },
+          { label: 'TP3', data: [5, 8, 10, 6, 10], backgroundColor: chartColors.tp3 },
+          { label: 'TP4', data: [15, 12, 10, 18, 18], backgroundColor: chartColors.tp4 },
+          { label: 'TP5', data: [12, 10, 8, 15, 10], backgroundColor: chartColors.tp5 },
+          { label: 'TP6', data: [8, 8, 6, 8, 7], backgroundColor: chartColors.tp6 }
+        ]
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } },
+        scales: { x: { stacked: true, grid: { display: false } }, y: { stacked: true, grid: { color: '#f1f5f9' } } }
+      }
+    });
+
+    // Subject Bar Chart
+    new Chart(document.getElementById('subjectBar'), {
+      type: 'bar',
+      data: {
+        labels: ['Bahasa Melayu', 'Matematik', 'Sains', 'Bahasa Inggeris'],
+        datasets: [{
+          label: 'Purata TP', data: [4.2, 4.0, 3.8, 3.2],
+          backgroundColor: ['#10b981', '#22c55e', '#84cc16', '#f97316'],
+          borderRadius: 8, borderSkipped: false
+        }]
+      },
+      options: {
+        indexAxis: 'y', responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } },
+        scales: { x: { beginAtZero: true, max: 6, grid: { color: '#f1f5f9' } }, y: { grid: { display: false } } }
+      }
+    });
+
+    // Class Stacked Bar
+    new Chart(document.getElementById('classStackedBar'), {
+      type: 'bar',
+      data: {
+        labels: ['4 Arif', '4 Bestari', '4 Cemerlang', '5 Arif', '5 Bestari'],
+        datasets: [
+          { label: 'TP1-2', data: [5, 7, 11, 3, 5], backgroundColor: '#ef4444', borderRadius: 4 },
+          { label: 'TP3-4', data: [20, 20, 20, 24, 28], backgroundColor: '#eab308', borderRadius: 4 },
+          { label: 'TP5-6', data: [20, 18, 14, 23, 17], backgroundColor: '#10b981', borderRadius: 4 }
+        ]
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        plugins: { legend: { position: 'bottom', labels: { boxWidth: 12, padding: 15, font: { size: 11 } } } },
+        scales: { x: { grid: { display: false } }, y: { grid: { color: '#f1f5f9' } } }
+      }
+    });
+
+    // Student Performance Chart
+    new Chart(document.getElementById('studentChart'), {
+      type: 'line',
+      data: {
+        labels: ['Penggal 1 2023', 'Penggal 2 2023', 'Penggal 1 2024', 'Penggal 2 2024'],
+        datasets: [
+          { label: 'B. Melayu', data: [3, 3, 4, 4], borderColor: '#2563eb', backgroundColor: '#2563eb20', fill: true, tension: 0.4 },
+          { label: 'B. Inggeris', data: [2, 1, 1, 1], borderColor: '#dc2626', backgroundColor: '#dc262620', fill: true, tension: 0.4 },
+          { label: 'Matematik', data: [4, 4, 5, 5], borderColor: '#10b981', backgroundColor: '#10b98120', fill: true, tension: 0.4 },
+          { label: 'Sains', data: [3, 2, 2, 2], borderColor: '#f97316', backgroundColor: '#f9731620', fill: true, tension: 0.4 }
+        ]
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        plugins: { legend: { position: 'bottom', labels: { boxWidth: 12, padding: 15, font: { size: 11 } } } },
+        scales: { y: { min: 0, max: 6, grid: { color: '#f1f5f9' } }, x: { grid: { display: false } } }
+      }
+    });
+
+    // Filter interactivity
+    document.querySelectorAll('select').forEach(select => {
+      select.addEventListener('change', () => {
+        select.classList.add('ring-2', 'ring-emerald-400');
+        setTimeout(() => select.classList.remove('ring-2', 'ring-emerald-400'), 300);
+      });
+    });
+
+    // Page Navigation
+    function switchPage(page) {
+      const dashboardPage = document.getElementById('dashboard-page');
+      const adminPage = document.getElementById('admin-page');
+      const navDashboard = document.getElementById('nav-dashboard');
+      const navAdmin = document.getElementById('nav-admin');
+
+      if (page === 'dashboard') {
+        dashboardPage.classList.remove('hidden');
+        adminPage.classList.add('hidden');
+        navDashboard.classList.remove('bg-white/10', 'text-white/70');
+        navDashboard.classList.add('bg-emerald-500/20', 'border-emerald-400/50', 'text-emerald-100');
+        navAdmin.classList.add('border-white/20', 'text-white/70');
+        navAdmin.classList.remove('bg-emerald-500/20', 'border-emerald-400/50', 'text-emerald-100');
+      } else {
+        dashboardPage.classList.add('hidden');
+        adminPage.classList.remove('hidden');
+        navAdmin.classList.remove('border-white/20', 'text-white/70');
+        navAdmin.classList.add('bg-emerald-500/20', 'border-emerald-400/50', 'text-emerald-100');
+        navDashboard.classList.add('border-white/20', 'text-white/70');
+        navDashboard.classList.remove('bg-emerald-500/20', 'border-emerald-400/50', 'text-emerald-100');
+      }
+    }
+
+    // Data Management Functions
+    let uploadedData = { murid: null, pbd: null };
+
+    function downloadTemplate(type) {
+      let csvContent = '';
+      let filename = '';
+
+      if (type === 'murid') {
+        csvContent = 'No. Pendaftaran,Nama Murid,Jenis Kelamin,Kelas,Tarikh Lahir,Wali Pelajar\n' +
+                     '2024001,Ahmad bin Ibrahim,Lelaki,4 Arif,2011-05-15,Ibu Ibrahim\n' +
+                     '2024002,Nurul Aisyah binti Hassan,Perempuan,4 Bestari,2011-07-20,Puan Fatimah\n' +
+                     '2024003,Muhammad Danial bin Razak,Lelaki,5 Arif,2010-03-10,Encik Razak';
+        filename = 'template_murid.csv';
+      } else {
+        csvContent = 'No. Pendaftaran,Subjek,Tahap Penguasaan (TP),Penggal,Catatan\n' +
+                     '2024001,Bahasa Melayu,4,1,Prestasi Baik\n' +
+                     '2024001,Bahasa Inggeris,1,1,Memerlukan Sokongan\n' +
+                     '2024001,Matematik,5,1,Cemerlang\n' +
+                     '2024002,Bahasa Melayu,4,1,Prestasi Baik\n' +
+                     '2024002,Sains,2,1,Perlu Bimbingan';
+        filename = 'template_pbd.csv';
+      }
+
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const link = document.createElement('a');
+      link.href = URL.createObjectURL(blob);
+      link.download = filename;
+      link.click();
+      URL.revokeObjectURL(link.href);
+    }
+
+    function handleFileUpload(type, input) {
+      const file = input.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const text = e.target.result;
+        const lines = text.split('\n').filter(line => line.trim() !== '');
+        const recordCount = Math.max(0, lines.length - 1); 
+
+        uploadedData[type] = {
+          file: file.name,
+          recordCount: recordCount,
+          timestamp: new Date().toLocaleString('ms-MY')
+        };
+
+        const statusDiv = document.getElementById(`${type}-status`);
+        statusDiv.innerHTML = `
+          <div class="p-3 bg-green-50 rounded-lg border border-green-200 flex items-center gap-2">
+            <svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+            </svg>
+            <div>
+              <p class="text-xs font-semibold text-green-700">${file.name}</p>
+              <p class="text-xs text-green-600">${recordCount} rekod | Dimuat naik pada ${new Date().toLocaleTimeString('ms-MY')}</p>
+            </div>
+          </div>
+        `;
+
+        document.getElementById('murid-count').textContent = type === 'murid' ? recordCount + ' rekod' : (uploadedData.murid?.recordCount || 0) + ' rekod';
+        document.getElementById('pbd-count').textContent = type === 'pbd' ? recordCount + ' rekod' : (uploadedData.pbd?.recordCount || 0) + ' rekod';
+
+        input.value = '';
+      };
+      reader.readAsText(file);
+    }
+
+    function processData() {
+      if (!uploadedData.murid || !uploadedData.pbd) {
+        alert('Sila muat naik kedua-dua fail (Data Murid dan Data PBD) sebelum memproses.');
+        return;
+      }
+
+      const successMsg = document.createElement('div');
+      successMsg.className = 'fixed top-4 right-4 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg flex items-center gap-2 animate-fade';
+      successMsg.innerHTML = `
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+        </svg>
+        <span>Data telah diproses dan disimpan dengan berjaya!</span>
+      `;
+      document.body.appendChild(successMsg);
+
+      setTimeout(() => successMsg.remove(), 3000);
+
+      setTimeout(() => {
+        uploadedData = { murid: null, pbd: null };
+        document.getElementById('murid-status').innerHTML = '';
+        document.getElementById('pbd-status').innerHTML = '';
+        document.getElementById('murid-count').textContent = '0 rekod';
+        document.getElementById('pbd-count').textContent = '0 rekod';
+      }, 1500);
+    }
+  </script>
+</body>
+</html>
