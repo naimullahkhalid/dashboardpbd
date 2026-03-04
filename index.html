@@ -139,7 +139,6 @@
     </div>
 
     <div id="sub-view-kelas" class="space-y-8">
-      
       <div class="bg-white p-8 rounded-3xl card-shadow border border-slate-100">
         <h3 class="text-xs font-black text-slate-800 uppercase mb-6 tracking-widest border-l-4 border-blue-500 pl-3">Trend Prestasi TP (Fasa 1 vs Fasa 2)</h3>
         <div class="h-80 w-full relative"><canvas id="chart-trend"></canvas></div>
@@ -236,25 +235,45 @@
       </div>
       
       <div class="bg-white rounded-3xl card-shadow border border-slate-100 overflow-hidden">
-        <div class="px-8 py-6 bg-slate-50 border-b border-slate-200 flex flex-col md:flex-row md:items-center justify-between gap-4">
-          <div>
-            <h3 class="text-sm font-black text-slate-800 uppercase tracking-widest">Senarai Murid Intervensi</h3>
-            <p class="text-[10px] font-bold text-slate-400 uppercase mt-1">Klik tajuk lajur untuk menyusun jadual</p>
+        <div class="px-8 py-6 bg-slate-50 border-b border-slate-200">
+          <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-4">
+            <div>
+              <h3 class="text-sm font-black text-slate-800 uppercase tracking-widest">Senarai Murid Intervensi</h3>
+              <p class="text-[10px] font-bold text-slate-400 uppercase mt-1">Klik tajuk lajur untuk menyusun jadual</p>
+            </div>
+            <div class="flex items-center gap-3">
+              <span id="inter-badge" class="bg-red-500 text-white text-[10px] px-4 py-2 rounded-full font-black uppercase shadow-md whitespace-nowrap">0 Kes</span>
+            </div>
           </div>
-          <div class="flex items-center gap-3">
-            <input type="text" id="search-intervensi" onkeyup="searchIntervensi()" placeholder="🔍 Cari nama murid, kelas, atau subjek..." class="px-4 py-2 border border-slate-200 rounded-xl text-xs font-bold focus:outline-none focus:border-emerald-500 w-full md:w-64 transition-all">
-            <span id="inter-badge" class="bg-red-500 text-white text-[10px] px-4 py-2 rounded-full font-black uppercase shadow-md whitespace-nowrap">0 Kes</span>
+          
+          <div class="grid grid-cols-2 md:grid-cols-5 gap-3 bg-white p-3 rounded-2xl border border-slate-200 shadow-sm">
+            <select id="filter-inter-nama" onchange="applyIntervensiFilters()" class="p-2 border-none bg-slate-50 rounded-xl text-[10px] font-bold text-slate-700 focus:ring-2 focus:ring-emerald-500 outline-none w-full uppercase">
+                <option value="Semua">Semua Nama</option>
+            </select>
+            <select id="filter-inter-kelas" onchange="applyIntervensiFilters()" class="p-2 border-none bg-slate-50 rounded-xl text-[10px] font-bold text-slate-700 focus:ring-2 focus:ring-emerald-500 outline-none w-full uppercase">
+                <option value="Semua">Semua Kelas</option>
+            </select>
+            <select id="filter-inter-subjek" onchange="applyIntervensiFilters()" class="p-2 border-none bg-slate-50 rounded-xl text-[10px] font-bold text-slate-700 focus:ring-2 focus:ring-emerald-500 outline-none w-full uppercase">
+                <option value="Semua">Semua Subjek</option>
+            </select>
+            <select id="filter-inter-tp" onchange="applyIntervensiFilters()" class="p-2 border-none bg-slate-50 rounded-xl text-[10px] font-bold text-slate-700 focus:ring-2 focus:ring-emerald-500 outline-none w-full uppercase">
+                <option value="Semua">Semua Tahap (TP1-TP2)</option>
+                <option value="1">Tahap 1 Sahaja</option>
+                <option value="2">Tahap 2 Sahaja</option>
+            </select>
+            <input type="text" id="search-intervensi" onkeyup="applyIntervensiFilters()" placeholder="🔍 Carian bebas..." class="p-2 border border-slate-200 bg-white rounded-xl text-[10px] font-bold text-slate-700 focus:ring-2 focus:ring-emerald-500 outline-none w-full placeholder-slate-400">
           </div>
         </div>
+
         <div class="overflow-x-auto max-h-[500px] custom-scrollbar">
           <table class="w-full text-left text-xs font-bold border-collapse relative">
             <thead class="bg-white text-slate-400 uppercase text-[10px] tracking-widest border-b-2 border-slate-100 sticky top-0 z-10 shadow-sm cursor-pointer">
               <tr>
                 <th class="px-8 py-5">Bil</th>
-                <th class="px-8 py-5 hover:text-emerald-600 transition-colors" onclick="sortIntervensi('nama')">Nama Murid ↕</th>
-                <th class="px-8 py-5 hover:text-emerald-600 transition-colors" onclick="sortIntervensi('kelas')">Tahun / Kelas ↕</th>
-                <th class="px-8 py-5 hover:text-emerald-600 transition-colors" onclick="sortIntervensi('subjek')">Subjek ↕</th>
-                <th class="px-8 py-5 text-center hover:text-emerald-600 transition-colors" onclick="sortIntervensi('tp')">Tahap ↕</th>
+                <th class="px-8 py-5 hover:text-emerald-600 transition-colors" onclick="sortIntervensi('nama')" title="Klik untuk susun">Nama Murid ↕</th>
+                <th class="px-8 py-5 hover:text-emerald-600 transition-colors" onclick="sortIntervensi('kelas')" title="Klik untuk susun">Tahun / Kelas ↕</th>
+                <th class="px-8 py-5 hover:text-emerald-600 transition-colors" onclick="sortIntervensi('subjek')" title="Klik untuk susun">Subjek ↕</th>
+                <th class="px-8 py-5 text-center hover:text-emerald-600 transition-colors" onclick="sortIntervensi('tp')" title="Klik untuk susun">Tahap ↕</th>
               </tr>
             </thead>
             <tbody id="table-inter" class="divide-y divide-slate-100 text-slate-700">
@@ -326,6 +345,8 @@
     function getFullSub(code) { return subjectMap[code] || code; }
 
     let charts = { dashPie: null, trend: null, bar: null };
+    
+    // PEMBOLEHUBAH UNTUK SMART TABLE INTERVENSI
     let senaraiIntervensiGlobal = [];
     let currentSortCol = 'tp';
     let currentSortDir = 'asc';
@@ -367,21 +388,13 @@
       }
     }
 
-    // PEMBAIKAN BUG TAHUN: Tukar semua data yang masuk kepada Teks (String)
     function parseData(data) {
       appData = [];
       if (!Array.isArray(data) || data.length < 2) return; 
       let header = data[0];
       for (let i = 1; i < data.length; i++) {
         let row = data[i];
-        let record = { 
-            id: String(row[0]), 
-            nama: String(row[1]).trim(), 
-            tahun: String(row[2]).trim(), // Dipaksa jadi Teks
-            kelas: String(row[3]).trim(), 
-            fasa: String(row[4]).trim(), 
-            scores: {} 
-        };
+        let record = { id: String(row[0]), nama: String(row[1]).trim(), tahun: String(row[2]).trim(), kelas: String(row[3]).trim(), fasa: String(row[4]).trim(), scores: {} };
         for (let j = 5; j < header.length; j++) {
           if (row[j] !== '' && row[j] !== null) record.scores[header[j]] = parseInt(row[j]);
         }
@@ -490,7 +503,6 @@
       const fKelas = document.getElementById('filter-kelas').value;
       const fSubjek = document.getElementById('filter-subjek').value;
       
-      // Filter dengan memastikan d.tahun dibaca sebagai String
       let filteredData = appData.filter(d => 
         (fTahun === 'Semua' || String(d.tahun) === fTahun) && 
         (fFasa === 'Semua' || d.fasa === fFasa) && 
@@ -574,15 +586,23 @@
       document.getElementById('p1-desc').textContent = `Fokus Panitia: ${sortedSubjek[0] ? getFullSub(sortedSubjek[0].nama) : 'Tiada'}`;
       document.getElementById('p2-desc').textContent = `Sasaran Pemulihan: ${uniqueIntervensiCount} Murid Terlibat`;
 
-      // Smart Table Intervensi
+      // =====================================
+      // ISI DATA SMART TABLE INTERVENSI 
+      // =====================================
       senaraiIntervensiGlobal = senaraiIntervensiTemp;
-      document.getElementById('inter-badge').textContent = senaraiIntervensiGlobal.length + " Keseluruhan Kes";
-      document.getElementById('search-intervensi').value = ""; 
-      senaraiIntervensiGlobal.sort((a, b) => a.tp - b.tp);
+      populateIntervensiDropdowns();
+      
+      // Default Sort: TP ascending (TP1 dahulu)
       currentSortCol = 'tp';
       currentSortDir = 'asc';
-      renderIntervensiTable(senaraiIntervensiGlobal);
+      senaraiIntervensiGlobal.sort((a, b) => a.tp - b.tp);
+      
+      // Terapkan penapis dan tunjuk data
+      applyIntervensiFilters();
 
+      // =====================================
+      // JADUAL RUMUSAN & BMTM
+      // =====================================
       let totalMurid = filteredData.length;
       let htmlTpTable = `<thead class="bg-slate-50 border-b border-slate-200"><tr><th class="py-3 px-4">TAHAP (TP)</th><th class="py-3 px-4 text-center">BIL. MURID</th><th class="py-3 px-4 text-center">PERATUS (%)</th></tr></thead><tbody class="divide-y divide-slate-100">`;
       for (let i = 6; i >= 1; i--) {
@@ -620,23 +640,60 @@
       renderChartsVisual(totalTPCount, statsSubjek, statsKelas);
     }
 
+    // ====================================================
+    // FUNGSI LOGIK SMART TABLE INTERVENSI (BARU)
+    // ====================================================
+    function populateIntervensiDropdowns() {
+      // Nama
+      const names = [...new Set(senaraiIntervensiGlobal.map(m => m.nama))].sort();
+      let hNama = '<option value="Semua">Semua Nama</option>';
+      names.forEach(n => hNama += `<option value="${n}">${n}</option>`);
+      document.getElementById('filter-inter-nama').innerHTML = hNama;
+
+      // Kelas
+      const classes = [...new Set(senaraiIntervensiGlobal.map(m => m.kelas))].sort();
+      let hKelas = '<option value="Semua">Semua Kelas</option>';
+      classes.forEach(c => hKelas += `<option value="${c}">${c}</option>`);
+      document.getElementById('filter-inter-kelas').innerHTML = hKelas;
+
+      // Subjek
+      const subs = [...new Set(senaraiIntervensiGlobal.map(m => getFullSub(m.subjek)))].sort();
+      let hSub = '<option value="Semua">Semua Subjek</option>';
+      subs.forEach(s => hSub += `<option value="${s}">${s}</option>`);
+      document.getElementById('filter-inter-subjek').innerHTML = hSub;
+    }
+
+    function applyIntervensiFilters() {
+      const fNama = document.getElementById('filter-inter-nama').value;
+      const fKelas = document.getElementById('filter-inter-kelas').value;
+      const fSubjek = document.getElementById('filter-inter-subjek').value;
+      const fTp = document.getElementById('filter-inter-tp').value;
+      const query = document.getElementById('search-intervensi').value.toLowerCase();
+
+      const filtered = senaraiIntervensiGlobal.filter(m => {
+        const matchNama = fNama === 'Semua' || m.nama === fNama;
+        const matchKelas = fKelas === 'Semua' || m.kelas === fKelas;
+        const matchSubjek = fSubjek === 'Semua' || getFullSub(m.subjek) === fSubjek;
+        const matchTp = fTp === 'Semua' || String(m.tp) === fTp;
+        
+        const matchQuery = m.nama.toLowerCase().includes(query) || 
+                           m.kelas.toLowerCase().includes(query) || 
+                           getFullSub(m.subjek).toLowerCase().includes(query);
+
+        return matchNama && matchKelas && matchSubjek && matchTp && matchQuery;
+      });
+
+      renderIntervensiTable(filtered);
+      document.getElementById('inter-badge').textContent = filtered.length + " Kes Dipaparkan";
+    }
+
     function renderIntervensiTable(dataToRender) {
       let htmlIntervensi = '';
       dataToRender.forEach((murid, i) => {
         let rowClass = murid.tp === 1 ? 'bg-red-100 text-red-900 border-b border-red-200' : 'bg-white text-slate-700 hover:bg-slate-50 border-b border-slate-100 transition-colors';
         htmlIntervensi += `<tr class="${rowClass}"><td class="px-8 py-5 font-bold opacity-60">${i+1}</td><td class="px-8 py-5 uppercase font-black">${murid.nama}</td><td class="px-8 py-5 font-bold opacity-80">${murid.kelas}</td><td class="px-8 py-5 font-black opacity-60">${getFullSub(murid.subjek)}</td><td class="px-8 py-5 text-center"><span class="tp-badge tp${murid.tp} shadow-md">TP${murid.tp}</span></td></tr>`;
       });
-      document.getElementById('table-inter').innerHTML = htmlIntervensi || `<tr><td colspan='5' class='text-center py-12 text-slate-400 font-bold uppercase tracking-widest'>Tiada Kes Intervensi Direkodkan</td></tr>`;
-    }
-
-    function searchIntervensi() {
-      const query = document.getElementById('search-intervensi').value.toLowerCase();
-      const filtered = senaraiIntervensiGlobal.filter(m => 
-        m.nama.toLowerCase().includes(query) || 
-        m.kelas.toLowerCase().includes(query) || 
-        getFullSub(m.subjek).toLowerCase().includes(query)
-      );
-      renderIntervensiTable(filtered);
+      document.getElementById('table-inter').innerHTML = htmlIntervensi || `<tr><td colspan='5' class='text-center py-12 text-slate-400 font-bold uppercase tracking-widest'>Tiada Data / Carian Tidak Dijumpai</td></tr>`;
     }
 
     function sortIntervensi(col) {
@@ -646,21 +703,28 @@
         currentSortCol = col;
         currentSortDir = 'asc';
       }
+
       senaraiIntervensiGlobal.sort((a, b) => {
         let valA = a[col];
         let valB = b[col];
+
         if (col === 'subjek') {
             valA = getFullSub(valA);
             valB = getFullSub(valB);
         }
+
         if (typeof valA === 'string') valA = valA.toLowerCase();
         if (typeof valB === 'string') valB = valB.toLowerCase();
+
         if (valA < valB) return currentSortDir === 'asc' ? -1 : 1;
         if (valA > valB) return currentSortDir === 'asc' ? 1 : -1;
         return 0;
       });
-      searchIntervensi();
+
+      // Terapkan kembali filter yang sedang aktif selepas menyusun
+      applyIntervensiFilters();
     }
+    // ====================================================
 
     function updateIndividual() {
       const namaCarian = document.getElementById('select-murid').value;
