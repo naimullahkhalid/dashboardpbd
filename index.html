@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Analisis PBD SKPR | Sistem Eksekutif</title>
+  <title>Sistem Analisis PBD Bersepadu | SKPR 2026</title>
   <script src="https://cdn.tailwindcss.com/3.4.17"></script>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -11,13 +11,14 @@
 
   <style>
     * { font-family: 'Poppins', sans-serif; }
-    .card-shadow { box-shadow: 0 10px 30px -12px rgba(0, 0, 0, 0.08); }
+    .card-shadow { box-shadow: 0 10px 40px -12px rgba(0, 0, 0, 0.1); }
     .gradient-header { background: linear-gradient(135deg, #064e3b 0%, #065f46 100%); }
     .tp-badge { display: inline-block; padding: 0.2rem 0.6rem; border-radius: 9999px; font-weight: 800; font-size: 0.7rem; color: white; min-width: 48px; text-align: center; }
     .tp1 { background-color: #ef4444; } .tp2 { background-color: #f97316; } .tp3 { background-color: #eab308; }
     .tp4 { background-color: #3b82f6; } .tp5 { background-color: #10b981; } .tp6 { background-color: #059669; }
     .loader { border: 4px solid rgba(255, 255, 255, 0.3); border-radius: 50%; border-top: 4px solid #34d399; width: 40px; height: 40px; animation: spin 1s linear infinite; }
     @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    .sub-nav-active { background-color: #065f46; color: white; }
   </style>
 </head>
 <body class="h-full bg-slate-50 overflow-auto flex flex-col">
@@ -34,8 +35,8 @@
         <p class="text-[9px] font-bold text-emerald-300 tracking-[0.2em] uppercase">Sistem Pengurusan Data Bersepadu</p>
       </div>
       <nav class="flex gap-2">
-        <button id="nav-dashboard" onclick="switchTab('dashboard')" class="px-4 py-2 rounded-xl text-[10px] font-black uppercase transition-all bg-white/10 border border-white/20">📊 Utama</button>
-        <button id="nav-laporan" onclick="switchTab('laporan')" class="px-4 py-2 rounded-xl text-[10px] font-black uppercase transition-all border border-white/20">📈 Laporan</button>
+        <button id="nav-dashboard" onclick="switchTab('dashboard')" class="px-4 py-2 rounded-xl text-[10px] font-black uppercase transition-all border border-white/20">📊 Dashboard</button>
+        <button id="nav-laporan" onclick="switchTab('laporan')" class="px-4 py-2 rounded-xl text-[10px] font-black uppercase transition-all border border-white/20">📈 Laporan Lengkap</button>
         <button id="nav-admin" onclick="switchTab('admin')" class="px-4 py-2 rounded-xl text-[10px] font-black uppercase transition-all border border-white/20">⚙️ Admin</button>
       </nav>
     </div>
@@ -55,161 +56,149 @@
         <label class="block text-[10px] font-black text-slate-400 uppercase mb-1">Tapis Tahun & Kelas</label>
         <select id="filter-kelas" onchange="processAllViews()" class="bg-slate-50 border-none text-sm font-bold text-slate-700 rounded-xl p-3 w-full ring-1 ring-slate-200"></select>
       </div>
-      <div class="text-right">
-        <p class="text-[10px] font-black text-slate-400 uppercase leading-none mb-1">Murid Aktif</p>
-        <p id="stat-total-records" class="text-3xl font-black text-emerald-600 leading-none">0</p>
-      </div>
     </div>
   </div>
 
-  <main id="dashboard-view" class="hidden max-w-7xl mx-auto px-6 py-6 w-full text-center">
-    <div id="welcome-msg" class="py-20 text-slate-300 font-bold uppercase tracking-widest">
-      Sila muat naik data di tab Admin atau pilih kelas di atas.
+  <main id="dashboard-view" class="hidden max-w-7xl mx-auto px-6 py-6 w-full space-y-6">
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <div class="bg-white p-6 rounded-3xl card-shadow text-center">
+        <p class="text-[9px] font-black text-slate-400 uppercase mb-1">Jumlah Murid</p>
+        <p id="dash-total" class="text-3xl font-black text-slate-800">0</p>
+      </div>
+      <div class="bg-white p-6 rounded-3xl card-shadow text-center border-b-4 border-emerald-500">
+        <p class="text-[9px] font-black text-slate-400 uppercase mb-1">Peratus Lulus</p>
+        <p id="dash-lulus" class="text-3xl font-black text-emerald-600">0%</p>
+      </div>
+      <div class="bg-white p-6 rounded-3xl card-shadow text-center border-b-4 border-blue-500">
+        <p class="text-[9px] font-black text-slate-400 uppercase mb-1">TP5 & TP6</p>
+        <p id="dash-cemerlang" class="text-3xl font-black text-blue-600">0%</p>
+      </div>
+      <div class="bg-white p-6 rounded-3xl card-shadow text-center border-b-4 border-red-500">
+        <p class="text-[9px] font-black text-slate-400 uppercase mb-1">Kes Intervensi</p>
+        <p id="dash-inter" class="text-3xl font-black text-red-500">0</p>
+      </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div class="bg-white p-8 rounded-3xl card-shadow">
+        <h3 class="text-xs font-black text-slate-700 uppercase mb-6 tracking-widest">Agihan TP Keseluruhan</h3>
+        <div class="h-64"><canvas id="chart-dash-pie"></canvas></div>
+      </div>
+      <div class="bg-white p-8 rounded-3xl card-shadow">
+        <h3 class="text-xs font-black text-slate-700 uppercase mb-6 tracking-widest">Analisis Subjek Kritikal</h3>
+        <div id="dash-rank-subjek" class="space-y-3"></div>
+      </div>
     </div>
   </main>
 
-  <main id="laporan-view" class="hidden max-w-7xl mx-auto px-6 py-6 w-full space-y-8">
-    <section>
-      <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-        <div class="bg-white p-5 rounded-3xl card-shadow text-center">
-          <p class="text-[9px] font-black text-slate-400 uppercase mb-1">Jumlah Murid</p>
-          <p id="exec-total" class="text-2xl font-black text-slate-800">0</p>
-        </div>
-        <div class="bg-white p-5 rounded-3xl card-shadow text-center border-b-4 border-emerald-500">
-          <p class="text-[9px] font-black text-slate-400 uppercase mb-1">Lulus (TP3+)</p>
-          <p id="exec-lulus" class="text-2xl font-black text-emerald-600">0%</p>
-        </div>
-        <div class="bg-white p-5 rounded-3xl card-shadow text-center border-b-4 border-blue-500">
-          <p class="text-[9px] font-black text-slate-400 uppercase mb-1">Cemerlang (TP5+)</p>
-          <p id="exec-excel" class="text-2xl font-black text-blue-600">0%</p>
-        </div>
-        <div class="bg-white p-5 rounded-3xl card-shadow text-center border-b-4 border-red-500">
-          <p class="text-[9px] font-black text-slate-400 uppercase mb-1">Intervensi</p>
-          <p id="exec-inter" class="text-2xl font-black text-red-500">0</p>
-        </div>
-        <div class="bg-white p-5 rounded-3xl card-shadow text-center">
-          <p class="text-[9px] font-black text-slate-400 uppercase mb-1">Subjek Lemah</p>
-          <p id="exec-weak" class="text-[10px] font-black text-orange-600 uppercase">-</p>
-        </div>
-        <div class="bg-white p-5 rounded-3xl card-shadow text-center">
-          <p class="text-[9px] font-black text-slate-400 uppercase mb-1">Kelas Terbaik</p>
-          <p id="exec-best" class="text-[10px] font-black text-emerald-600 uppercase">-</p>
-        </div>
-      </div>
-    </section>
+  <main id="laporan-view" class="hidden max-w-7xl mx-auto px-6 py-6 w-full space-y-6">
+    <div class="flex justify-center gap-2 mb-4">
+      <button onclick="switchSubTab('kelas')" id="btn-sub-kelas" class="px-6 py-2 rounded-full text-[10px] font-black uppercase border border-slate-200 transition-all sub-nav-active">Analisis Kelas</button>
+      <button onclick="switchSubTab('individu')" id="btn-sub-individu" class="px-6 py-2 rounded-full text-[10px] font-black uppercase border border-slate-200 transition-all">Profil Murid</button>
+    </div>
 
-    <section class="bg-white p-8 rounded-3xl card-shadow border border-slate-100">
-      <h3 class="text-xs font-black text-slate-700 uppercase mb-6 tracking-widest">Trend Prestasi TP Mengikut Fasa</h3>
-      <div class="h-80 w-full relative"><canvas id="chart-trend"></canvas></div>
-    </section>
-
-    <section class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-      <div class="bg-white p-8 rounded-3xl card-shadow space-y-6">
-        <h3 class="text-xs font-black text-slate-700 uppercase border-l-4 border-blue-500 pl-3">Analisis Individu</h3>
-        <select id="select-murid" onchange="updateIndividual()" class="w-full p-3 bg-slate-50 border-none rounded-2xl text-sm font-bold ring-1 ring-slate-200">
-          <option value="">Pilih Murid...</option>
-        </select>
-        <div id="ind-card" class="hidden space-y-4">
-          <div class="flex items-center gap-4 bg-blue-600 p-5 rounded-2xl text-white">
-            <div class="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center font-black text-xl">AI</div>
-            <div><p id="ind-nama" class="font-black uppercase text-sm"></p><p id="ind-info" class="text-[10px] font-bold opacity-80 uppercase"></p></div>
-          </div>
-          <div class="grid grid-cols-1 gap-2 text-xs font-bold uppercase">
-            <div class="bg-slate-50 p-4 rounded-xl flex justify-between"><span>PURATA TP</span><span id="ind-avg" class="font-black text-lg">0.0</span></div>
-            <div class="bg-red-50 p-4 rounded-xl flex justify-between text-red-600"><span>SUBJEK LEMAH</span><span id="ind-weak" class="font-black"></span></div>
-            <div class="bg-emerald-50 p-4 rounded-xl flex justify-between text-emerald-600"><span>SUBJEK KUAT</span><span id="ind-strong" class="font-black"></span></div>
-          </div>
-        </div>
-      </div>
-
+    <div id="sub-view-kelas" class="space-y-6">
       <div class="bg-white p-8 rounded-3xl card-shadow">
-        <h3 class="text-xs font-black text-slate-700 uppercase mb-6 tracking-widest">⚡ Prioriti Tindakan</h3>
-        <div class="space-y-4">
-          <div class="p-5 bg-red-50 rounded-2xl border-l-8 border-red-500 flex justify-between items-center">
-            <div><p class="text-xs font-black text-red-800 uppercase">Intervensi Segera</p><p id="p1-desc" class="text-[10px] text-red-600 font-bold uppercase mt-1"></p></div>
-            <span class="font-black text-red-500 text-xl tracking-tighter">P1</span>
+        <h3 class="text-xs font-black text-slate-700 uppercase mb-6 tracking-widest text-center">Trend Prestasi TP Mengikut Fasa</h3>
+        <div class="h-80"><canvas id="chart-trend"></canvas></div>
+      </div>
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div class="bg-white p-8 rounded-3xl card-shadow">
+          <h3 class="text-xs font-black text-slate-700 uppercase mb-6 tracking-widest">🏆 Ranking Kelas</h3>
+          <div id="rank-kelas" class="space-y-3"></div>
+        </div>
+        <div class="bg-white p-8 rounded-3xl card-shadow">
+          <h3 class="text-xs font-black text-slate-700 uppercase mb-6 tracking-widest">Agihan TP Ikut Kelas</h3>
+          <div class="h-64"><canvas id="chart-bar-kelas"></canvas></div>
+        </div>
+      </div>
+    </div>
+
+    <div id="sub-view-individu" class="hidden space-y-6">
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div class="bg-white p-8 rounded-3xl card-shadow space-y-6">
+          <h3 class="text-xs font-black text-slate-700 uppercase border-l-4 border-blue-500 pl-3">Pilih Murid</h3>
+          <select id="select-murid" onchange="updateIndividual()" class="w-full p-4 bg-slate-50 border-none rounded-2xl text-sm font-bold ring-1 ring-slate-200"></select>
+          <div id="ind-card" class="hidden space-y-4">
+            <div class="flex items-center gap-4 bg-emerald-600 p-6 rounded-3xl text-white shadow-xl shadow-emerald-100">
+              <div class="w-14 h-14 bg-white/20 rounded-2xl flex items-center justify-center font-black text-2xl">AI</div>
+              <div><p id="ind-nama" class="font-black uppercase text-sm"></p><p id="ind-info" class="text-[10px] font-bold opacity-80 uppercase"></p></div>
+            </div>
+            <div class="grid grid-cols-1 gap-2 text-[10px] font-bold uppercase">
+              <div class="bg-slate-50 p-4 rounded-xl flex justify-between"><span>PURATA TP</span><span id="ind-avg" class="font-black text-lg">0.0</span></div>
+              <div class="bg-red-50 p-4 rounded-xl flex justify-between text-red-600"><span>SUBJEK LEMAH</span><span id="ind-weak" class="font-black"></span></div>
+              <div class="bg-emerald-50 p-4 rounded-xl flex justify-between text-emerald-600"><span>SUBJEK KUAT</span><span id="ind-strong" class="font-black"></span></div>
+            </div>
           </div>
-          <div class="p-5 bg-orange-50 rounded-2xl border-l-8 border-orange-500 flex justify-between items-center">
-            <div><p class="text-xs font-black text-orange-800 uppercase">Sokongan Rakan Sebaya</p><p id="p2-desc" class="text-[10px] text-orange-600 font-bold uppercase mt-1"></p></div>
-            <span class="font-black text-orange-500 text-xl tracking-tighter">P2</span>
+        </div>
+        <div class="bg-white p-8 rounded-3xl card-shadow">
+          <h3 class="text-xs font-black text-slate-700 uppercase mb-6 tracking-widest">⚡ Prioriti Tindakan</h3>
+          <div class="space-y-4">
+            <div class="p-5 bg-red-50 rounded-2xl border-l-8 border-red-500 flex justify-between items-center">
+              <div><p class="text-xs font-black text-red-800 uppercase">Segera (P1)</p><p id="p1-desc" class="text-[10px] text-red-600 font-bold uppercase mt-1"></p></div>
+              <span class="text-3xl opacity-20 font-black">!</span>
+            </div>
+            <div class="p-5 bg-orange-50 rounded-2xl border-l-8 border-orange-500 flex justify-between items-center">
+              <div><p class="text-xs font-black text-orange-800 uppercase">Sokongan (P2)</p><p id="p2-desc" class="text-[10px] text-orange-600 font-bold uppercase mt-1"></p></div>
+              <span class="text-3xl opacity-20 font-black">?</span>
+            </div>
           </div>
         </div>
       </div>
-    </section>
-
-    <section class="bg-white rounded-3xl card-shadow overflow-hidden">
-      <div class="px-8 py-5 bg-slate-50 border-b flex justify-between items-center">
-        <h3 class="text-xs font-black text-slate-800 uppercase tracking-widest">Senarai Intervensi (TP1 & TP2)</h3>
-        <span id="inter-badge" class="bg-red-500 text-white text-[10px] px-3 py-1 rounded-full font-black uppercase">0 Rekod</span>
+      
+      <div class="bg-white rounded-3xl card-shadow overflow-hidden">
+        <div class="px-8 py-5 bg-slate-50 border-b flex justify-between items-center">
+          <h3 class="text-xs font-black text-slate-800 uppercase tracking-widest">Senarai Intervensi (TP1 & TP2)</h3>
+          <span id="inter-badge" class="bg-red-500 text-white text-[10px] px-3 py-1 rounded-full font-black">0 Murid</span>
+        </div>
+        <div class="overflow-x-auto">
+          <table class="w-full text-left text-xs font-bold border-collapse">
+            <thead class="bg-slate-50 text-slate-400 uppercase text-[9px]">
+              <tr><th class="px-8 py-4">Bil</th><th class="px-8 py-4">Nama Murid</th><th class="px-8 py-4">Kelas</th><th class="px-8 py-4 text-center">Tahap</th><th class="px-8 py-4 text-center">Tindakan</th></tr>
+            </thead>
+            <tbody id="table-inter" class="divide-y divide-slate-100"></tbody>
+          </table>
+        </div>
       </div>
-      <div class="overflow-x-auto">
-        <table class="w-full text-left text-xs font-bold border-collapse">
-          <thead class="bg-slate-50 text-slate-400 uppercase text-[9px]">
-            <tr><th class="px-8 py-4">Bil</th><th class="px-8 py-4">Nama Murid</th><th class="px-8 py-4">Kelas</th><th class="px-8 py-4">Subjek</th><th class="px-8 py-4 text-center">Tahap</th><th class="px-8 py-4 text-center">Tindakan</th></tr>
-          </thead>
-          <tbody id="table-inter" class="divide-y divide-slate-100"></tbody>
-        </table>
-      </div>
-    </section>
-
-    <section class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-       <div class="bg-white p-8 rounded-3xl card-shadow">
-          <h3 class="text-xs font-black text-slate-700 uppercase mb-6 tracking-widest">🏆 Ranking Kelas (Purata TP)</h3>
-          <div id="rank-kelas" class="space-y-3"></div>
-       </div>
-       <div class="bg-white p-8 rounded-3xl card-shadow">
-          <h3 class="text-xs font-black text-slate-700 uppercase mb-6 tracking-widest">📚 Ranking Subjek</h3>
-          <div id="rank-subjek" class="space-y-3"></div>
-       </div>
-    </section>
-
-    <section class="bg-white p-8 rounded-3xl card-shadow">
-      <h3 class="text-xs font-black text-slate-700 uppercase mb-6 tracking-widest text-center">Agihan Tahap Penguasaan Mengikut Kelas</h3>
-      <div class="h-80 w-full relative"><canvas id="chart-bar-kelas"></canvas></div>
-    </section>
+    </div>
   </main>
 
   <main id="admin-view" class="hidden max-w-4xl mx-auto px-6 py-12 w-full space-y-8">
     <div class="bg-white p-10 rounded-3xl card-shadow border border-slate-200">
-      <h2 class="text-xl font-black text-slate-800 mb-2 uppercase">Muat Naik Fail PBD</h2>
-      <p class="text-[10px] font-bold text-slate-400 uppercase mb-8">Format Fail: TAHUN KELAS FASA.xls (Cth: 2025 5 TOPAZ FASA 1.xls)</p>
-      
+      <h2 class="text-xl font-black text-slate-800 mb-8 uppercase">Muat Naik Data PBD (.xls)</h2>
       <div class="space-y-6">
         <div>
-          <label class="block text-[10px] font-black text-slate-400 uppercase mb-2">Pilih Fail (Boleh pilih banyak sekaligus)</label>
+          <label class="block text-[10px] font-black text-slate-400 uppercase mb-2">Pilih Fail (Format: TAHUN KELAS FASA.xls)</label>
           <input type="file" id="file-upload" accept=".xls,.xlsx" multiple class="hidden" onchange="handleFileSelect(event)">
           <div onclick="document.getElementById('file-upload').click()" class="border-2 border-dashed border-emerald-200 rounded-3xl p-10 text-center bg-emerald-50/30 cursor-pointer hover:bg-emerald-50 transition">
             <p id="file-display" class="text-emerald-600 font-black uppercase text-xs">Klik untuk pilih fail Excel</p>
           </div>
         </div>
-        <button onclick="processUploadAndSync()" class="w-full py-5 bg-emerald-600 text-white font-black rounded-3xl shadow-xl shadow-emerald-100 hover:bg-emerald-700 transition uppercase tracking-widest text-xs">🚀 Kemas Kini Cloud Database</button>
+        <button onclick="processUploadAndSync()" class="w-full py-5 bg-emerald-600 text-white font-black rounded-3xl shadow-xl shadow-emerald-100 hover:bg-emerald-700 transition uppercase tracking-widest text-xs">🚀 Hantar Data ke Cloud</button>
       </div>
     </div>
 
     <div class="bg-white p-10 rounded-3xl card-shadow border border-red-100">
-      <h2 class="text-xl font-black text-red-800 mb-2 uppercase">Padam Data Fail Tertentu</h2>
-      <p class="text-[10px] font-bold text-slate-400 uppercase mb-8">Pilih fail unik yang ingin dikeluarkan dari sistem</p>
-      
+      <h2 class="text-xl font-black text-red-800 mb-8 uppercase">Padam Fail Spesifik</h2>
       <div class="space-y-6">
-        <div>
-          <label class="block text-[10px] font-black text-slate-400 uppercase mb-2">Pilih Rekod Fail Unik</label>
-          <select id="select-delete-file" class="w-full p-4 bg-slate-50 rounded-2xl border-none ring-1 ring-slate-200 font-bold text-sm">
-            <option value="">Tiada Data</option>
-          </select>
-        </div>
+        <select id="select-delete-file" class="w-full p-4 bg-slate-50 rounded-2xl border-none ring-1 ring-slate-200 font-bold text-sm uppercase"></select>
         <div class="flex gap-2">
           <button onclick="deleteSpecificFile()" class="flex-1 py-4 bg-red-600 text-white font-black rounded-2xl hover:bg-red-700 transition uppercase text-[10px]">🗑️ Padam Fail Terpilih</button>
-          <button onclick="clearAllData()" class="px-6 py-4 bg-slate-800 text-white font-black rounded-2xl hover:bg-black transition uppercase text-[10px]">Reset Semua</button>
+          <button onclick="clearAllData()" class="px-6 py-4 bg-slate-800 text-white font-black rounded-2xl uppercase text-[10px]">Reset Pangkalan Data</button>
         </div>
       </div>
     </div>
   </main>
 
+  <footer class="py-10 text-center text-[10px] font-black text-slate-400 uppercase tracking-[0.3em] mt-auto">
+    <p>© 2026 Sistem Analisis PBD Bersepadu | SK Paya Resak</p>
+  </footer>
+
   <script>
     const GAS_URL = "https://script.google.com/macros/s/AKfycbxyuiQInWhGYkMuIBVt0R6fSw9G3NEhFzuRjyw4WHBjpBAnz2PaVj0b7JVUmfUD-VAVIg/exec";
     let appData = [];
     const subjects = ['BM', 'BI', 'MM', 'SAINS', 'SEJ', 'PAI', 'PM', 'BC', 'BT', 'BIN', 'RBT', 'AR', 'PJPK', 'PMZ', 'PSV'];
-    let charts = { trend: null, bar: null };
+    let charts = { dashPie: null, trend: null, bar: null };
 
     window.onload = loadFromCloud;
 
@@ -254,8 +243,8 @@
 
     function switchTab(t) {
       ['dashboard-view', 'laporan-view', 'admin-view', 'global-filters'].forEach(id => document.getElementById(id).classList.add('hidden'));
-      const active = "px-4 py-2 rounded-xl text-[10px] font-black uppercase bg-white/10 border border-white/20";
-      const inactive = "px-4 py-2 rounded-xl text-[10px] font-black uppercase border border-white/20";
+      const active = "px-4 py-2 rounded-xl text-[10px] font-black uppercase bg-emerald-600 text-white";
+      const inactive = "px-4 py-2 rounded-xl text-[10px] font-black uppercase border border-slate-200 text-slate-400";
       ['nav-dashboard', 'nav-laporan', 'nav-admin'].forEach(id => document.getElementById(id).className = inactive);
       
       document.getElementById(t+'-view').classList.remove('hidden');
@@ -267,23 +256,30 @@
       showLoad(false);
     }
 
+    function switchSubTab(t) {
+      document.getElementById('sub-view-kelas').classList.add('hidden');
+      document.getElementById('sub-view-individu').classList.add('hidden');
+      document.getElementById('btn-sub-kelas').className = "px-6 py-2 rounded-full text-[10px] font-black uppercase border border-slate-200 transition-all";
+      document.getElementById('btn-sub-individu').className = "px-6 py-2 rounded-full text-[10px] font-black uppercase border border-slate-200 transition-all";
+      
+      document.getElementById('sub-view-'+t).classList.remove('hidden');
+      document.getElementById('btn-sub-'+t).classList.add('sub-nav-active');
+    }
+
     function updateFilters() {
-      // Filter Dashboard/Laporan
       const uniqueItems = [...new Set(appData.map(d => `${d.tahun} ${d.kelas}`))].sort();
       let h = '<option value="Semua">Semua Kelas</option>';
       uniqueItems.forEach(k => h += `<option value="${k}">${k}</option>`);
       document.getElementById('filter-kelas').innerHTML = h;
 
-      // Filter Padam Data (Spesifik Fail)
       const uniqueFiles = [...new Set(appData.map(d => `${d.tahun} ${d.kelas} ${d.fasa}`))].sort();
       let delH = '<option value="">Pilih Fail Untuk Dipadam</option>';
       uniqueFiles.forEach(f => delH += `<option value="${f}">${f}</option>`);
       document.getElementById('select-delete-file').innerHTML = delH;
 
-      // Filter Murid
       const curK = document.getElementById('filter-kelas').value;
       const uS = [...new Set(appData.filter(d => curK === 'Semua' || `${d.tahun} ${d.kelas}` === curK).map(d => d.nama))].sort();
-      let sh = '<option value="">Pilih Murid...</option>';
+      let sh = '<option value="">Cari Nama Murid...</option>';
       uS.forEach(s => sh += `<option value="${s}">${s}</option>`);
       document.getElementById('select-murid').innerHTML = sh;
     }
@@ -291,27 +287,16 @@
     function processAllViews() {
       const fFasa = document.getElementById('filter-fasa').value;
       const fKelas = document.getElementById('filter-kelas').value;
-      
-      let fd = appData.filter(d => 
-        (fFasa === 'Semua' || d.fasa === fFasa) && 
-        (fKelas === 'Semua' || `${d.tahun} ${d.kelas}` === fKelas)
-      );
+      let fd = appData.filter(d => (fFasa === 'Semua' || d.fasa === fFasa) && (fKelas === 'Semua' || `${d.tahun} ${d.kelas}` === fKelas));
 
-      document.getElementById('stat-total-records').textContent = fd.length;
-      if(!fd.length) { 
-        document.getElementById('welcome-msg').classList.remove('hidden');
-        return; 
-      } else {
-        document.getElementById('welcome-msg').classList.add('hidden');
-      }
+      if(!fd.length) return;
 
-      let tSub = 0, cL = 0, cE = 0, sTP = 0, subS = {}, clsS = {}, iL = [];
+      let tSub = 0, cL = 0, cE = 0, sTP = 0, subS = {}, clsS = {}, iL = [], tpP = {1:0,2:0,3:0,4:0,5:0,6:0};
       fd.forEach(s => {
-        let stA = 0, stC = 0;
-        let kKey = `${s.tahun} ${s.kelas}`;
+        let stA = 0, stC = 0, kKey = `${s.tahun} ${s.kelas}`;
         if(!clsS[kKey]) clsS[kKey] = { sum:0, count:0, tpD: {1:0, 3:0, 5:0} };
         for(let sub in s.scores) {
-          let sc = s.scores[sub]; tSub++; stA += sc; stC++;
+          let sc = s.scores[sub]; tSub++; stA += sc; stC++; tpP[sc]++;
           if(sc >= 3) cL++; if(sc >= 5) cE++;
           if(sc <= 2) iL.push({ n: s.nama, k: s.kelas, s: sub, t: sc });
           if(!subS[sub]) subS[sub] = { sum:0, count:0 }; subS[sub].sum += sc; subS[sub].count++;
@@ -320,29 +305,33 @@
         if(stC) { clsS[kKey].sum += (stA/stC); clsS[kKey].count++; }
       });
 
-      document.getElementById('exec-total').textContent = fd.length;
-      document.getElementById('exec-lulus').textContent = tSub ? ((cL/tSub)*100).toFixed(1)+'%' : '0%';
-      document.getElementById('exec-excel').textContent = tSub ? ((cE/tSub)*100).toFixed(1)+'%' : '0%';
-      document.getElementById('exec-inter').textContent = [...new Set(iL.map(x=>x.n))].length;
-      
+      // DASHBOARD DATA
+      document.getElementById('dash-total').textContent = fd.length;
+      document.getElementById('dash-lulus').textContent = tSub ? ((cL/tSub)*100).toFixed(1)+'%' : '0%';
+      document.getElementById('dash-cemerlang').textContent = tSub ? ((cE/tSub)*100).toFixed(1)+'%' : '0%';
+      document.getElementById('dash-inter').textContent = [...new Set(iL.map(x=>x.n))].length;
+
+      // SUBJEK KRITIKAL DASHBOARD
       let sortSub = Object.keys(subS).map(n => ({ n, a: subS[n].sum/subS[n].count })).sort((a,b)=>a.a-b.a);
-      document.getElementById('exec-weak').textContent = sortSub[0]?.n || '-';
+      let rSH = ''; sortSub.slice(0,4).forEach((s,i) => rSH += `<div class="flex justify-between p-3 bg-red-50 rounded-xl font-bold text-[10px]"><span>${i+1}. ${s.n}</span><span class="text-red-600">${s.a.toFixed(2)}</span></div>`);
+      document.getElementById('dash-rank-subjek').innerHTML = rSH;
+
+      // LAPORAN DATA
       let sortCls = Object.keys(clsS).map(n => ({ n, a: clsS[n].sum/clsS[n].count, d: clsS[n].tpD })).sort((a,b)=>b.a-a.a);
-      document.getElementById('exec-best').textContent = sortCls[0]?.n || '-';
-
-      document.getElementById('p1-desc').textContent = `Subjek Kritikal: ${sortSub[0]?.n || '-'}`;
-      document.getElementById('p2-desc').textContent = `Target: ${[...new Set(iL.map(x=>x.n))].length} Murid`;
-
       let rKH = ''; sortCls.slice(0,5).forEach((c,i) => rKH += `<div class="flex justify-between p-3 bg-slate-50 rounded-xl font-bold text-[10px]"><span>${i+1}. ${c.n}</span><span class="text-emerald-600">${c.a.toFixed(2)}</span></div>`);
       document.getElementById('rank-kelas').innerHTML = rKH;
-      let rSH = ''; sortSub.reverse().slice(0,5).forEach((s,i) => rSH += `<div class="flex justify-between p-3 bg-slate-50 rounded-xl font-bold text-[10px]"><span>${i+1}. ${s.n}</span><span class="text-blue-600">${s.a.toFixed(2)}</span></div>`);
-      document.getElementById('rank-subjek').innerHTML = rSH;
+      
+      let rSubH = ''; sortSub.reverse().slice(0,5).forEach((s,i) => rSubH += `<div class="flex justify-between p-3 bg-slate-50 rounded-xl font-bold text-[10px]"><span>${i+1}. ${s.n}</span><span class="text-blue-600">${s.a.toFixed(2)}</span></div>`);
+      document.getElementById('rank-subjek').innerHTML = rSubH;
 
-      document.getElementById('inter-badge').textContent = iL.length + " Kes";
-      let iH = ''; iL.sort((a,b)=>a.t-b.t).forEach((x,i) => iH += `<tr class="${x.t===1?'bg-red-50':''}"><td class="px-8 py-4 opacity-30">${i+1}</td><td class="px-8 py-4 uppercase font-black">${x.n}</td><td class="px-8 py-4">${x.k}</td><td class="px-8 py-4 opacity-60">${x.s}</td><td class="px-8 py-4 text-center"><span class="tp-badge tp${x.t}">TP${x.t}</span></td><td class="px-8 py-4 text-center"><button class="text-blue-600">Lihat</button></td></tr>`);
-      document.getElementById('table-inter').innerHTML = iH || "<tr><td colspan='6' class='text-center py-10 opacity-30 uppercase'>Tiada Kes Intervensi</td></tr>";
+      document.getElementById('p1-desc').textContent = `Fokus Panitia: ${sortSub[sortSub.length-1]?.n || '-'}`;
+      document.getElementById('p2-desc').textContent = `Target: ${[...new Set(iL.map(x=>x.n))].length} Murid`;
 
-      renderCharts(subS, clsS);
+      document.getElementById('inter-badge').textContent = [...new Set(iL.map(x=>x.n))].length + " Murid";
+      let iH = ''; iL.sort((a,b)=>a.t-b.t).forEach((x,i) => iH += `<tr class="${x.t===1?'bg-red-100 text-red-800':''}"><td class="px-8 py-4 opacity-50">${i+1}</td><td class="px-8 py-4 uppercase font-black">${x.n}</td><td class="px-8 py-4">${x.k}</td><td class="px-8 py-4 text-center"><span class="tp-badge tp${x.t}">TP${x.t}</span></td><td class="px-8 py-4 text-center"><button class="text-blue-600">Profil</button></td></tr>`);
+      document.getElementById('table-inter').innerHTML = iH || "<tr><td colspan='5' class='text-center py-10 opacity-30 uppercase'>Tiada Kes Intervensi</td></tr>";
+
+      renderCharts(tpP, subS, clsS);
     }
 
     function updateIndividual() {
@@ -360,43 +349,34 @@
       document.getElementById('ind-strong').textContent = s.join(', ') || 'Tiada';
     }
 
-    function renderCharts(subS, clsS) {
+    function renderCharts(tpP, subS, clsS) {
+      // 1. Dash Pie
+      if(charts.dashPie) charts.dashPie.destroy();
+      charts.dashPie = new Chart(document.getElementById('chart-dash-pie'), { type: 'doughnut', data: { labels: ['TP1','TP2','TP3','TP4','TP5','TP6'], datasets: [{ data: [1,2,3,4,5,6].map(i => tpP[i]), backgroundColor: ['#ef4444','#f97316','#eab308','#3b82f6','#10b981','#059669'], borderWidth:0 }] }, options: { responsive:true, maintainAspectRatio:false, plugins: { legend: { position:'bottom', labels:{boxWidth:10, font:{size:9}} } } } });
+
+      // 2. Trend Line
       if(charts.trend) charts.trend.destroy();
       const subs = Object.keys(subS).slice(0,4);
-      charts.trend = new Chart(document.getElementById('chart-trend'), {
-        type: 'line',
-        data: { labels: ['FASA 1', 'FASA 2'], datasets: subs.map((s,i) => ({ label: s, data: [1,2].map(f => { let d = appData.filter(x=>x.fasa==='FASA '+f && x.scores[s]); return d.length ? d.reduce((a,b)=>a+b.scores[s],0)/d.length : null; }), borderColor: ['#3b82f6','#ef4444','#10b981','#f59e0b'][i], tension:0.4, fill:true, backgroundColor: ['#3b82f610','#ef444410','#10b98110','#f59e0b10'][i] })) },
-        options: { responsive:true, maintainAspectRatio:false, scales: { y: { min:1, max:6, ticks:{stepSize:1} } } }
-      });
+      charts.trend = new Chart(document.getElementById('chart-trend'), { type: 'line', data: { labels: ['FASA 1', 'FASA 2'], datasets: subs.map((s,i) => ({ label: s, data: [1,2].map(f => { let d = appData.filter(x=>x.fasa==='FASA '+f && x.scores[s]); return d.length ? d.reduce((a,b)=>a+b.scores[s],0)/d.length : null; }), borderColor: ['#3b82f6','#ef4444','#10b981','#f59e0b'][i], tension:0.4, fill:true, backgroundColor: ['#3b82f610','#ef444410','#10b98110','#f59e0b10'][i] })) }, options: { responsive:true, maintainAspectRatio:false, scales: { y: { min:1, max:6, ticks:{stepSize:1} } } } });
 
+      // 3. Bar Kelas
       if(charts.bar) charts.bar.destroy();
       const cNs = Object.keys(clsS);
-      charts.bar = new Chart(document.getElementById('chart-bar-kelas'), {
-        type: 'bar',
-        data: { labels: cNs, datasets: [{label:'TP1-2',data:cNs.map(c=>clsS[c].tpD[1]),backgroundColor:'#ef4444'},{label:'TP3-4',data:cNs.map(c=>clsS[c].tpD[3]),backgroundColor:'#f59e0b'},{label:'TP5-6',data:cNs.map(c=>clsS[c].tpD[5]),backgroundColor:'#10b981'}] },
-        options: { responsive:true, maintainAspectRatio:false, scales:{x:{stacked:true},y:{stacked:true}} }
-      });
+      charts.bar = new Chart(document.getElementById('chart-bar-kelas'), { type: 'bar', data: { labels: cNs, datasets: [{label:'TP1-2',data:cNs.map(c=>clsS[c].tpD[1]),backgroundColor:'#ef4444'},{label:'TP3-4',data:cNs.map(c=>clsS[c].tpD[3]),backgroundColor:'#f59e0b'},{label:'TP5-6',data:cNs.map(c=>clsS[c].tpD[5]),backgroundColor:'#10b981'}] }, options: { responsive:true, maintainAspectRatio:false, scales:{x:{stacked:true},y:{stacked:true}} } });
     }
 
-    // --- ADMIN LOGIC ---
+    // ADMIN LOGIC
     let selF = [];
     function handleFileSelect(e) { selF = Array.from(e.target.files); document.getElementById('file-display').textContent = selF.length + " Fail Sedia."; }
-    
     async function processUploadAndSync() {
       if(!selF.length) return alert("Pilih fail dahulu.");
       showLoad(true, "Menganalisis Fail...");
       for(let file of selF) {
-        // Ekstrak Tahun, Kelas, Fasa dari Nama Fail
         let name = file.name.replace(/\.[^/.]+$/, "").trim().toUpperCase();
         let parts = name.split(" ");
-        
-        let tahun = parts[0];
-        let fasaIdx = parts.indexOf("FASA");
+        let tahun = parts[0], fasaIdx = parts.indexOf("FASA");
         let fasa = (fasaIdx !== -1 && parts[fasaIdx+1]) ? `FASA ${parts[fasaIdx+1]}` : "FASA 1";
-        
-        // Ambil bahagian di tengah sebagai nama kelas
-        let kelasParts = parts.slice(1, fasaIdx !== -1 ? fasaIdx : -1);
-        let kelas = kelasParts.join(" ");
+        let kelas = parts.slice(1, fasaIdx !== -1 ? fasaIdx : -1).join(" ");
 
         let jsonData = await new Promise(res => {
           let reader = new FileReader();
@@ -418,21 +398,16 @@
         let id = kI && row[kI] ? String(row[kI]).replace(/[- ]/g, '').trim() : `ID_${kelas}_${idx}`;
         let rec = { nama: String(row[kN]).trim().toUpperCase(), id, tahun, kelas, fasa, scores: {} };
         for(let s in sK) { let n = parseInt(String(row[sK[s]]).replace(/\D/g, '')); if(!isNaN(n) && n>=1 && n<=6) rec.scores[s] = n; }
-        // Update/Tindih data lama
         let exIdx = appData.findIndex(d => d.fasa === fasa && d.tahun === tahun && d.kelas === kelas && d.nama === rec.nama);
         if(exIdx > -1) appData[exIdx] = rec; else appData.push(rec);
       });
     }
 
-    // FUNGSI PADAM SPESIFIK
     async function deleteSpecificFile() {
       const fileKey = document.getElementById('select-delete-file').value;
-      if(!fileKey) return alert("Sila pilih rekod fail untuk dipadam.");
-      
-      if(confirm(`AWAS! Anda pasti mahu memadam SEMUA DATA bagi fail: ${fileKey}?`)) {
-        appData = appData.filter(d => `${d.tahun} ${d.kelas} ${d.fasa}` !== fileKey);
-        await syncToCloud();
-      }
+      if(!fileKey || !confirm(`Padam SEMUA data bagi: ${fileKey}?`)) return;
+      appData = appData.filter(d => `${d.tahun} ${d.kelas} ${d.fasa}` !== fileKey);
+      await syncToCloud();
     }
 
     function clearAllData() { if(confirm("RESET SEMUA DATABASE?")) { appData = []; syncToCloud(); } }
