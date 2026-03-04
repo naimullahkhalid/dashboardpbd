@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Sistem Analisis PBD Bersepadu | SKPR</title>
+  <title>Analisis PBD SKPR | Sistem Eksekutif</title>
   <script src="https://cdn.tailwindcss.com/3.4.17"></script>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -11,515 +11,431 @@
 
   <style>
     * { font-family: 'Poppins', sans-serif; }
-    .card-shadow { box-shadow: 0 4px 20px rgba(0, 51, 102, 0.05); }
-    .gradient-header { background: linear-gradient(135deg, #0a1628 0%, #1e3a5f 50%, #0d2137 100%); }
-    .tp-badge { display: inline-block; padding: 0.25rem 0.75rem; border-radius: 9999px; font-weight: bold; font-size: 0.75rem; color: white; text-align: center; min-width: 50px; }
-    .tp1 { background-color: #dc2626; } /* Merah Garang */
-    .tp2 { background-color: #f97316; } /* Orange */
-    .tp3 { background-color: #eab308; } .tp4 { background-color: #3b82f6; }
-    .tp5 { background-color: #10b981; } .tp6 { background-color: #059669; }
-    .loader { border: 4px solid rgba(255, 255, 255, 0.3); border-radius: 50%; border-top: 4px solid #10b981; width: 40px; height: 40px; animation: spin 1s linear infinite; }
+    .card-shadow { box-shadow: 0 10px 30px -12px rgba(0, 0, 0, 0.08); }
+    .gradient-header { background: linear-gradient(135deg, #064e3b 0%, #065f46 100%); }
+    .tp-badge { display: inline-block; padding: 0.2rem 0.6rem; border-radius: 9999px; font-weight: 800; font-size: 0.7rem; color: white; min-width: 48px; text-align: center; }
+    .tp1 { background-color: #ef4444; } .tp2 { background-color: #f97316; } .tp3 { background-color: #eab308; }
+    .tp4 { background-color: #3b82f6; } .tp5 { background-color: #10b981; } .tp6 { background-color: #059669; }
+    .loader { border: 4px solid rgba(255, 255, 255, 0.3); border-radius: 50%; border-top: 4px solid #34d399; width: 40px; height: 40px; animation: spin 1s linear infinite; }
     @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
   </style>
 </head>
 <body class="h-full bg-slate-50 overflow-auto flex flex-col">
   
-  <div id="loading-overlay" class="fixed inset-0 bg-slate-900 z-[100] flex flex-col items-center justify-center text-white p-6">
+  <div id="loading-overlay" class="fixed inset-0 bg-slate-900/90 z-[100] flex flex-col items-center justify-center text-white hidden">
     <div class="loader mb-4"></div>
-    <h2 id="loading-text" class="text-xl font-bold tracking-wider text-center">Menyambung Cloud...</h2>
+    <h2 id="loading-text" class="text-lg font-bold uppercase tracking-widest">Sila Tunggu...</h2>
   </div>
 
-  <header class="text-white sticky top-0 z-50 gradient-header shadow-lg">
-    <div class="max-w-7xl mx-auto px-4 py-4 flex flex-col md:flex-row md:items-center justify-between gap-4">
-      <div class="flex items-center gap-4">
-        <div>
-          <h1 class="text-xl font-bold tracking-tight">PBD Analisis SK Paya Resak</h1>
-          <p class="text-emerald-300 text-[10px] uppercase font-bold tracking-widest flex items-center gap-1">
-            <span class="w-2 h-2 rounded-full bg-green-400 animate-pulse"></span> Sistem Live
-          </p>
-        </div>
+  <header class="text-white sticky top-0 z-50 gradient-header shadow-md">
+    <div class="max-w-7xl mx-auto px-6 py-4 flex flex-col md:flex-row items-center justify-between gap-4">
+      <div>
+        <h1 class="text-xl font-black tracking-tighter uppercase">PBD ANALISIS SK PAYA RESAK</h1>
+        <p class="text-[9px] font-bold text-emerald-300 tracking-[0.2em] uppercase">Sistem Pengurusan Data Bersepadu</p>
       </div>
-      <div class="flex flex-wrap gap-2">
-        <button id="nav-dashboard" onclick="switchTab('dashboard')" class="px-4 py-2 rounded-lg border border-white/20 text-white/70 text-xs font-bold transition-all uppercase">📊 Dashboard</button> 
-        <button id="nav-laporan" onclick="switchTab('laporan')" class="px-4 py-2 rounded-lg border border-white/20 text-white/70 text-xs font-bold transition-all uppercase">📈 Laporan Lengkap</button>
-        <button id="nav-admin" onclick="switchTab('admin')" class="px-4 py-2 rounded-lg border border-white/20 text-white/70 text-xs font-bold transition-all uppercase">⚙️ Admin</button>
-      </div>
+      <nav class="flex gap-2">
+        <button id="nav-dashboard" onclick="switchTab('dashboard')" class="px-4 py-2 rounded-xl text-[10px] font-black uppercase transition-all bg-white/10 border border-white/20">📊 Utama</button>
+        <button id="nav-laporan" onclick="switchTab('laporan')" class="px-4 py-2 rounded-xl text-[10px] font-black uppercase transition-all border border-white/20">📈 Laporan</button>
+        <button id="nav-admin" onclick="switchTab('admin')" class="px-4 py-2 rounded-xl text-[10px] font-black uppercase transition-all border border-white/20">⚙️ Admin</button>
+      </nav>
     </div>
   </header>
 
-  <div id="global-filters" class="max-w-7xl mx-auto px-4 pt-6 w-full hidden">
-    <div class="bg-white p-4 rounded-2xl card-shadow flex flex-wrap gap-4 items-end border border-slate-200">
-      <div class="flex-1 min-w-[200px]">
-        <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Tapis Kelas / Tahun</label>
-        <select id="filter-kelas" onchange="processAllViews()" class="bg-slate-50 border border-slate-200 text-sm rounded-lg p-2.5 w-full font-bold text-slate-700">
-          <option value="Semua">Semua Kelas</option>
+  <div id="global-filters" class="max-w-7xl mx-auto px-6 pt-6 w-full hidden">
+    <div class="bg-white p-5 rounded-3xl card-shadow border border-slate-100 flex flex-wrap items-center gap-6">
+      <div class="flex-1 min-w-[150px]">
+        <label class="block text-[10px] font-black text-slate-400 uppercase mb-1">Tapis Fasa</label>
+        <select id="filter-fasa" onchange="processAllViews()" class="bg-slate-50 border-none text-sm font-bold text-slate-700 rounded-xl p-3 w-full ring-1 ring-slate-200">
+          <option value="Semua">Semua Fasa</option>
+          <option value="FASA 1">FASA 1</option>
+          <option value="FASA 2">FASA 2</option>
         </select>
       </div>
-      <div class="text-right ml-auto">
-        <p class="text-[10px] text-slate-400 font-bold uppercase">Jumlah Murid Terlibat</p>
-        <p id="stat-total-records" class="text-2xl font-black text-emerald-600">0</p>
+      <div class="flex-1 min-w-[200px]">
+        <label class="block text-[10px] font-black text-slate-400 uppercase mb-1">Tapis Tahun & Kelas</label>
+        <select id="filter-kelas" onchange="processAllViews()" class="bg-slate-50 border-none text-sm font-bold text-slate-700 rounded-xl p-3 w-full ring-1 ring-slate-200"></select>
+      </div>
+      <div class="text-right">
+        <p class="text-[10px] font-black text-slate-400 uppercase leading-none mb-1">Murid Aktif</p>
+        <p id="stat-total-records" class="text-3xl font-black text-emerald-600 leading-none">0</p>
       </div>
     </div>
   </div>
 
-  <main id="dashboard-view" class="flex-grow max-w-7xl mx-auto px-4 py-6 w-full hidden">
-     <div id="dashboard-summary-content" class="grid grid-cols-1 md:grid-cols-3 gap-6">
-        </div>
+  <main id="dashboard-view" class="hidden max-w-7xl mx-auto px-6 py-6 w-full text-center">
+    <div id="welcome-msg" class="py-20 text-slate-300 font-bold uppercase tracking-widest">
+      Sila muat naik data di tab Admin atau pilih kelas di atas.
+    </div>
   </main>
 
-  <main id="laporan-view" class="hidden flex-grow max-w-7xl mx-auto px-4 py-6 w-full space-y-8">
-    
+  <main id="laporan-view" class="hidden max-w-7xl mx-auto px-6 py-6 w-full space-y-8">
     <section>
-      <h2 class="text-sm font-black text-slate-800 uppercase mb-4 border-l-4 border-emerald-500 pl-3">Ringkasan Eksekutif</h2>
       <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-        <div class="bg-white p-4 rounded-2xl card-shadow border border-slate-100 text-center">
-          <p class="text-[10px] font-bold text-slate-400 uppercase mb-1">Jumlah Murid</p>
-          <p id="exec-total" class="text-xl font-black text-slate-800">0</p>
+        <div class="bg-white p-5 rounded-3xl card-shadow text-center">
+          <p class="text-[9px] font-black text-slate-400 uppercase mb-1">Jumlah Murid</p>
+          <p id="exec-total" class="text-2xl font-black text-slate-800">0</p>
         </div>
-        <div class="bg-white p-4 rounded-2xl card-shadow border border-slate-100 text-center">
-          <p class="text-[10px] font-bold text-slate-400 uppercase mb-1">Peratus Lulus</p>
-          <p id="exec-lulus" class="text-xl font-black text-emerald-600">0%</p>
+        <div class="bg-white p-5 rounded-3xl card-shadow text-center border-b-4 border-emerald-500">
+          <p class="text-[9px] font-black text-slate-400 uppercase mb-1">Lulus (TP3+)</p>
+          <p id="exec-lulus" class="text-2xl font-black text-emerald-600">0%</p>
         </div>
-        <div class="bg-white p-4 rounded-2xl card-shadow border border-slate-100 text-center">
-          <p class="text-[10px] font-bold text-slate-400 uppercase mb-1">TP5 & TP6</p>
-          <p id="exec-excel" class="text-xl font-black text-blue-600">0%</p>
+        <div class="bg-white p-5 rounded-3xl card-shadow text-center border-b-4 border-blue-500">
+          <p class="text-[9px] font-black text-slate-400 uppercase mb-1">Cemerlang (TP5+)</p>
+          <p id="exec-excel" class="text-2xl font-black text-blue-600">0%</p>
         </div>
-        <div class="bg-white p-4 rounded-2xl card-shadow border border-red-50 text-center">
-          <p class="text-[10px] font-bold text-red-400 uppercase mb-1">Intervensi</p>
-          <p id="exec-inter" class="text-xl font-black text-red-500">0</p>
+        <div class="bg-white p-5 rounded-3xl card-shadow text-center border-b-4 border-red-500">
+          <p class="text-[9px] font-black text-slate-400 uppercase mb-1">Intervensi</p>
+          <p id="exec-inter" class="text-2xl font-black text-red-500">0</p>
         </div>
-        <div class="bg-white p-4 rounded-2xl card-shadow border border-slate-100 text-center">
-          <p class="text-[10px] font-bold text-slate-400 uppercase mb-1">Subjek Lemah</p>
-          <p id="exec-weak" class="text-xs font-black text-orange-600 uppercase">-</p>
+        <div class="bg-white p-5 rounded-3xl card-shadow text-center">
+          <p class="text-[9px] font-black text-slate-400 uppercase mb-1">Subjek Lemah</p>
+          <p id="exec-weak" class="text-[10px] font-black text-orange-600 uppercase">-</p>
         </div>
-        <div class="bg-white p-4 rounded-2xl card-shadow border border-slate-100 text-center">
-          <p class="text-[10px] font-bold text-slate-400 uppercase mb-1">Kelas Terbaik</p>
-          <p id="exec-best-class" class="text-xs font-black text-emerald-600 uppercase">-</p>
+        <div class="bg-white p-5 rounded-3xl card-shadow text-center">
+          <p class="text-[9px] font-black text-slate-400 uppercase mb-1">Kelas Terbaik</p>
+          <p id="exec-best" class="text-[10px] font-black text-emerald-600 uppercase">-</p>
         </div>
       </div>
     </section>
 
-    <section class="bg-white p-6 rounded-3xl card-shadow border border-slate-100">
-      <h3 class="text-sm font-bold text-slate-700 mb-6 uppercase">Prestasi Mengikut Fasa/Penggal</h3>
-      <div class="h-80 w-full relative">
-        <canvas id="chart-trend-pbd"></canvas>
-      </div>
+    <section class="bg-white p-8 rounded-3xl card-shadow border border-slate-100">
+      <h3 class="text-xs font-black text-slate-700 uppercase mb-6 tracking-widest">Trend Prestasi TP Mengikut Fasa</h3>
+      <div class="h-80 w-full relative"><canvas id="chart-trend"></canvas></div>
     </section>
 
     <section class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-      <div class="bg-white p-6 rounded-3xl card-shadow border border-slate-100">
-        <h3 class="text-sm font-bold text-slate-700 mb-4 uppercase border-l-4 border-blue-500 pl-3">Analisis Individu</h3>
-        <select id="select-murid-analisis" onchange="updateIndividualAnalysis()" class="w-full p-3 border rounded-xl mb-6 text-sm font-bold bg-slate-50">
-          <option value="">Pilih Murid untuk Analisis Terperinci</option>
+      <div class="bg-white p-8 rounded-3xl card-shadow space-y-6">
+        <h3 class="text-xs font-black text-slate-700 uppercase border-l-4 border-blue-500 pl-3">Analisis Individu</h3>
+        <select id="select-murid" onchange="updateIndividual()" class="w-full p-3 bg-slate-50 border-none rounded-2xl text-sm font-bold ring-1 ring-slate-200">
+          <option value="">Pilih Murid...</option>
         </select>
-        <div id="individual-card" class="space-y-4 hidden">
-          <div class="flex items-center gap-4 bg-blue-50 p-4 rounded-2xl">
-             <div class="w-12 h-12 bg-blue-600 rounded-xl flex items-center justify-center text-white font-black text-xl">AI</div>
-             <div>
-                <p id="ind-nama" class="font-black text-slate-800 text-sm uppercase"></p>
-                <p id="ind-kelas" class="text-[10px] text-slate-500 font-bold uppercase"></p>
-             </div>
+        <div id="ind-card" class="hidden space-y-4">
+          <div class="flex items-center gap-4 bg-blue-600 p-5 rounded-2xl text-white">
+            <div class="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center font-black text-xl">AI</div>
+            <div><p id="ind-nama" class="font-black uppercase text-sm"></p><p id="ind-info" class="text-[10px] font-bold opacity-80 uppercase"></p></div>
           </div>
-          <div class="bg-slate-50 p-4 rounded-2xl flex justify-between items-center">
-             <span class="text-xs font-bold text-slate-500 uppercase">Purata TP Keseluruhan</span>
-             <span id="ind-avg" class="text-xl font-black text-slate-800">0.0</span>
-          </div>
-          <div class="bg-red-50 p-4 rounded-2xl flex justify-between items-center">
-             <span class="text-xs font-bold text-red-500 uppercase">Subjek Lemah</span>
-             <span id="ind-weak" class="text-[10px] font-black text-red-600 text-right"></span>
-          </div>
-          <div class="bg-emerald-50 p-4 rounded-2xl flex justify-between items-center">
-             <span class="text-xs font-bold text-emerald-600 uppercase">Subjek Kuat</span>
-             <span id="ind-strong" class="text-[10px] font-black text-emerald-600 text-right"></span>
+          <div class="grid grid-cols-1 gap-2 text-xs font-bold uppercase">
+            <div class="bg-slate-50 p-4 rounded-xl flex justify-between"><span>PURATA TP</span><span id="ind-avg" class="font-black text-lg">0.0</span></div>
+            <div class="bg-red-50 p-4 rounded-xl flex justify-between text-red-600"><span>SUBJEK LEMAH</span><span id="ind-weak" class="font-black"></span></div>
+            <div class="bg-emerald-50 p-4 rounded-xl flex justify-between text-emerald-600"><span>SUBJEK KUAT</span><span id="ind-strong" class="font-black"></span></div>
           </div>
         </div>
       </div>
 
-      <div class="bg-white p-6 rounded-3xl card-shadow border border-slate-100">
-        <h3 class="text-sm font-bold text-slate-700 mb-6 uppercase">⚡ Prioriti Tindakan</h3>
+      <div class="bg-white p-8 rounded-3xl card-shadow">
+        <h3 class="text-xs font-black text-slate-700 uppercase mb-6 tracking-widest">⚡ Prioriti Tindakan</h3>
         <div class="space-y-4">
-           <div class="flex items-center justify-between p-4 bg-red-50 rounded-2xl border-l-8 border-red-500">
-              <div><p class="text-xs font-black text-red-800">Intervensi PBD</p><p id="act-p1" class="text-[10px] text-red-600 font-bold uppercase">Segera</p></div>
-              <span class="font-black text-red-500">P1</span>
-           </div>
-           <div class="flex items-center justify-between p-4 bg-orange-50 rounded-2xl border-l-8 border-orange-500">
-              <div><p class="text-xs font-black text-orange-800">Sokongan Rakan Sebaya</p><p id="act-p2" class="text-[10px] text-orange-600 font-bold uppercase">1-2 Minggu</p></div>
-              <span class="font-black text-orange-500">P2</span>
-           </div>
-           <div class="flex items-center justify-between p-4 bg-yellow-50 rounded-2xl border-l-8 border-yellow-500">
-              <div><p class="text-xs font-black text-yellow-800">Latihan Guru PD</p><p class="text-[10px] text-yellow-600 font-bold uppercase">3 Bulan</p></div>
-              <span class="font-black text-yellow-500">P3</span>
-           </div>
+          <div class="p-5 bg-red-50 rounded-2xl border-l-8 border-red-500 flex justify-between items-center">
+            <div><p class="text-xs font-black text-red-800 uppercase">Intervensi Segera</p><p id="p1-desc" class="text-[10px] text-red-600 font-bold uppercase mt-1"></p></div>
+            <span class="font-black text-red-500 text-xl tracking-tighter">P1</span>
+          </div>
+          <div class="p-5 bg-orange-50 rounded-2xl border-l-8 border-orange-500 flex justify-between items-center">
+            <div><p class="text-xs font-black text-orange-800 uppercase">Sokongan Rakan Sebaya</p><p id="p2-desc" class="text-[10px] text-orange-600 font-bold uppercase mt-1"></p></div>
+            <span class="font-black text-orange-500 text-xl tracking-tighter">P2</span>
+          </div>
         </div>
-        <p class="text-[9px] text-slate-400 mt-6 leading-relaxed italic">* Laporan ini dijana secara automatik berdasarkan data PBD semasa bagi tujuan intervensi awal.</p>
       </div>
     </section>
 
-    <section class="bg-white rounded-3xl card-shadow border border-slate-100 overflow-hidden">
-      <div class="p-5 bg-slate-50 border-b flex justify-between items-center">
-        <h3 class="text-sm font-black text-slate-800 uppercase">Senarai Intervensi</h3>
-        <span id="inter-count-badge" class="bg-red-500 text-white text-[10px] px-3 py-1 rounded-full font-bold uppercase">0 Murid</span>
+    <section class="bg-white rounded-3xl card-shadow overflow-hidden">
+      <div class="px-8 py-5 bg-slate-50 border-b flex justify-between items-center">
+        <h3 class="text-xs font-black text-slate-800 uppercase tracking-widest">Senarai Intervensi (TP1 & TP2)</h3>
+        <span id="inter-badge" class="bg-red-500 text-white text-[10px] px-3 py-1 rounded-full font-black uppercase">0 Rekod</span>
       </div>
       <div class="overflow-x-auto">
-        <table class="w-full text-left border-collapse">
-          <thead class="bg-slate-50 text-slate-400 text-[10px] uppercase font-black">
-            <tr>
-              <th class="px-6 py-4">Bil</th>
-              <th class="px-6 py-4">Nama Murid</th>
-              <th class="px-6 py-4 text-center">Kelas</th>
-              <th class="px-6 py-4 text-center">Subjek</th>
-              <th class="px-6 py-4 text-center">Tahap</th>
-              <th class="px-6 py-4 text-center">Tindakan</th>
-            </tr>
+        <table class="w-full text-left text-xs font-bold border-collapse">
+          <thead class="bg-slate-50 text-slate-400 uppercase text-[9px]">
+            <tr><th class="px-8 py-4">Bil</th><th class="px-8 py-4">Nama Murid</th><th class="px-8 py-4">Kelas</th><th class="px-8 py-4">Subjek</th><th class="px-8 py-4 text-center">Tahap</th><th class="px-8 py-4 text-center">Tindakan</th></tr>
           </thead>
-          <tbody id="lap-table-intervensi" class="text-xs font-bold text-slate-700 divide-y divide-slate-100">
-             </tbody>
+          <tbody id="table-inter" class="divide-y divide-slate-100"></tbody>
         </table>
       </div>
     </section>
 
     <section class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-       <div class="bg-white p-6 rounded-3xl card-shadow border border-slate-100">
-          <h3 class="text-sm font-black text-slate-700 mb-6 uppercase tracking-wider">Ranking Kelas (Purata TP)</h3>
-          <div id="lap-ranking-kelas" class="space-y-4"></div>
+       <div class="bg-white p-8 rounded-3xl card-shadow">
+          <h3 class="text-xs font-black text-slate-700 uppercase mb-6 tracking-widest">🏆 Ranking Kelas (Purata TP)</h3>
+          <div id="rank-kelas" class="space-y-3"></div>
        </div>
-       <div class="bg-white p-6 rounded-3xl card-shadow border border-slate-100">
-          <h3 class="text-sm font-black text-slate-700 mb-6 uppercase tracking-wider">Ranking Subjek (Purata TP)</h3>
-          <div id="lap-ranking-subjek" class="space-y-4"></div>
+       <div class="bg-white p-8 rounded-3xl card-shadow">
+          <h3 class="text-xs font-black text-slate-700 uppercase mb-6 tracking-widest">📚 Ranking Subjek</h3>
+          <div id="rank-subjek" class="space-y-3"></div>
        </div>
     </section>
 
-    <section class="bg-white p-6 rounded-3xl card-shadow border border-slate-100">
-      <h3 class="text-sm font-bold text-slate-700 mb-6 uppercase tracking-widest">Agihan TP Mengikut Kelas</h3>
-      <div class="h-80 w-full relative">
-        <canvas id="chart-lap-kelas-bar"></canvas>
-      </div>
+    <section class="bg-white p-8 rounded-3xl card-shadow">
+      <h3 class="text-xs font-black text-slate-700 uppercase mb-6 tracking-widest text-center">Agihan Tahap Penguasaan Mengikut Kelas</h3>
+      <div class="h-80 w-full relative"><canvas id="chart-bar-kelas"></canvas></div>
     </section>
-
   </main>
 
-  <main id="admin-view" class="hidden flex-grow max-w-4xl mx-auto px-4 py-8 w-full">
-     <div class="bg-white p-8 rounded-3xl card-shadow border border-slate-200">
-        <h2 class="text-xl font-bold text-slate-800 mb-6">Muat Naik Data PBD</h2>
-        <div class="space-y-6">
-           <div>
-              <label class="block text-xs font-bold text-slate-400 uppercase mb-2">1. Pilih Fasa / Penggal</label>
-              <select id="input-fasa" class="w-full p-3 border rounded-xl bg-slate-50">
-                 <option value="Fasa 1">Fasa 1 (Ujian Awal)</option>
-                 <option value="Fasa 2">Fasa 2 (Ujian Akhir)</option>
-              </select>
-           </div>
-           <div>
-              <label class="block text-xs font-bold text-slate-400 uppercase mb-2">2. Pilih Fail Excel</label>
-              <input type="file" id="file-upload" accept=".xlsx" multiple class="hidden" onchange="handleFileSelect(event)">
-              <div onclick="document.getElementById('file-upload').click()" class="border-2 border-dashed border-emerald-200 rounded-2xl p-8 text-center bg-emerald-50/50 cursor-pointer hover:bg-emerald-100 transition">
-                 <p id="file-name-display" class="text-emerald-600 font-bold">Pilih fail Excel (Nama Fail = Nama Kelas)</p>
-              </div>
-           </div>
-           <button onclick="processUploadAndSync()" class="w-full py-4 bg-emerald-600 text-white font-black rounded-2xl shadow-lg hover:bg-emerald-700 transition uppercase">🚀 Hantar ke Cloud</button>
-           <button onclick="clearDataCloud()" class="w-full py-2 text-red-500 font-bold text-xs uppercase opacity-50 hover:opacity-100">🗑️ Padam Semua Data</button>
+  <main id="admin-view" class="hidden max-w-4xl mx-auto px-6 py-12 w-full space-y-8">
+    <div class="bg-white p-10 rounded-3xl card-shadow border border-slate-200">
+      <h2 class="text-xl font-black text-slate-800 mb-2 uppercase">Muat Naik Fail PBD</h2>
+      <p class="text-[10px] font-bold text-slate-400 uppercase mb-8">Format Fail: TAHUN KELAS FASA.xls (Cth: 2025 5 TOPAZ FASA 1.xls)</p>
+      
+      <div class="space-y-6">
+        <div>
+          <label class="block text-[10px] font-black text-slate-400 uppercase mb-2">Pilih Fail (Boleh pilih banyak sekaligus)</label>
+          <input type="file" id="file-upload" accept=".xls,.xlsx" multiple class="hidden" onchange="handleFileSelect(event)">
+          <div onclick="document.getElementById('file-upload').click()" class="border-2 border-dashed border-emerald-200 rounded-3xl p-10 text-center bg-emerald-50/30 cursor-pointer hover:bg-emerald-50 transition">
+            <p id="file-display" class="text-emerald-600 font-black uppercase text-xs">Klik untuk pilih fail Excel</p>
+          </div>
         </div>
-     </div>
-  </main>
+        <button onclick="processUploadAndSync()" class="w-full py-5 bg-emerald-600 text-white font-black rounded-3xl shadow-xl shadow-emerald-100 hover:bg-emerald-700 transition uppercase tracking-widest text-xs">🚀 Kemas Kini Cloud Database</button>
+      </div>
+    </div>
 
-  <footer class="py-10 text-center text-[10px] font-bold text-slate-400 uppercase tracking-widest">
-    <p>Sistem Analisis PBD Bersepadu | SK Paya Resak | Cloud Powered</p>
-  </footer>
+    <div class="bg-white p-10 rounded-3xl card-shadow border border-red-100">
+      <h2 class="text-xl font-black text-red-800 mb-2 uppercase">Padam Data Fail Tertentu</h2>
+      <p class="text-[10px] font-bold text-slate-400 uppercase mb-8">Pilih fail unik yang ingin dikeluarkan dari sistem</p>
+      
+      <div class="space-y-6">
+        <div>
+          <label class="block text-[10px] font-black text-slate-400 uppercase mb-2">Pilih Rekod Fail Unik</label>
+          <select id="select-delete-file" class="w-full p-4 bg-slate-50 rounded-2xl border-none ring-1 ring-slate-200 font-bold text-sm">
+            <option value="">Tiada Data</option>
+          </select>
+        </div>
+        <div class="flex gap-2">
+          <button onclick="deleteSpecificFile()" class="flex-1 py-4 bg-red-600 text-white font-black rounded-2xl hover:bg-red-700 transition uppercase text-[10px]">🗑️ Padam Fail Terpilih</button>
+          <button onclick="clearAllData()" class="px-6 py-4 bg-slate-800 text-white font-black rounded-2xl hover:bg-black transition uppercase text-[10px]">Reset Semua</button>
+        </div>
+      </div>
+    </div>
+  </main>
 
   <script>
-    // URL API Google Apps Script Cikgu
     const GAS_URL = "https://script.google.com/macros/s/AKfycbxyuiQInWhGYkMuIBVt0R6fSw9G3NEhFzuRjyw4WHBjpBAnz2PaVj0b7JVUmfUD-VAVIg/exec";
-    
     let appData = [];
-    const knownSubjects = ['BM', 'BI', 'MM', 'SAINS', 'SEJ', 'PAI', 'PM', 'BC', 'BT', 'BIN', 'RBT', 'AR', 'PJPK', 'PMZ', 'PSV'];
-    let charts = { trend: null, barKelas: null };
+    const subjects = ['BM', 'BI', 'MM', 'SAINS', 'SEJ', 'PAI', 'PM', 'BC', 'BT', 'BIN', 'RBT', 'AR', 'PJPK', 'PMZ', 'PSV'];
+    let charts = { trend: null, bar: null };
 
-    window.onload = loadDataFromCloud;
+    window.onload = loadFromCloud;
 
-    function showLoading(show, text = "Memproses...") {
-      const overlay = document.getElementById('loading-overlay');
-      document.getElementById('loading-text').textContent = text;
-      if(show) overlay.classList.remove('hidden'); else overlay.classList.add('hidden');
+    function showLoad(show, txt = "Sila Tunggu...") {
+      const el = document.getElementById('loading-overlay');
+      document.getElementById('loading-text').textContent = txt;
+      if(show) el.classList.remove('hidden'); else el.classList.add('hidden');
     }
 
-    async function loadDataFromCloud() {
-      showLoading(true, "Menarik data PBD...");
+    async function loadFromCloud() {
+      showLoad(true, "Menyambung Cloud...");
       try {
         let res = await fetch(GAS_URL);
-        let data2D = await res.json();
-        parse2DArrayToData(data2D);
+        let data = await res.json();
+        parseData(data);
         switchTab('dashboard');
-      } catch (err) { alert("Gagal sambung ke database."); showLoading(false); }
+      } catch (e) { alert("Sambungan Cloud Gagal."); showLoad(false); }
     }
 
-    function parse2DArrayToData(data) {
+    function parseData(data) {
       appData = [];
-      if (!data || data.length < 2) return;
-      let headers = data[0];
-      for (let i = 1; i < data.length; i++) {
-        let row = data[i];
-        let record = { id: String(row[0]), nama: row[1], jantina: row[2], kelas: row[3], fasa: row[4], scores: {} };
-        for (let j = 5; j < headers.length; j++) {
-          if (row[j] !== '' && row[j] !== null) record.scores[headers[j]] = parseInt(row[j]);
-        }
-        appData.push(record);
+      if(!data || data.length < 2) return;
+      let head = data[0];
+      for(let i=1; i<data.length; i++) {
+        let r = data[i], rec = { id: String(r[0]), nama: r[1], tahun: r[2], kelas: r[3], fasa: r[4], scores: {} };
+        for(let j=5; j<head.length; j++) if(r[j] !== '') rec.scores[head[j]] = parseInt(r[j]);
+        appData.push(rec);
       }
     }
 
-    async function saveDataToCloud() {
-      showLoading(true, "Menyegerakkan Cloud...");
-      try {
-        let headers = ['ID', 'NAMA', 'JANTINA', 'KELAS', 'FASA', ...knownSubjects];
-        let rows = [headers];
-        appData.forEach(d => {
-          let row = [d.id, d.nama, d.jantina || '', d.kelas, d.fasa];
-          knownSubjects.forEach(s => row.push(d.scores[s] || ''));
-          rows.push(row);
-        });
-        await fetch(GAS_URL, {
-          method: "POST",
-          headers: { "Content-Type": "text/plain;charset=utf-8" },
-          body: JSON.stringify({ action: "SIMPAN_DATA", data: rows })
-        });
-        location.reload();
-      } catch (err) { alert("Ralat simpan."); showLoading(false); }
+    async function syncToCloud() {
+      showLoad(true, "Menyimpan ke Cloud...");
+      let head = ['ID', 'NAMA', 'TAHUN', 'KELAS', 'FASA', ...subjects], rows = [head];
+      appData.forEach(d => {
+        let r = [d.id, d.nama, d.tahun, d.kelas, d.fasa];
+        subjects.forEach(s => r.push(d.scores[s] || ''));
+        rows.push(r);
+      });
+      await fetch(GAS_URL, { method: "POST", body: JSON.stringify({ action: "SIMPAN_DATA", data: rows }) });
+      location.reload();
     }
 
-    function switchTab(tab) {
+    function switchTab(t) {
       ['dashboard-view', 'laporan-view', 'admin-view', 'global-filters'].forEach(id => document.getElementById(id).classList.add('hidden'));
-      ['nav-dashboard', 'nav-laporan', 'nav-admin'].forEach(id => document.getElementById(id).className = "px-4 py-2 rounded-lg border border-white/20 text-white/70 text-xs font-bold hover:bg-white/10 transition-all uppercase");
+      const active = "px-4 py-2 rounded-xl text-[10px] font-black uppercase bg-white/10 border border-white/20";
+      const inactive = "px-4 py-2 rounded-xl text-[10px] font-black uppercase border border-white/20";
+      ['nav-dashboard', 'nav-laporan', 'nav-admin'].forEach(id => document.getElementById(id).className = inactive);
       
-      const activeBtn = "px-4 py-2 rounded-lg bg-emerald-500/30 border border-emerald-400/50 text-white text-xs font-bold transition-all uppercase";
+      document.getElementById(t+'-view').classList.remove('hidden');
+      if(t !== 'admin') document.getElementById('global-filters').classList.remove('hidden');
+      document.getElementById('nav-'+t).className = active;
       
-      if (tab === 'dashboard') {
-        document.getElementById('dashboard-view').classList.remove('hidden');
-        document.getElementById('global-filters').classList.remove('hidden');
-        document.getElementById('nav-dashboard').className = activeBtn;
-      } else if (tab === 'laporan') {
-        document.getElementById('laporan-view').classList.remove('hidden');
-        document.getElementById('global-filters').classList.remove('hidden');
-        document.getElementById('nav-laporan').className = activeBtn;
-      } else {
-        document.getElementById('admin-view').classList.remove('hidden');
-        document.getElementById('nav-admin').className = activeBtn;
-      }
-      if(tab !== 'admin') { updateFilterDropdowns(); processAllViews(); }
-      showLoading(false);
+      updateFilters();
+      if(t !== 'admin') processAllViews();
+      showLoad(false);
     }
 
-    function updateFilterDropdowns() {
-      const uniqueKelas = [...new Set(appData.map(d => d.kelas))].sort();
+    function updateFilters() {
+      // Filter Dashboard/Laporan
+      const uniqueItems = [...new Set(appData.map(d => `${d.tahun} ${d.kelas}`))].sort();
       let h = '<option value="Semua">Semua Kelas</option>';
-      uniqueKelas.forEach(k => h += `<option value="${k}">${k}</option>`);
+      uniqueItems.forEach(k => h += `<option value="${k}">${k}</option>`);
       document.getElementById('filter-kelas').innerHTML = h;
 
-      // Update Analisis Individu Dropdown
-      const f = document.getElementById('filter-kelas').value;
-      let filteredStud = appData.filter(d => f === 'Semua' || d.kelas === f);
-      let uniqueStud = [...new Set(filteredStud.map(s => s.nama))].sort();
-      let sh = '<option value="">Pilih Murid untuk Analisis Terperinci</option>';
-      uniqueStud.forEach(s => sh += `<option value="${s}">${s}</option>`);
-      document.getElementById('select-murid-analisis').innerHTML = sh;
+      // Filter Padam Data (Spesifik Fail)
+      const uniqueFiles = [...new Set(appData.map(d => `${d.tahun} ${d.kelas} ${d.fasa}`))].sort();
+      let delH = '<option value="">Pilih Fail Untuk Dipadam</option>';
+      uniqueFiles.forEach(f => delH += `<option value="${f}">${f}</option>`);
+      document.getElementById('select-delete-file').innerHTML = delH;
+
+      // Filter Murid
+      const curK = document.getElementById('filter-kelas').value;
+      const uS = [...new Set(appData.filter(d => curK === 'Semua' || `${d.tahun} ${d.kelas}` === curK).map(d => d.nama))].sort();
+      let sh = '<option value="">Pilih Murid...</option>';
+      uS.forEach(s => sh += `<option value="${s}">${s}</option>`);
+      document.getElementById('select-murid').innerHTML = sh;
     }
 
     function processAllViews() {
+      const fFasa = document.getElementById('filter-fasa').value;
       const fKelas = document.getElementById('filter-kelas').value;
-      let filtered = appData.filter(d => (fKelas === 'Semua' || d.kelas === fKelas));
-      document.getElementById('stat-total-records').textContent = filtered.length;
-
-      // Calculation logic
-      let totSub = 0, cLulus = 0, cExcel = 0, sumTP = 0, subStats = {}, classStats = {}, interList = [];
       
-      filtered.forEach(s => {
-        let stAvg = 0, stCount = 0;
-        if(!classStats[s.kelas]) classStats[s.kelas] = { sum: 0, count: 0, tpData: {1:0, 2:0, 3:0, 4:0, 5:0, 6:0} };
+      let fd = appData.filter(d => 
+        (fFasa === 'Semua' || d.fasa === fFasa) && 
+        (fKelas === 'Semua' || `${d.tahun} ${d.kelas}` === fKelas)
+      );
 
-        for (let sub in s.scores) {
-          let sc = s.scores[sub];
-          totSub++; sumTP += sc; stAvg += sc; stCount++;
-          if (sc >= 3) cLulus++;
-          if (sc >= 5) cExcel++;
-          if (sc <= 2) interList.push({ nama: s.nama, kelas: s.kelas, sub, tp: sc });
-          
-          if(!subStats[sub]) subStats[sub] = { sum: 0, count: 0 };
-          subStats[sub].sum += sc; subStats[sub].count++;
-          classStats[s.kelas].tpData[sc > 2 ? (sc > 4 ? 5 : 3) : 1]++; // Simplified for bar chart grouping (TP1-2, 3-4, 5-6)
-        }
-        if(stCount > 0) {
-          classStats[s.kelas].sum += (stAvg / stCount);
-          classStats[s.kelas].count++;
-        }
-      });
-
-      // Update Exec Summary
-      document.getElementById('exec-total').textContent = filtered.length;
-      document.getElementById('exec-lulus').textContent = totSub > 0 ? ((cLulus / totSub) * 100).toFixed(1) + '%' : '0%';
-      document.getElementById('exec-excel').textContent = totSub > 0 ? ((cExcel / totSub) * 100).toFixed(1) + '%' : '0%';
-      document.getElementById('exec-inter').textContent = [...new Set(interList.map(x=>x.nama))].length;
-      
-      let sortedSub = Object.keys(subStats).map(n => ({ n, a: subStats[n].sum/subStats[n].count })).sort((a,b)=>a.a-b.a);
-      document.getElementById('exec-weak').textContent = sortedSub.length ? sortedSub[0].n : '-';
-      
-      let sortedCls = Object.keys(classStats).map(n => ({ n, a: classStats[n].sum/classStats[n].count, d: classStats[n].tpData })).sort((a,b)=>b.a-a.a);
-      document.getElementById('exec-best-class').textContent = sortedCls.length ? sortedCls[0].n : '-';
-
-      // P1 Action Update
-      document.getElementById('act-p1').textContent = `Fokus: ${sortedSub.length ? sortedSub[0].n : 'Tiada'}`;
-      document.getElementById('act-p2').textContent = `Target: ${[...new Set(interList.map(x=>x.nama))].length} Murid`;
-
-      // Ranking UI
-      let rClsH = ''; sortedCls.slice(0,5).forEach((c,i) => {
-         rClsH += `<div class="flex items-center justify-between p-3 bg-slate-50 rounded-xl">
-            <span class="font-bold text-slate-600">${i+1}. ${c.n}</span>
-            <span class="font-black text-emerald-600">${c.a.toFixed(2)}</span>
-         </div>`;
-      });
-      document.getElementById('lap-ranking-kelas').innerHTML = rClsH;
-
-      let rSubH = ''; sortedSub.reverse().slice(0,5).forEach((s,i) => {
-         rSubH += `<div class="flex items-center justify-between p-3 bg-slate-50 rounded-xl">
-            <span class="font-bold text-slate-600">${i+1}. ${s.n}</span>
-            <span class="font-black text-blue-600">${s.a.toFixed(2)}</span>
-         </div>`;
-      });
-      document.getElementById('lap-ranking-subjek').innerHTML = rSubH;
-
-      // Intervensi Table
-      let interH = '';
-      document.getElementById('inter-count-badge').textContent = interList.length + " Rekod";
-      interList.sort((a,b) => a.tp - b.tp).forEach((x, i) => {
-         let badgeClass = x.tp === 1 ? 'tp1' : 'tp2';
-         interH += `<tr>
-            <td class="px-6 py-4 text-slate-400 font-bold">${i+1}</td>
-            <td class="px-6 py-4 uppercase font-black">${x.nama}</td>
-            <td class="px-6 py-4 text-center text-[10px]">${x.kelas}</td>
-            <td class="px-6 py-4 text-center font-bold text-slate-500">${x.sub}</td>
-            <td class="px-6 py-4 text-center"><span class="tp-badge ${badgeClass}">TP${x.tp}</span></td>
-            <td class="px-6 py-4 text-center"><button class="text-blue-600 hover:underline">Profil</button></td>
-         </tr>`;
-      });
-      document.getElementById('lap-table-intervensi').innerHTML = interH || "<tr><td colspan='6' class='text-center py-10 text-slate-300 italic'>Tiada data intervensi dikesan.</td></tr>";
-
-      // AI Analysis Text
-      document.getElementById('lap-ai-insight').textContent = `Berdasarkan data ${fKelas === 'Semua' ? 'seluruh sekolah' : 'kelas '+fKelas}, kadar penguasaan murid berada pada tahap ${totSub > 0 ? ((cLulus/totSub)*100).toFixed(1) : 0}%. Subjek ${sortedSub.length ? sortedSub[sortedSub.length-1].n : '-'} merekodkan pencapaian terendah. Strategi intervensi berfokus perlu dijalankan bagi ${[...new Set(interList.map(x=>x.nama))].length} murid yang masih berada pada TP1 dan TP2.`;
-
-      renderAllCharts(subStats, classStats, filtered);
-    }
-
-    function updateIndividualAnalysis() {
-      const name = document.getElementById('select-murid-analisis').value;
-      const card = document.getElementById('individual-card');
-      if(!name) { card.classList.add('hidden'); return; }
-      
-      let studentRecords = appData.filter(d => d.nama === name);
-      if(studentRecords.length === 0) return;
-      
-      let latest = studentRecords[studentRecords.length - 1];
-      card.classList.remove('hidden');
-      document.getElementById('ind-nama').textContent = latest.nama;
-      document.getElementById('ind-kelas').textContent = latest.kelas;
-      
-      let total = 0, count = 0, strong = [], weak = [];
-      for(let s in latest.scores) {
-         let v = latest.scores[s];
-         total += v; count++;
-         if(v >= 5) strong.push(s);
-         if(v <= 2) weak.push(s);
+      document.getElementById('stat-total-records').textContent = fd.length;
+      if(!fd.length) { 
+        document.getElementById('welcome-msg').classList.remove('hidden');
+        return; 
+      } else {
+        document.getElementById('welcome-msg').classList.add('hidden');
       }
-      document.getElementById('ind-avg').textContent = (total/count).toFixed(1);
-      document.getElementById('ind-weak').textContent = weak.join(', ') || 'Tiada';
-      document.getElementById('ind-strong').textContent = strong.join(', ') || 'Tiada';
-    }
 
-    function renderAllCharts(subStats, classStats, filtered) {
-       // 1. Trend Line Chart (Fasa 1 vs Fasa 2)
-       if(charts.trend) charts.trend.destroy();
-       let fasaLabels = ["Fasa 1", "Fasa 2"];
-       let subjekTrend = Object.keys(subStats).slice(0, 4); // Ambil 4 subjek teratas
-       let datasets = subjekTrend.map((s, i) => {
-          let colors = ['#3b82f6', '#ef4444', '#10b981', '#f59e0b'];
-          return {
-             label: s,
-             data: fasaLabels.map(f => {
-                let recs = appData.filter(d => d.fasa === f && d.scores[s]);
-                if(recs.length === 0) return null;
-                return recs.reduce((a, b) => a + b.scores[s], 0) / recs.length;
-             }),
-             borderColor: colors[i],
-             backgroundColor: colors[i] + '20',
-             fill: true,
-             tension: 0.4
-          };
-       });
-       charts.trend = new Chart(document.getElementById('chart-trend-pbd'), {
-          type: 'line',
-          data: { labels: fasaLabels, datasets: datasets },
-          options: { responsive: true, maintainAspectRatio: false, scales: { y: { min: 1, max: 6 } } }
-       });
+      let tSub = 0, cL = 0, cE = 0, sTP = 0, subS = {}, clsS = {}, iL = [];
+      fd.forEach(s => {
+        let stA = 0, stC = 0;
+        let kKey = `${s.tahun} ${s.kelas}`;
+        if(!clsS[kKey]) clsS[kKey] = { sum:0, count:0, tpD: {1:0, 3:0, 5:0} };
+        for(let sub in s.scores) {
+          let sc = s.scores[sub]; tSub++; stA += sc; stC++;
+          if(sc >= 3) cL++; if(sc >= 5) cE++;
+          if(sc <= 2) iL.push({ n: s.nama, k: s.kelas, s: sub, t: sc });
+          if(!subS[sub]) subS[sub] = { sum:0, count:0 }; subS[sub].sum += sc; subS[sub].count++;
+          clsS[kKey].tpD[sc < 3 ? 1 : (sc < 5 ? 3 : 5)]++;
+        }
+        if(stC) { clsS[kKey].sum += (stA/stC); clsS[kKey].count++; }
+      });
 
-       // 2. Bar Chart Agihan TP Ikut Kelas
-       if(charts.barKelas) charts.barKelas.destroy();
-       let clsNames = Object.keys(classStats);
-       charts.barKelas = new Chart(document.getElementById('chart-lap-kelas-bar'), {
-          type: 'bar',
-          data: {
-             labels: clsNames,
-             datasets: [
-                { label: 'TP1-2', data: clsNames.map(c => classStats[c].tpData[1]), backgroundColor: '#ef4444' },
-                { label: 'TP3-4', data: clsNames.map(c => classStats[c].tpData[3]), backgroundColor: '#f59e0b' },
-                { label: 'TP5-6', data: clsNames.map(c => classStats[c].tpData[5]), backgroundColor: '#10b981' }
-             ]
-          },
-          options: { responsive: true, maintainAspectRatio: false, scales: { x: { stacked: true }, y: { stacked: true } } }
-       });
-    }
-
-    // -- ADMIN LOGIC --
-    let selectedFiles = [];
-    function handleFileSelect(e) { 
-      selectedFiles = Array.from(e.target.files); 
-      document.getElementById('file-name-display').textContent = selectedFiles.length + " fail sedia."; 
-    }
-
-    async function processUploadAndSync() {
-      const fasa = document.getElementById('input-fasa').value;
-      if (selectedFiles.length === 0) return alert("Pilih fail.");
-      showLoading(true, "Membaca Fail...");
+      document.getElementById('exec-total').textContent = fd.length;
+      document.getElementById('exec-lulus').textContent = tSub ? ((cL/tSub)*100).toFixed(1)+'%' : '0%';
+      document.getElementById('exec-excel').textContent = tSub ? ((cE/tSub)*100).toFixed(1)+'%' : '0%';
+      document.getElementById('exec-inter').textContent = [...new Set(iL.map(x=>x.n))].length;
       
-      for (let file of selectedFiles) {
-        let kelas = file.name.replace(/\.[^/.]+$/, "").trim(); 
-        let reader = new FileReader();
+      let sortSub = Object.keys(subS).map(n => ({ n, a: subS[n].sum/subS[n].count })).sort((a,b)=>a.a-b.a);
+      document.getElementById('exec-weak').textContent = sortSub[0]?.n || '-';
+      let sortCls = Object.keys(clsS).map(n => ({ n, a: clsS[n].sum/clsS[n].count, d: clsS[n].tpD })).sort((a,b)=>b.a-a.a);
+      document.getElementById('exec-best').textContent = sortCls[0]?.n || '-';
+
+      document.getElementById('p1-desc').textContent = `Subjek Kritikal: ${sortSub[0]?.n || '-'}`;
+      document.getElementById('p2-desc').textContent = `Target: ${[...new Set(iL.map(x=>x.n))].length} Murid`;
+
+      let rKH = ''; sortCls.slice(0,5).forEach((c,i) => rKH += `<div class="flex justify-between p-3 bg-slate-50 rounded-xl font-bold text-[10px]"><span>${i+1}. ${c.n}</span><span class="text-emerald-600">${c.a.toFixed(2)}</span></div>`);
+      document.getElementById('rank-kelas').innerHTML = rKH;
+      let rSH = ''; sortSub.reverse().slice(0,5).forEach((s,i) => rSH += `<div class="flex justify-between p-3 bg-slate-50 rounded-xl font-bold text-[10px]"><span>${i+1}. ${s.n}</span><span class="text-blue-600">${s.a.toFixed(2)}</span></div>`);
+      document.getElementById('rank-subjek').innerHTML = rSH;
+
+      document.getElementById('inter-badge').textContent = iL.length + " Kes";
+      let iH = ''; iL.sort((a,b)=>a.t-b.t).forEach((x,i) => iH += `<tr class="${x.t===1?'bg-red-50':''}"><td class="px-8 py-4 opacity-30">${i+1}</td><td class="px-8 py-4 uppercase font-black">${x.n}</td><td class="px-8 py-4">${x.k}</td><td class="px-8 py-4 opacity-60">${x.s}</td><td class="px-8 py-4 text-center"><span class="tp-badge tp${x.t}">TP${x.t}</span></td><td class="px-8 py-4 text-center"><button class="text-blue-600">Lihat</button></td></tr>`);
+      document.getElementById('table-inter').innerHTML = iH || "<tr><td colspan='6' class='text-center py-10 opacity-30 uppercase'>Tiada Kes Intervensi</td></tr>";
+
+      renderCharts(subS, clsS);
+    }
+
+    function updateIndividual() {
+      const name = document.getElementById('select-murid').value;
+      const card = document.getElementById('ind-card');
+      if(!name) { card.classList.add('hidden'); return; }
+      let r = appData.find(d => d.nama === name);
+      card.classList.remove('hidden');
+      document.getElementById('ind-nama').textContent = r.nama;
+      document.getElementById('ind-info').textContent = `${r.tahun} | ${r.kelas}`;
+      let t=0, c=0, w=[], s=[];
+      for(let sub in r.scores) { let v=r.scores[sub]; t+=v; c++; if(v>=5) s.push(sub); if(v<=2) w.push(sub); }
+      document.getElementById('ind-avg').textContent = (t/c).toFixed(1);
+      document.getElementById('ind-weak').textContent = w.join(', ') || 'Tiada';
+      document.getElementById('ind-strong').textContent = s.join(', ') || 'Tiada';
+    }
+
+    function renderCharts(subS, clsS) {
+      if(charts.trend) charts.trend.destroy();
+      const subs = Object.keys(subS).slice(0,4);
+      charts.trend = new Chart(document.getElementById('chart-trend'), {
+        type: 'line',
+        data: { labels: ['FASA 1', 'FASA 2'], datasets: subs.map((s,i) => ({ label: s, data: [1,2].map(f => { let d = appData.filter(x=>x.fasa==='FASA '+f && x.scores[s]); return d.length ? d.reduce((a,b)=>a+b.scores[s],0)/d.length : null; }), borderColor: ['#3b82f6','#ef4444','#10b981','#f59e0b'][i], tension:0.4, fill:true, backgroundColor: ['#3b82f610','#ef444410','#10b98110','#f59e0b10'][i] })) },
+        options: { responsive:true, maintainAspectRatio:false, scales: { y: { min:1, max:6, ticks:{stepSize:1} } } }
+      });
+
+      if(charts.bar) charts.bar.destroy();
+      const cNs = Object.keys(clsS);
+      charts.bar = new Chart(document.getElementById('chart-bar-kelas'), {
+        type: 'bar',
+        data: { labels: cNs, datasets: [{label:'TP1-2',data:cNs.map(c=>clsS[c].tpD[1]),backgroundColor:'#ef4444'},{label:'TP3-4',data:cNs.map(c=>clsS[c].tpD[3]),backgroundColor:'#f59e0b'},{label:'TP5-6',data:cNs.map(c=>clsS[c].tpD[5]),backgroundColor:'#10b981'}] },
+        options: { responsive:true, maintainAspectRatio:false, scales:{x:{stacked:true},y:{stacked:true}} }
+      });
+    }
+
+    // --- ADMIN LOGIC ---
+    let selF = [];
+    function handleFileSelect(e) { selF = Array.from(e.target.files); document.getElementById('file-display').textContent = selF.length + " Fail Sedia."; }
+    
+    async function processUploadAndSync() {
+      if(!selF.length) return alert("Pilih fail dahulu.");
+      showLoad(true, "Menganalisis Fail...");
+      for(let file of selF) {
+        // Ekstrak Tahun, Kelas, Fasa dari Nama Fail
+        let name = file.name.replace(/\.[^/.]+$/, "").trim().toUpperCase();
+        let parts = name.split(" ");
+        
+        let tahun = parts[0];
+        let fasaIdx = parts.indexOf("FASA");
+        let fasa = (fasaIdx !== -1 && parts[fasaIdx+1]) ? `FASA ${parts[fasaIdx+1]}` : "FASA 1";
+        
+        // Ambil bahagian di tengah sebagai nama kelas
+        let kelasParts = parts.slice(1, fasaIdx !== -1 ? fasaIdx : -1);
+        let kelas = kelasParts.join(" ");
+
         let jsonData = await new Promise(res => {
-          reader.onload = e => {
-            const wb = XLSX.read(new Uint8Array(e.target.result), {type: 'array'});
-            res(XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], {raw: true, defval: ""}));
-          };
+          let reader = new FileReader();
+          reader.onload = e => { let wb = XLSX.read(new Uint8Array(e.target.result), {type:'array'}); res(XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], {raw:true, defval:""})); };
           reader.readAsArrayBuffer(file);
         });
-        parseExcelJSON(jsonData, fasa, kelas);
+        parseExcel(jsonData, tahun, kelas, fasa);
       }
-      saveDataToCloud();
+      syncToCloud();
     }
 
-    function parseExcelJSON(jsonData, fasa, kelas) {
-      const keys = Object.keys(jsonData[0] || {});
-      const kNama = keys.find(k => k.toUpperCase().includes('NAMA')), kId = keys.find(k => k.toUpperCase().includes('ID'));
-      if (!kNama) return;
-      const subKeys = {}; knownSubjects.forEach(s => { let m = keys.find(k => k.toUpperCase().trim() === s); if(m) subKeys[s] = m; });
-      jsonData.forEach((row, idx) => {
-        if (!row[kNama]) return;
-        let id = kId && row[kId] ? String(row[kId]).replace(/[- ]/g, '').trim() : `ID_${kelas}_${idx}`;
-        let rec = { nama: String(row[kNama]).trim().toUpperCase(), id, kelas, fasa, scores: {} };
-        for (let s in subKeys) { 
-          let n = parseInt(String(row[subKeys[s]]).replace(/\D/g, '')); 
-          if(!isNaN(n) && n>=1 && n<=6) rec.scores[s] = n; 
-        }
-        let exIdx = appData.findIndex(d => d.fasa === fasa && d.kelas === kelas && d.nama === rec.nama);
+    function parseExcel(json, tahun, kelas, fasa) {
+      const keys = Object.keys(json[0] || {});
+      const kN = keys.find(k => k.toUpperCase().includes('NAMA')), kI = keys.find(k => k.toUpperCase().includes('ID'));
+      if(!kN) return;
+      const sK = {}; subjects.forEach(s => { let m = keys.find(k => k.toUpperCase().trim() === s); if(m) sK[s] = m; });
+      json.forEach((row, idx) => {
+        if(!row[kN]) return;
+        let id = kI && row[kI] ? String(row[kI]).replace(/[- ]/g, '').trim() : `ID_${kelas}_${idx}`;
+        let rec = { nama: String(row[kN]).trim().toUpperCase(), id, tahun, kelas, fasa, scores: {} };
+        for(let s in sK) { let n = parseInt(String(row[sK[s]]).replace(/\D/g, '')); if(!isNaN(n) && n>=1 && n<=6) rec.scores[s] = n; }
+        // Update/Tindih data lama
+        let exIdx = appData.findIndex(d => d.fasa === fasa && d.tahun === tahun && d.kelas === kelas && d.nama === rec.nama);
         if(exIdx > -1) appData[exIdx] = rec; else appData.push(rec);
       });
     }
 
-    function clearDataCloud() { if(confirm("Reset semua?")) { appData = []; saveDataToCloud(); } }
+    // FUNGSI PADAM SPESIFIK
+    async function deleteSpecificFile() {
+      const fileKey = document.getElementById('select-delete-file').value;
+      if(!fileKey) return alert("Sila pilih rekod fail untuk dipadam.");
+      
+      if(confirm(`AWAS! Anda pasti mahu memadam SEMUA DATA bagi fail: ${fileKey}?`)) {
+        appData = appData.filter(d => `${d.tahun} ${d.kelas} ${d.fasa}` !== fileKey);
+        await syncToCloud();
+      }
+    }
+
+    function clearAllData() { if(confirm("RESET SEMUA DATABASE?")) { appData = []; syncToCloud(); } }
   </script>
 </body>
 </html>
