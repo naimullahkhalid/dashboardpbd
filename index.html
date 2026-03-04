@@ -198,12 +198,13 @@
   </footer>
 
   <script>
-    const GAS_URL = "https://script.google.com/macros/s/AKfycbwYKVgs6XsXaOUqQ7ZYmQdvyaEA0-lcNuBnbFyqPVCRZzKydKYESZWfzS0JMPnwzt_zDg/exec";
+    const GAS_URL = "https://script.google.com/macros/s/AKfycbxyuiQInWhGYkMuIBVt0R6fSw9G3NEhFzuRjyw4WHBjpBAnz2PaVj0b7JVUmfUD-VAVIg/exec";
     let appData = [];
     const knownSubjects = ['BM', 'BI', 'MM', 'SAINS', 'SEJ', 'PAI', 'PM', 'BC', 'BT', 'BIN', 'RBT', 'AR', 'PJPK', 'PMZ', 'PSV'];
     let charts = { dashSubject: null, dashPie: null, lapKelas: null };
     let currentSort = { column: null, dir: 'asc' };
 
+    document.getElementById('current-year').textContent = new Date().getFullYear();
     window.onload = () => loadDataFromCloud();
 
     function showLoading(show, text = "Memproses...") {
@@ -212,29 +213,60 @@
       if(show) overlay.classList.remove('hidden'); else overlay.classList.add('hidden');
     }
 
+    // --- TIMEOUT FUNCTION: TARIK DATA (15 SAAT) ---
     async function loadDataFromCloud() {
       showLoading(true, "Menarik data terkini dari Cloud...");
+      
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 15000); // 15s Timer
+
       try {
-        let res = await fetch(GAS_URL);
+        let res = await fetch(GAS_URL, { signal: controller.signal });
+        clearTimeout(timeoutId);
+        
         let data2D = await res.json();
         parse2DArrayToData(data2D);
         switchTab('dashboard');
-      } catch (err) { alert("Gagal menghubungi Database."); showLoading(false); }
+      } catch (err) {
+        clearTimeout(timeoutId);
+        showLoading(false);
+        if (err.name === 'AbortError') {
+          alert("Masa Tamat (15 Saat)! Gagal menghubungi Database Cloud.");
+        } else {
+          alert("Gagal menghubungi Database.");
+        }
+      }
     }
 
+    // --- TIMEOUT FUNCTION: SIMPAN DATA (15 SAAT) ---
     async function saveDataToCloud() {
       showLoading(true, "Menyimpan perubahan...");
+      
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 15000);
+
       try {
         let array2D = build2DArrayFromData();
         await fetch(GAS_URL, {
           method: "POST",
           headers: { "Content-Type": "text/plain;charset=utf-8" },
-          body: JSON.stringify({ action: "SIMPAN_DATA", data: array2D })
+          body: JSON.stringify({ action: "SIMPAN_DATA", data: array2D }),
+          signal: controller.signal
         });
+        
+        clearTimeout(timeoutId);
         showLoading(false);
         alert("Pangkalan Data Berjaya Dikemas Kini!");
         loadDataFromCloud();
-      } catch (err) { showLoading(false); alert("Gagal menyimpan data."); }
+      } catch (err) { 
+        clearTimeout(timeoutId);
+        showLoading(false); 
+        if (err.name === 'AbortError') {
+          alert("Masa Simpanan Tamat (15 Saat)! Data mungkin gagal disimpan.");
+        } else {
+          alert("Gagal menyimpan data.");
+        }
+      }
     }
 
     function parse2DArrayToData(data) {
@@ -267,6 +299,7 @@
       ['dashboard-view', 'laporan-view', 'admin-view', 'global-filters'].forEach(id => document.getElementById(id).classList.add('hidden'));
       ['nav-dashboard', 'nav-laporan', 'nav-admin'].forEach(id => document.getElementById(id).className = "px-4 py-2 rounded-lg border border-white/20 text-white/70 text-xs font-bold hover:bg-white/10 transition-all uppercase");
       const activeBtn = "px-4 py-2 rounded-lg bg-emerald-500/30 border border-emerald-400/50 text-white text-xs font-bold transition-all uppercase";
+      
       if (tab === 'dashboard') {
         document.getElementById('dashboard-view').classList.remove('hidden');
         document.getElementById('global-filters').classList.remove('hidden');
@@ -288,14 +321,26 @@
       document.getElementById('file-name-display').textContent = selectedFiles.length + " fail dipilih.";
     }
 
+    // --- LOGIK UPLOAD (PERBAIKAN NAMA FAIL "FASA1") ---
     async function processUploadAndSync() {
-      const fasa = document.getElementById('input-fasa').value;
+      const fasaPilihan = document.getElementById('input-fasa').value;
       if (selectedFiles.length === 0) return alert("Pilih fail dahulu.");
       showLoading(true, "Membaca data...");
+      
       for (let file of selectedFiles) {
-        let kelas = file.name.replace(/\.[^/.]+$/, "").trim(); 
+        // Ambil nama tanpa format (Cth: "2025 4 EMERALD FASA1")
+        let rawName = file.name.replace(/\.[^/.]+$/, "").trim().toUpperCase(); 
+        
+        // Logik Regex: Buang perkataan FASA berserta nombor selepasnya
+        // Jadi, "2025 4 EMERALD FASA1" atau "FASA 1" akan dipadam.
+        let cleanKelas = rawName.replace(/FASA\s*\d/g, "").trim();
+        
+        // Semak jika fasa ada disebut di dalam nama fail, jika ada guna fasa itu
+        let matchFasa = rawName.match(/FASA\s*(\d)/);
+        let fasaAkhir = matchFasa ? "Fasa " + matchFasa[1] : fasaPilihan;
+
         let jsonData = await readExcelAsync(file);
-        parseExcelJSON(jsonData, fasa, kelas);
+        parseExcelJSON(jsonData, fasaAkhir, cleanKelas);
       }
       saveDataToCloud();
     }
@@ -316,11 +361,16 @@
       const kNama = keys.find(k => k.toUpperCase().includes('NAMA')), kId = keys.find(k => k.toUpperCase().includes('KID') || k.toUpperCase().includes('ID')), kJantina = keys.find(k => k.toUpperCase().includes('JANTINA'));
       if (!kNama) return;
       const subKeys = {}; knownSubjects.forEach(s => { let m = keys.find(k => k.toUpperCase().trim() === s); if(m) subKeys[s] = m; });
+      
       jsonData.forEach((row, idx) => {
         if (!row[kNama]) return;
         let id = kId && row[kId] ? String(row[kId]).replace(/[- ]/g, '').trim() : `ID_${kelas}_${idx}`;
         let rec = { nama: String(row[kNama]).trim().toUpperCase(), id: id, jantina: kJantina ? row[kJantina] : '', kelas: kelas, fasa: fasa, scores: {} };
-        for (let s in subKeys) { let v = String(row[subKeys[s]]); let n = parseInt(v.replace(/\D/g, '')); if(!isNaN(n) && n>=1 && n<=6) rec.scores[s] = n; }
+        for (let s in subKeys) { 
+            let v = String(row[subKeys[s]]); 
+            let n = parseInt(v.replace(/\D/g, '')); 
+            if(!isNaN(n) && n>=1 && n<=6) rec.scores[s] = n; 
+        }
         let exist = appData.find(d => d.fasa === fasa && d.kelas === kelas && (d.id === rec.id || d.nama === rec.nama));
         if(exist) Object.assign(exist, rec); else appData.push(rec);
       });
@@ -331,18 +381,20 @@
       let h = '<option value="Semua">Semua Kelas</option>';
       uniqueKelas.forEach(k => h += `<option value="${k}">${k}</option>`);
       document.getElementById('filter-kelas').innerHTML = h;
-      let hd = ''; uniqueKelas.forEach(k => hd += `<option value="${k}">${k}</option>`);
+      
+      let hd = ''; 
+      uniqueKelas.forEach(k => hd += `<option value="${k}">${k}</option>`);
       document.getElementById('delete-kelas').innerHTML = hd || '<option value="">Tiada Data</option>';
     }
 
     function deleteSpecificClass() {
       const f = document.getElementById('delete-fasa').value, k = document.getElementById('delete-kelas').value;
-      if(!k || !confirm(`Padam DATA ${k} (${f})?`)) return;
+      if(!k || !confirm(`Padam DATA Kelas: ${k} (bagi ${f})?`)) return;
       appData = appData.filter(d => !(d.fasa === f && d.kelas === k));
       saveDataToCloud();
     }
 
-    function clearDataCloud() { if(confirm("RESET SEMUA DATA?")) { appData = []; saveDataToCloud(); } }
+    function clearDataCloud() { if(confirm("RESET SEMUA DATA DARI CLOUD?")) { appData = []; saveDataToCloud(); } }
 
     function processAllViews() {
       const f = document.getElementById('filter-fasa').value, k = document.getElementById('filter-kelas').value;
@@ -360,46 +412,36 @@
           if(!subS[sub]) subS[sub] = {sum: 0, count: 0}; subS[sub].sum += sc; subS[sub].count++;
           if (sc >= 3) cL++; if (sc >= 5) cC++;
           if (sc <= 2) iL.push(s);
-          // Flatten for main table
           flattened.push({ n: s.nama, k: s.kelas, f: s.fasa, s: sub, t: sc });
         }
         if(stC > 0) { clS[s.kelas].sum += (stS / stC); clS[s.kelas].count++; }
       });
 
-      // Update KPIs
       document.getElementById('dash-lulus').textContent = ((cL / totalS) * 100).toFixed(1) + '%';
       document.getElementById('dash-cemerlang').textContent = ((cC / totalS) * 100).toFixed(1) + '%';
       document.getElementById('dash-gagal').textContent = [...new Set(iL.map(x=>x.id))].length;
       document.getElementById('dash-purata').textContent = (Object.values(subS).reduce((a,b)=>a+b.sum,0)/totalS).toFixed(2);
-      document.getElementById('inter-count').textContent = [...new Set(iL.map(x=>x.id))].length + " Murid";
 
-      // Ranking
       let sSub = Object.keys(subS).map(n => ({ n, a: subS[n].sum/subS[n].count })).sort((a,b)=>b.a-a.a);
       let sCls = Object.keys(clS).map(n => ({ n, a: clS[n].sum/clS[n].count, d: clS[n].tpData })).sort((a,b)=>b.a-a.a);
+      
       let rSH = ''; sSub.forEach((s,i)=>rSH+=`<div class='flex justify-between p-2 bg-slate-50 rounded border border-slate-100'><span>${i+1}. ${s.n}</span><span class='font-black text-emerald-600'>${s.a.toFixed(2)}</span></div>`);
       document.getElementById('lap-ranking-subjek').innerHTML = rSH;
+      
       let rCH = ''; sCls.forEach((s,i)=>rCH+=`<div class='flex justify-between p-2 bg-slate-50 rounded border border-slate-100'><span>${i<3?['🥇','🥈','🥉'][i]:i+1+'.'} ${s.n}</span><span class='font-black text-blue-600'>${s.a.toFixed(2)}</span></div>`);
       document.getElementById('lap-ranking-kelas').innerHTML = rCH;
 
-      // Populate Main Table
       window.currentFlattened = flattened;
       renderMainTable(flattened);
 
-      // Intervention Table
-      let iH = ''; [...new Set(iL.map(x=>x.id))].forEach(id => {
-         let x = iL.find(m => m.id === id);
-         let subs = iL.filter(m => m.id === id).map(m => m.failedSub);
-         iH+=`<tr><td class='px-6 py-2 uppercase font-black'>${x.nama}</td><td class='px-6'>${x.kelas}</td><td class='px-6 font-bold'>DILAPORKAN</td><td class='px-6'><span class='tp-badge tp2'>REKOD</span></td></tr>`;
-      });
+      document.getElementById('lap-ai-insight').innerHTML = `Berdasarkan data terkini, sekolah merekodkan kadar menguasai <strong>${((cL/totalS)*100).toFixed(1)}%</strong> dengan purata GPS <strong>${(Object.values(subS).reduce((a,b)=>a+b.sum,0)/totalS).toFixed(2)}</strong>. Kelas <strong>${sCls[0]?.n || '-'}</strong> menunjukkan prestasi paling stabil manakala subjek <strong>${sSub[sSub.length-1]?.n || '-'}</strong> memerlukan perhatian khusus.`;
 
-      // AI Text
-      document.getElementById('lap-ai-insight').innerHTML = `Berdasarkan data terkini, sekolah merekodkan kadar menguasai <strong>${((cL/totalS)*100).toFixed(1)}%</strong> dengan purata GPS <strong>${(Object.values(subS).reduce((a,b)=>a+b.sum,0)/totalS).toFixed(2)}</strong>. Kelas <strong>${sCls[0]?.n}</strong> menunjukkan prestasi paling stabil manakala subjek <strong>${sSub[sSub.length-1]?.n}</strong> memerlukan perhatian khusus.`;
-
-      // Charts
       if(charts.dashSubject) charts.dashSubject.destroy();
       charts.dashSubject = new Chart(document.getElementById('chart-dash-subject'), { type: 'bar', data: { labels: sSub.map(x=>x.n), datasets: [{ data: sSub.map(x=>x.a), backgroundColor: '#10b981', borderRadius: 6 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { max: 6, ticks: { stepSize: 1 } } } } });
+      
       if(charts.dashPie) charts.dashPie.destroy();
       charts.dashPie = new Chart(document.getElementById('chart-dash-pie'), { type: 'doughnut', data: { labels: ['TP1','TP2','TP3','TP4','TP5','TP6'], datasets: [{ data: [tpD[1],tpD[2],tpD[3],tpD[4],tpD[5],tpD[6]], backgroundColor: ['#dc2626','#f97316','#eab308','#84cc16','#22c55e','#10b981'], borderWidth: 0 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { boxWidth: 10, font: { size: 9 } } } } } });
+      
       if(charts.lapKelas) charts.lapKelas.destroy();
       charts.lapKelas = new Chart(document.getElementById('chart-lap-kelas'), { type: 'bar', data: { labels: sCls.map(x=>x.n), datasets: [{ label: 'TP1-2', data: sCls.map(x=>x.d[1]+x.d[2]), backgroundColor: '#dc2626' }, { label: 'TP3-4', data: sCls.map(x=>x.d[3]+x.d[4]), backgroundColor: '#f59e0b' }, { label: 'TP5-6', data: sCls.map(x=>x.d[5]+x.d[6]), backgroundColor: '#10b981' }] }, options: { responsive: true, maintainAspectRatio: false, scales: { x: { stacked: true }, y: { stacked: true } }, plugins: { legend: { position: 'top', labels: { boxWidth: 10, font: { size: 10 } } } } } });
     }
@@ -420,8 +462,7 @@
 
     function filterTableBySearch() {
       const query = document.getElementById('search-murid').value.toUpperCase();
-      const filtered = window.currentFlattened.filter(x => x.n.includes(query));
-      renderMainTable(filtered);
+      renderMainTable(window.currentFlattened.filter(x => x.n.includes(query)));
     }
 
     function sortTable(colIdx) {
