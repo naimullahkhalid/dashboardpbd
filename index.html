@@ -215,14 +215,14 @@
           <div class="space-y-5">
             <div class="p-6 bg-red-50 rounded-3xl border-l-8 border-red-500 flex justify-between items-center shadow-sm">
               <div>
-                <p class="text-xs font-black text-red-800 uppercase tracking-widest">Intervensi P1 (Segera)</p>
+                <p class="text-xs font-black text-red-800 uppercase tracking-widest">TINDAKAN SEGERA (KRITIKAL)</p>
                 <p id="p1-desc" class="text-[10px] text-red-600 font-bold uppercase mt-2"></p>
               </div>
               <span class="text-4xl text-red-200 font-black">!</span>
             </div>
             <div class="p-6 bg-orange-50 rounded-3xl border-l-8 border-orange-500 flex justify-between items-center shadow-sm">
               <div>
-                <p class="text-xs font-black text-orange-800 uppercase tracking-widest">Sokongan P2 (Berterusan)</p>
+                <p class="text-xs font-black text-orange-800 uppercase tracking-widest">SOKONGAN BERTERUSAN (PEMULIHAN)</p>
                 <p id="p2-desc" class="text-[10px] text-orange-600 font-bold uppercase mt-2"></p>
               </div>
               <span class="text-4xl text-orange-200 font-black">?</span>
@@ -289,7 +289,6 @@
   </footer>
 
   <script>
-    // Mendaftar plugin ChartDataLabels untuk peratusan Carta Pai
     Chart.register(ChartDataLabels);
 
     let systemReady = false;
@@ -329,10 +328,7 @@
       'PSV': 'Pendidikan Seni Visual'
     };
 
-    // Fungsi kecil tukar kod kepada nama penuh
-    function getFullSub(code) {
-      return subjectMap[code] || code;
-    }
+    function getFullSub(code) { return subjectMap[code] || code; }
 
     let charts = { dashPie: null, trend: null, bar: null };
 
@@ -543,7 +539,10 @@
         htmlKelas += `<div class="flex justify-between items-center p-4 bg-emerald-50 rounded-2xl border border-emerald-100"><span class="font-bold text-xs text-emerald-900 uppercase">${i+1}. ${cls.nama}</span><span class="font-black text-emerald-600 bg-white px-3 py-1 rounded-full text-[10px] shadow-sm">${cls.avg.toFixed(2)}</span></div>`;
       });
       document.getElementById('rank-kelas').innerHTML = htmlKelas;
+      
+      // Update label Amaran & Fokus
       document.getElementById('p1-desc').textContent = `Fokus Panitia: ${sortedSubjek[0] ? getFullSub(sortedSubjek[0].nama) : 'Tiada'}`;
+      document.getElementById('p2-desc').textContent = `Sasaran Pemulihan: ${uniqueIntervensiCount} Murid Terlibat`;
 
       document.getElementById('inter-badge').textContent = senaraiIntervensi.length + " Keseluruhan Kes";
       let htmlIntervensi = '';
@@ -631,13 +630,12 @@
           responsive: true, maintainAspectRatio: false, cutout: '70%',
           plugins: { 
             legend: { position: 'right', labels: { boxWidth: 12, font: { weight: 'bold', size: 10 } } },
-            // Plugin DataLabels untuk Peratus
             datalabels: {
               color: '#ffffff',
               font: { weight: 'bold', size: 10 },
               formatter: (value, ctx) => {
                 let sum = ctx.chart.data.datasets[0].data.reduce((a, b) => a + b, 0);
-                if(value === 0 || sum === 0) return null; // Sembunyi kalau kosong
+                if(value === 0 || sum === 0) return null; 
                 return (value * 100 / sum).toFixed(1) + "%";
               }
             }
@@ -657,7 +655,7 @@
         data: { labels: ['FASA 1', 'FASA 2'], datasets: datasetTrend }, 
         options: { 
           responsive: true, maintainAspectRatio: false, scales: { y: { min: 1, max: 6 } },
-          plugins: { datalabels: { display: false } } // Tutup label peratusan di sini
+          plugins: { datalabels: { display: false } } 
         } 
       });
 
@@ -675,7 +673,7 @@
         }, 
         options: { 
           responsive: true, maintainAspectRatio: false, scales: { x: { stacked: true }, y: { stacked: true } },
-          plugins: { datalabels: { display: false } } // Tutup label peratusan di sini
+          plugins: { datalabels: { display: false } } 
         } 
       });
     }
