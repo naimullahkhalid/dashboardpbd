@@ -7,11 +7,10 @@
   <script src="https://cdn.tailwindcss.com/3.4.17"></script>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
   <style>
     * { font-family: 'Poppins', sans-serif; }
     .card-shadow { box-shadow: 0 4px 20px rgba(0, 51, 102, 0.08); }
-    .card-hover { transition: all 0.3s ease; }
-    .card-hover:hover { transform: translateY(-4px); box-shadow: 0 8px 30px rgba(0, 51, 102, 0.12); }
     .gradient-header { background: linear-gradient(135deg, #0a1628 0%, #1e3a5f 50%, #0d2137 100%); }
     .scrollbar-thin::-webkit-scrollbar { width: 6px; height: 6px; }
     .scrollbar-thin::-webkit-scrollbar-track { background: #f1f5f9; border-radius: 3px; }
@@ -32,12 +31,12 @@
           <div class="flex items-center gap-4">
             <div class="w-12 h-12 bg-white/10 rounded-xl flex items-center justify-center border border-white/20">
               <svg class="w-7 h-7 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
               </svg>
             </div>
             <div>
               <h1 class="text-xl font-bold tracking-tight">Sistem Analisis PBD Pintar</h1>
-              <p class="text-emerald-300 text-xs">Janaan Automatik dari Data Mentah (CSV)</p>
+              <p class="text-emerald-300 text-xs">Muat Naik Pukal (Bulk Upload) Excel Automatik</p>
             </div>
           </div>
           <div class="flex gap-2">
@@ -75,37 +74,29 @@
         <div class="bg-white rounded-2xl p-5 card-shadow border border-slate-100">
           <p class="text-sm font-medium text-slate-500">Kadar Menguasai (TP3-TP6)</p>
           <h3 id="stat-lulus" class="text-3xl font-bold text-emerald-500 mt-2">0%</h3>
-          <p class="text-xs text-slate-400 mt-1">Daripada keseluruhan subjek</p>
         </div>
         <div class="bg-white rounded-2xl p-5 card-shadow border border-slate-100">
           <p class="text-sm font-medium text-slate-500">Kadar Cemerlang (TP5-TP6)</p>
           <h3 id="stat-cemerlang" class="text-3xl font-bold text-blue-500 mt-2">0%</h3>
-          <p class="text-xs text-slate-400 mt-1">Murid capai tahap tertinggi</p>
         </div>
         <div class="bg-white rounded-2xl p-5 card-shadow border border-red-100">
           <p class="text-sm font-medium text-red-500">Perlu Intervensi (TP1-TP2)</p>
           <h3 id="stat-gagal" class="text-3xl font-bold text-red-500 mt-2">0</h3>
-          <p class="text-xs text-red-400 mt-1">Jumlah subjek direkodkan</p>
         </div>
         <div class="bg-white rounded-2xl p-5 card-shadow border border-slate-100">
           <p class="text-sm font-medium text-slate-500">Purata Keseluruhan</p>
           <h3 id="stat-purata" class="text-3xl font-bold text-slate-700 mt-2">0.00</h3>
-          <p class="text-xs text-slate-400 mt-1">Tahap Penguasaan (TP)</p>
         </div>
       </div>
 
       <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
         <div class="bg-white p-5 rounded-2xl card-shadow border border-slate-100">
           <h3 class="text-sm font-bold text-slate-700 mb-4">Analisis Keseluruhan Subjek (Purata TP)</h3>
-          <div class="h-64 relative">
-            <canvas id="chartSubject"></canvas>
-          </div>
+          <div class="h-64 relative"><canvas id="chartSubject"></canvas></div>
         </div>
         <div class="bg-white p-5 rounded-2xl card-shadow border border-slate-100">
           <h3 class="text-sm font-bold text-slate-700 mb-4">Agihan Tahap Penguasaan (Semua Subjek)</h3>
-          <div class="h-64 relative">
-            <canvas id="chartPie"></canvas>
-          </div>
+          <div class="h-64 relative"><canvas id="chartPie"></canvas></div>
         </div>
       </div>
 
@@ -113,7 +104,6 @@
         <div class="p-5 border-b border-slate-100 flex justify-between items-center bg-red-50/30">
           <div>
             <h3 class="text-base font-bold text-slate-800">Senarai Nama Murid Intervensi (TP1 & TP2)</h3>
-            <p class="text-xs text-slate-500">Senarai murid yang memerlukan pemulihan segera mengikut subjek.</p>
           </div>
         </div>
         <div class="overflow-x-auto">
@@ -128,7 +118,7 @@
               </tr>
             </thead>
             <tbody id="table-intervensi" class="text-sm divide-y divide-slate-100">
-              <tr><td colspan="5" class="px-6 py-8 text-center text-slate-400">Tiada data direkodkan. Sila muat naik fail CSV di tab Pengurusan Data.</td></tr>
+              <tr><td colspan="5" class="px-6 py-8 text-center text-slate-400">Tiada data direkodkan.</td></tr>
             </tbody>
           </table>
         </div>
@@ -139,50 +129,43 @@
       <div class="bg-white rounded-2xl card-shadow p-6 md:p-8 border border-slate-200">
         <div class="mb-6 pb-6 border-b border-slate-100 flex justify-between items-center">
           <div>
-            <h2 class="text-xl font-bold text-slate-800">Muat Naik Data Mentah CSV</h2>
-            <p class="text-sm text-slate-500 mt-1">Sistem akan mengekstrak nama, MyKID, dan markah subjek (TP) secara automatik.</p>
+            <h2 class="text-xl font-bold text-slate-800">Muat Naik Data Mentah Excel (Pukal)</h2>
+            <p class="text-sm text-slate-500 mt-1">Sistem akan gunakan <strong>Nama Fail</strong> sebagai Nama Kelas secara automatik.</p>
           </div>
           <button onclick="clearData()" class="px-4 py-2 bg-red-100 text-red-600 text-xs font-bold rounded-lg hover:bg-red-200 transition">🗑️ Padam Semua Data</button>
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-          <div>
-            <label class="block text-sm font-semibold text-slate-700 mb-2">1. Pilih Fasa</label>
-            <select id="input-fasa" class="bg-slate-50 border border-slate-300 text-slate-800 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-3">
-              <option value="Fasa 1">Fasa 1</option>
-              <option value="Fasa 2">Fasa 2</option>
-            </select>
-          </div>
-          <div>
-            <label class="block text-sm font-semibold text-slate-700 mb-2">2. Nama Kelas (Fail yang dimuat naik)</label>
-            <input type="text" id="input-kelas" placeholder="Cth: 5 Topaz" class="bg-slate-50 border border-slate-300 text-slate-800 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-3">
-          </div>
+        <div class="mb-6">
+          <label class="block text-sm font-semibold text-slate-700 mb-2">1. Pilih Fasa untuk Semua Fail Ini</label>
+          <select id="input-fasa" class="bg-slate-50 border border-slate-300 text-slate-800 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full md:w-1/2 p-3">
+            <option value="Fasa 1">Fasa 1</option>
+            <option value="Fasa 2">Fasa 2</option>
+          </select>
         </div>
 
         <div class="mb-6">
-          <label class="block text-sm font-semibold text-slate-700 mb-2">3. Pilih Fail (Format CSV)</label>
+          <label class="block text-sm font-semibold text-slate-700 mb-2">2. Pilih Fail Excel (Boleh pilih banyak terus)</label>
           <div class="border-2 border-dashed border-slate-300 rounded-xl p-8 text-center bg-slate-50 hover:bg-slate-100 transition">
-            <input type="file" id="file-upload" accept=".csv" class="hidden" onchange="handleFileSelect(event)">
+            <input type="file" id="file-upload" accept=".xls,.xlsx,.csv,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" multiple class="hidden" onchange="handleFileSelect(event)">
             <button onclick="document.getElementById('file-upload').click()" class="inline-flex items-center gap-2 px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition shadow-md">
               <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
-              Klik untuk cari fail CSV
+              Klik untuk cari fail-fail Excel
             </button>
-            <p id="file-name-display" class="text-sm text-slate-500 mt-3">Tiada fail dipilih</p>
+            <div id="file-name-display" class="text-sm text-slate-500 mt-4">Tiada fail dipilih</div>
           </div>
         </div>
 
         <button onclick="processUpload()" class="w-full py-4 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl shadow-lg transition text-lg flex justify-center items-center gap-2">
-          ⚙️ Proses dan Simpan Data
+          ⚙️ Proses dan Simpan Semua Data
         </button>
       </div>
 
       <div class="mt-8 bg-blue-50 rounded-xl p-5 border border-blue-100">
-        <h4 class="font-bold text-blue-800 text-sm mb-2">💡 Panduan Format Excel / CSV:</h4>
+        <h4 class="font-bold text-blue-800 text-sm mb-2">💡 Tips Penting Untuk Cikgu Naimullah:</h4>
         <ul class="text-xs text-blue-700 space-y-1 list-disc pl-4">
-          <li>Pastikan lajur wajib wujud: <strong>Nama</strong>, <strong>MyKID</strong> (atau Pengenalan).</li>
-          <li>Format MyKID di Excel <strong>MESTI</strong> ditukar format Number (0 titik perpuluhan) sebelum save as CSV untuk elak ralat (cth `1.41E+11`).</li>
-          <li>Sistem akan cari lajur subjek automatik (BM, BI, MM, SAINS, SEJ, PAI, dll).</li>
-          <li>Markah mestilah mengandungi nombor TP (contoh: "TP3", "TP 4", atau "4").</li>
+          <li><strong>Penting:</strong> Namakan fail Excel mengikut nama kelas sebelum *upload*. Contohnya: rename fail kepada <strong>5 Topaz.xlsx</strong>.</li>
+          <li>Sistem akan baca perkataan "5 Topaz" tersebut dan jadikannya nama kelas di Dashboard.</li>
+          <li>Cikgu boleh <i>highlight</i> (pilih) 5 atau 10 fail kelas sekaligus semasa memilih fail!</li>
         </ul>
       </div>
     </main>
@@ -201,18 +184,15 @@
     let chartSubjectInst = null;
     let chartPieInst = null;
 
-    // Data Storage (Saved in LocalStorage)
-    // Structure: [{ id, nama, jantina, kelas, fasa, scores: { BM: 3, BI: 4... } }]
+    // Data Storage
     let appData = JSON.parse(localStorage.getItem('pbdSistemData')) || [];
     const knownSubjects = ['BM', 'BI', 'MM', 'SAINS', 'SEJ', 'PAI', 'PM', 'BC', 'BT', 'BIN', 'RBT', 'AR', 'PJPK', 'PMZ', 'PSV'];
 
-    // Initialize Dashboard on load
     window.onload = () => {
       updateFilterDropdowns();
       renderDashboard();
     };
 
-    // Tab Switcher
     function switchTab(tab) {
       if (tab === 'dashboard') {
         document.getElementById('dashboard-view').classList.remove('hidden');
@@ -221,7 +201,6 @@
         document.getElementById('nav-dashboard').classList.remove('border-white/20', 'text-white/70');
         document.getElementById('nav-admin').classList.remove('bg-emerald-500/30', 'border-emerald-400/50', 'text-white');
         document.getElementById('nav-admin').classList.add('border-white/20', 'text-white/70');
-        
         updateFilterDropdowns();
         renderDashboard();
       } else {
@@ -234,12 +213,19 @@
       }
     }
 
-    // --- ADMIN / UPLOAD LOGIC ---
-    let selectedFile = null;
+    // --- ADMIN / UPLOAD PUKAL LOGIC ---
+    let selectedFiles = [];
+
     function handleFileSelect(event) {
-      selectedFile = event.target.files[0];
-      if (selectedFile) {
-        document.getElementById('file-name-display').innerHTML = `Fail sedia diproses: <strong>${selectedFile.name}</strong>`;
+      selectedFiles = Array.from(event.target.files);
+      if (selectedFiles.length > 0) {
+        let fileNames = selectedFiles.map(f => f.name).join(', ');
+        document.getElementById('file-name-display').innerHTML = `
+          <strong class="text-blue-600">${selectedFiles.length} fail sedia diproses:</strong><br>
+          <span class="text-xs text-slate-500">${fileNames}</span>
+        `;
+      } else {
+        document.getElementById('file-name-display').textContent = 'Tiada fail dipilih';
       }
     }
 
@@ -253,105 +239,121 @@
       }
     }
 
-    function processUpload() {
+    // Fungsi Asynchronous untuk membaca pelbagai fail
+    async function processUpload() {
       const fasa = document.getElementById('input-fasa').value;
-      const kelas = document.getElementById('input-kelas').value.trim();
 
-      if (!kelas) return alert("Sila taipkan Nama Kelas (Contoh: 5 Topaz) sebelum muat naik.");
-      if (!selectedFile) return alert("Sila pilih fail CSV terlebih dahulu.");
+      if (selectedFiles.length === 0) return alert("Sila pilih fail-fail Excel terlebih dahulu.");
 
-      const reader = new FileReader();
-      reader.onload = function(e) {
-        const text = e.target.result;
-        parseCSV(text, fasa, kelas);
-      };
-      reader.readAsText(selectedFile);
+      let totalAdded = 0;
+      let senaraiKelasDiproses = [];
+
+      for (let file of selectedFiles) {
+        // Ekstrak nama kelas dari nama fail (Buang format .xlsx / .xls)
+        let kelas = file.name.replace(/\.[^/.]+$/, "").trim();
+        senaraiKelasDiproses.push(kelas);
+
+        try {
+          let jsonData = await readExcelAsync(file);
+          let added = parseExcelJSONBulk(jsonData, fasa, kelas);
+          totalAdded += added;
+        } catch (error) {
+          console.error("Gagal membaca fail " + file.name, error);
+        }
+      }
+
+      // Selepas semua fail diproses, simpan data ke storage
+      localStorage.setItem('pbdSistemData', JSON.stringify(appData));
+      
+      alert(`Selesai! ${totalAdded} rekod baharu berjaya disimpan.\n\nKelas yang dimuat naik:\n${senaraiKelasDiproses.join(', ')}\nFasa: ${fasa}`);
+      
+      // Reset form
+      document.getElementById('file-upload').value = '';
+      selectedFiles = [];
+      document.getElementById('file-name-display').textContent = 'Tiada fail dipilih';
+
+      switchTab('dashboard');
     }
 
-    function parseCSV(csvText, fasa, kelas) {
-      // Split by newline and handle basic CSV
-      const lines = csvText.split('\n');
-      if (lines.length < 2) return alert("Fail CSV kosong atau tidak sah.");
+    // Tukar FileReader menjadi Promise supaya kita boleh guna 'await' di atas
+    function readExcelAsync(file) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          try {
+            const data = new Uint8Array(e.target.result);
+            const workbook = XLSX.read(data, {type: 'array'});
+            const firstSheetName = workbook.SheetNames[0];
+            const worksheet = workbook.Sheets[firstSheetName];
+            const jsonData = XLSX.utils.sheet_to_json(worksheet, {raw: true, defval: ""});
+            resolve(jsonData);
+          } catch (err) {
+            reject(err);
+          }
+        };
+        reader.onerror = reject;
+        reader.readAsArrayBuffer(file);
+      });
+    }
 
-      // Parse headers
-      const headers = lines[0].split(',').map(h => h.trim().toUpperCase().replace(/['"]/g,''));
-      
-      // Find critical columns dynamically
-      const idxNama = headers.findIndex(h => h === 'NAMA' || h.includes('NAMA MURID'));
-      const idxId = headers.findIndex(h => h.includes('KID') || h.includes('PENGENALAN') || h.includes('ID'));
-      const idxJantina = headers.findIndex(h => h.includes('JANTINA'));
+    function parseExcelJSONBulk(jsonData, fasa, kelas) {
+      if (!jsonData || jsonData.length === 0) return 0;
 
-      if (idxNama === -1) return alert("Ralat: Tidak jumpa lajur 'Nama' di dalam fail CSV.");
+      const keys = Object.keys(jsonData[0]);
+      const keyNama = keys.find(k => k.toUpperCase().includes('NAMA'));
+      const keyId = keys.find(k => k.toUpperCase().includes('KID') || k.toUpperCase().includes('PENGENALAN') || k.toUpperCase().includes('ID'));
+      const keyJantina = keys.find(k => k.toUpperCase().includes('JANTINA'));
 
-      // Find subject columns
-      const subjectIndexes = {};
+      if (!keyNama) return 0; // Skip jika tiada nama dijumpai
+
+      const subjectKeys = {};
       knownSubjects.forEach(sub => {
-        const i = headers.indexOf(sub);
-        if (i > -1) subjectIndexes[sub] = i;
+        const match = keys.find(k => k.toUpperCase().trim() === sub);
+        if (match) subjectKeys[sub] = match;
       });
 
       let addedCount = 0;
 
-      for (let i = 1; i < lines.length; i++) {
-        if (!lines[i].trim()) continue;
-        
-        // Basic split (won't handle commas inside quotes perfectly, but sufficient for standard raw data)
-        const cols = lines[i].split(','); 
-        if (cols.length < 3) continue;
+      jsonData.forEach((row, index) => {
+        const nama = row[keyNama];
+        if (!nama || String(nama).trim() === '') return;
 
-        const nama = cols[idxNama]?.trim();
-        if (!nama || nama === '') continue;
+        let strId = `TIADA_ID_${index}`;
+        if (keyId && row[keyId]) {
+            strId = String(row[keyId]).replace(/[- ]/g, '').trim(); 
+        }
 
         let record = {
-          nama: nama,
-          id: idxId > -1 ? cols[idxId].trim() : `TIADA_ID_${i}`,
-          jantina: idxJantina > -1 ? cols[idxJantina].trim() : '',
+          nama: String(nama).trim(),
+          id: strId,
+          jantina: keyJantina && row[keyJantina] ? String(row[keyJantina]).trim() : '',
           kelas: kelas,
           fasa: fasa,
           scores: {}
         };
 
-        // Extract TP scores for this student
-        for (let sub in subjectIndexes) {
-          let val = cols[subjectIndexes[sub]]?.trim();
-          if (val) {
-            // Extract number from strings like "TP3" or "TP 4" or just "3"
-            let tpNum = parseInt(val.replace(/\D/g, ''));
-            if (!isNaN(tpNum) && tpNum >= 1 && tpNum <= 6) {
-              record.scores[sub] = tpNum;
-            }
+        for (let sub in subjectKeys) {
+          let val = String(row[subjectKeys[sub]]);
+          let tpNum = parseInt(val.replace(/\D/g, ''));
+          if (!isNaN(tpNum) && tpNum >= 1 && tpNum <= 6) {
+            record.scores[sub] = tpNum;
           }
         }
 
-        // Avoid exact duplicates (same Fasa, same Kelas, same ID/Name)
         const isDuplicate = appData.find(d => d.fasa === fasa && d.kelas === kelas && (d.id === record.id || d.nama === record.nama));
         if(!isDuplicate) {
            appData.push(record);
            addedCount++;
         }
-      }
+      });
 
-      // Save to local storage
-      localStorage.setItem('pbdSistemData', JSON.stringify(appData));
-      
-      alert(`Berjaya! ${addedCount} rekod baharu untuk kelas ${kelas} (${fasa}) telah disimpan ke dalam sistem.`);
-      
-      // Reset form
-      document.getElementById('input-kelas').value = '';
-      document.getElementById('file-upload').value = '';
-      selectedFile = null;
-      document.getElementById('file-name-display').textContent = 'Tiada fail dipilih';
-
-      // Switch to dashboard
-      switchTab('dashboard');
+      return addedCount;
     }
 
     // --- DASHBOARD LOGIC ---
     function updateFilterDropdowns() {
       const kelasSelect = document.getElementById('filter-kelas');
       const uniqueKelas = [...new Set(appData.map(d => d.kelas))].sort();
-      
-      // Keep selected value if it exists
       const currentVal = kelasSelect.value;
       
       let html = `<option value="Semua">Semua Kelas</option>`;
@@ -366,7 +368,6 @@
       const fasaFilter = document.getElementById('filter-fasa').value;
       const kelasFilter = document.getElementById('filter-kelas').value;
 
-      // Filter Data
       let filteredData = appData.filter(d => {
         const matchFasa = fasaFilter === 'Semua' || d.fasa === fasaFilter;
         const matchKelas = kelasFilter === 'Semua' || d.kelas === kelasFilter;
@@ -380,14 +381,13 @@
         return;
       }
 
-      // Calculate Statistics
       let totalSubjectsRecorded = 0;
-      let countLulus = 0; // TP3 - TP6
-      let countCemerlang = 0; // TP5 - TP6
-      let countGagal = 0; // TP1 - TP2
+      let countLulus = 0; 
+      let countCemerlang = 0; 
+      let countGagal = 0; 
       let totalTPScore = 0;
 
-      let subjectTotals = {}; // { BM: { sum: 0, count: 0 }, ... }
+      let subjectTotals = {}; 
       let tpDistribution = {1:0, 2:0, 3:0, 4:0, 5:0, 6:0};
       let interventionList = [];
 
@@ -411,7 +411,6 @@
         }
       });
 
-      // Update KPI DOM
       if(totalSubjectsRecorded > 0) {
         document.getElementById('stat-lulus').textContent = ((countLulus / totalSubjectsRecorded) * 100).toFixed(1) + '%';
         document.getElementById('stat-cemerlang').textContent = ((countCemerlang / totalSubjectsRecorded) * 100).toFixed(1) + '%';
@@ -421,10 +420,7 @@
         resetDashboardUI();
       }
 
-      // Update Intervention Table
       renderInterventionTable(interventionList);
-
-      // Render Charts
       renderCharts(subjectTotals, tpDistribution);
     }
 
@@ -446,7 +442,6 @@
         return;
       }
 
-      // Sort by score (TP1 first), then class
       list.sort((a,b) => a.failScore - b.failScore || a.kelas.localeCompare(b.kelas));
 
       let html = '';
@@ -466,7 +461,6 @@
     }
 
     function renderCharts(subjectTotals, tpDist) {
-      // 1. Prepare Data for Bar Chart (Subject Averages)
       const subLabels = [];
       const subAverages = [];
       
@@ -494,7 +488,6 @@
         }
       });
 
-      // 2. Prepare Data for Pie Chart (TP Distribution)
       const distData = [tpDist[1], tpDist[2], tpDist[3], tpDist[4], tpDist[5], tpDist[6]];
       
       if(chartPieInst) chartPieInst.destroy();
