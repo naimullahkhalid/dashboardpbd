@@ -26,7 +26,7 @@
     
     .sub-nav-active { background-color: #047857; color: white; border-color: #047857; }
     
-    .custom-scrollbar::-webkit-scrollbar { width: 4px; }
+    .custom-scrollbar::-webkit-scrollbar { width: 4px; height: 4px; }
     .custom-scrollbar::-webkit-scrollbar-track { background: #f1f5f9; border-radius: 4px; }
     .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
   </style>
@@ -177,7 +177,7 @@
         </div>
 
         <div>
-          <h4 class="text-xs font-black text-slate-600 uppercase tracking-widest mb-4">3. Senarai Murid BMTM</h4>
+          <h4 class="text-xs font-black text-slate-600 uppercase tracking-widest mb-4">3. Senarai Murid BMTM Mengikut Subjek</h4>
           <div id="bmtm-student-list" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5"></div>
         </div>
       </div>
@@ -236,22 +236,25 @@
       </div>
       
       <div class="bg-white rounded-3xl card-shadow border border-slate-100 overflow-hidden">
-        <div class="px-8 py-6 bg-slate-50 border-b border-slate-200 flex justify-between items-center">
+        <div class="px-8 py-6 bg-slate-50 border-b border-slate-200 flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
             <h3 class="text-sm font-black text-slate-800 uppercase tracking-widest">Senarai Murid Intervensi</h3>
-            <p class="text-[10px] font-bold text-slate-400 uppercase mt-1">Murid dengan pencapaian TP1 dan TP2</p>
+            <p class="text-[10px] font-bold text-slate-400 uppercase mt-1">Klik tajuk lajur untuk menyusun jadual</p>
           </div>
-          <span id="inter-badge" class="bg-red-500 text-white text-[10px] px-4 py-2 rounded-full font-black uppercase shadow-md">0 Kes</span>
+          <div class="flex items-center gap-3">
+            <input type="text" id="search-intervensi" onkeyup="searchIntervensi()" placeholder="🔍 Cari nama murid, kelas, atau subjek..." class="px-4 py-2 border border-slate-200 rounded-xl text-xs font-bold focus:outline-none focus:border-emerald-500 w-full md:w-64 transition-all">
+            <span id="inter-badge" class="bg-red-500 text-white text-[10px] px-4 py-2 rounded-full font-black uppercase shadow-md whitespace-nowrap">0 Kes</span>
+          </div>
         </div>
-        <div class="overflow-x-auto">
-          <table class="w-full text-left text-xs font-bold border-collapse">
-            <thead class="bg-white text-slate-400 uppercase text-[10px] tracking-widest border-b-2 border-slate-100">
+        <div class="overflow-x-auto max-h-[500px] custom-scrollbar">
+          <table class="w-full text-left text-xs font-bold border-collapse relative">
+            <thead class="bg-white text-slate-400 uppercase text-[10px] tracking-widest border-b-2 border-slate-100 sticky top-0 z-10 shadow-sm cursor-pointer">
               <tr>
                 <th class="px-8 py-5">Bil</th>
-                <th class="px-8 py-5">Nama Murid</th>
-                <th class="px-8 py-5">Tahun / Kelas</th>
-                <th class="px-8 py-5">Subjek</th>
-                <th class="px-8 py-5 text-center">Tahap</th>
+                <th class="px-8 py-5 hover:text-emerald-600 transition-colors" onclick="sortIntervensi('nama')">Nama Murid ↕</th>
+                <th class="px-8 py-5 hover:text-emerald-600 transition-colors" onclick="sortIntervensi('kelas')">Tahun / Kelas ↕</th>
+                <th class="px-8 py-5 hover:text-emerald-600 transition-colors" onclick="sortIntervensi('subjek')">Subjek ↕</th>
+                <th class="px-8 py-5 text-center hover:text-emerald-600 transition-colors" onclick="sortIntervensi('tp')">Tahap ↕</th>
               </tr>
             </thead>
             <tbody id="table-inter" class="divide-y divide-slate-100 text-slate-700">
@@ -323,6 +326,9 @@
     function getFullSub(code) { return subjectMap[code] || code; }
 
     let charts = { dashPie: null, trend: null, bar: null };
+    let senaraiIntervensiGlobal = [];
+    let currentSortCol = 'tp';
+    let currentSortDir = 'asc';
 
     window.onload = loadFromCloud;
 
@@ -361,13 +367,21 @@
       }
     }
 
+    // PEMBAIKAN BUG TAHUN: Tukar semua data yang masuk kepada Teks (String)
     function parseData(data) {
       appData = [];
       if (!Array.isArray(data) || data.length < 2) return; 
       let header = data[0];
       for (let i = 1; i < data.length; i++) {
         let row = data[i];
-        let record = { id: String(row[0]), nama: row[1], tahun: row[2], kelas: row[3], fasa: row[4], scores: {} };
+        let record = { 
+            id: String(row[0]), 
+            nama: String(row[1]).trim(), 
+            tahun: String(row[2]).trim(), // Dipaksa jadi Teks
+            kelas: String(row[3]).trim(), 
+            fasa: String(row[4]).trim(), 
+            scores: {} 
+        };
         for (let j = 5; j < header.length; j++) {
           if (row[j] !== '' && row[j] !== null) record.scores[header[j]] = parseInt(row[j]);
         }
@@ -434,43 +448,37 @@
       const curKelas = document.getElementById('filter-kelas') ? document.getElementById('filter-kelas').value : 'Semua';
       const curSubjek = document.getElementById('filter-subjek') ? document.getElementById('filter-subjek').value : 'Semua';
 
-      // 1. Tahun
-      const uniqueTahun = [...new Set(appData.map(d => d.tahun))].sort().reverse();
+      const uniqueTahun = [...new Set(appData.map(d => String(d.tahun)))].sort().reverse();
       let hTahun = '<option value="Semua">Semua Tahun</option>';
       uniqueTahun.forEach(t => hTahun += `<option value="${t}">${t}</option>`);
       document.getElementById('filter-tahun').innerHTML = hTahun;
       if(uniqueTahun.includes(curTahun)) document.getElementById('filter-tahun').value = curTahun;
 
-      // 2. Fasa
       const uniqueFasa = [...new Set(appData.map(d => d.fasa))].sort();
       let hFasa = '<option value="Semua">Semua Fasa</option>';
       uniqueFasa.forEach(f => hFasa += `<option value="${f}">${f}</option>`);
       document.getElementById('filter-fasa').innerHTML = hFasa;
       if(uniqueFasa.includes(curFasa)) document.getElementById('filter-fasa').value = curFasa;
 
-      // 3. Kelas
       const uniqueKelas = [...new Set(appData.map(d => d.kelas))].sort();
       let hKelas = '<option value="Semua">Semua Kelas</option>';
       uniqueKelas.forEach(k => hKelas += `<option value="${k}">${k}</option>`);
       document.getElementById('filter-kelas').innerHTML = hKelas;
       if(uniqueKelas.includes(curKelas)) document.getElementById('filter-kelas').value = curKelas;
 
-      // 4. Subjek
       let hSubjek = '<option value="Semua">Semua Subjek</option>';
       subjects.forEach(s => hSubjek += `<option value="${s}">${getFullSub(s)}</option>`);
       document.getElementById('filter-subjek').innerHTML = hSubjek;
       document.getElementById('filter-subjek').value = curSubjek; 
 
-      // 5. Admin Delete Dropdown
       const uniqueFiles = [...new Set(appData.map(d => `${d.tahun} ${d.kelas} ${d.fasa}`))].sort();
       let htmlDelete = '<option value="">Pilih Fail Untuk Dipadam</option>';
       uniqueFiles.forEach(f => htmlDelete += `<option value="${f}">${f}</option>`);
       document.getElementById('select-delete-file').innerHTML = htmlDelete;
 
-      // 6. Murid Profil Dropdown
       const fT = document.getElementById('filter-tahun').value;
       const fK = document.getElementById('filter-kelas').value;
-      const uniqueMurid = [...new Set(appData.filter(d => (fT === 'Semua' || d.tahun === fT) && (fK === 'Semua' || d.kelas === fK)).map(d => d.nama))].sort();
+      const uniqueMurid = [...new Set(appData.filter(d => (fT === 'Semua' || String(d.tahun) === fT) && (fK === 'Semua' || d.kelas === fK)).map(d => d.nama))].sort();
       let htmlMurid = '<option value="">Cari Nama Murid...</option>';
       uniqueMurid.forEach(m => htmlMurid += `<option value="${m}">${m}</option>`);
       document.getElementById('select-murid').innerHTML = htmlMurid;
@@ -482,8 +490,9 @@
       const fKelas = document.getElementById('filter-kelas').value;
       const fSubjek = document.getElementById('filter-subjek').value;
       
+      // Filter dengan memastikan d.tahun dibaca sebagai String
       let filteredData = appData.filter(d => 
-        (fTahun === 'Semua' || d.tahun === fTahun) && 
+        (fTahun === 'Semua' || String(d.tahun) === fTahun) && 
         (fFasa === 'Semua' || d.fasa === fFasa) && 
         (fKelas === 'Semua' || d.kelas === fKelas)
       );
@@ -500,7 +509,7 @@
       }
 
       let totalSubjekDiambil = 0, countLulus = 0, countCemerlang = 0;
-      let statsSubjek = {}, statsKelas = {}, senaraiIntervensi = [], totalTPCount = {1:0, 2:0, 3:0, 4:0, 5:0, 6:0}; 
+      let statsSubjek = {}, statsKelas = {}, senaraiIntervensiTemp = [], totalTPCount = {1:0, 2:0, 3:0, 4:0, 5:0, 6:0}; 
       let tpPurataMuridCount = {1:0, 2:0, 3:0, 4:0, 5:0, 6:0};
       let bmtmBySubject = {};
       subjects.forEach(s => bmtmBySubject[s] = []);
@@ -512,7 +521,6 @@
         if (!statsKelas[classKey]) statsKelas[classKey] = { sum: 0, count: 0, tpDist: {1:0, 3:0, 5:0} };
         
         for (let subjek in student.scores) {
-          // TAPISAN SUBJEK DINAMIK
           if (fSubjek !== 'Semua' && subjek !== fSubjek) continue;
 
           let score = student.scores[subjek];
@@ -521,7 +529,7 @@
           if (score >= 3) countLulus++;
           if (score >= 5) countCemerlang++;
           if (score <= 2) {
-             senaraiIntervensi.push({ nama: student.nama, kelas: student.kelas, subjek: subjek, tp: score });
+             senaraiIntervensiTemp.push({ nama: student.nama, kelas: student.kelas, subjek: subjek, tp: score });
              if (!bmtmBySubject[subjek]) bmtmBySubject[subjek] = [];
              bmtmBySubject[subjek].push(`${student.nama} (${student.kelas})`);
           }
@@ -547,7 +555,7 @@
       document.getElementById('dash-total').textContent = filteredData.length;
       document.getElementById('dash-lulus').textContent = totalSubjekDiambil > 0 ? ((countLulus / totalSubjekDiambil) * 100).toFixed(1) + '%' : '0%';
       document.getElementById('dash-cemerlang').textContent = totalSubjekDiambil > 0 ? ((countCemerlang / totalSubjekDiambil) * 100).toFixed(1) + '%' : '0%';
-      let uniqueIntervensiCount = [...new Set(senaraiIntervensi.map(x => x.nama))].length;
+      let uniqueIntervensiCount = [...new Set(senaraiIntervensiTemp.map(x => x.nama))].length;
       document.getElementById('dash-inter').textContent = uniqueIntervensiCount;
 
       let sortedSubjek = Object.keys(statsSubjek).map(n => ({ nama: n, avg: statsSubjek[n].sum / statsSubjek[n].count })).sort((a,b) => a.avg - b.avg);
@@ -563,15 +571,17 @@
         htmlKelas += `<div class="flex justify-between items-center p-4 bg-emerald-50 rounded-2xl border border-emerald-100"><span class="font-bold text-xs text-emerald-900 uppercase">${i+1}. ${cls.nama}</span><span class="font-black text-emerald-600 bg-white px-3 py-1 rounded-full text-[10px] shadow-sm">${cls.avg.toFixed(2)}</span></div>`;
       });
       document.getElementById('rank-kelas').innerHTML = htmlKelas;
-      document.getElementById('p1-desc').textContent = `Fokus: ${sortedSubjek[0] ? getFullSub(sortedSubjek[0].nama) : 'Tiada'}`;
+      document.getElementById('p1-desc').textContent = `Fokus Panitia: ${sortedSubjek[0] ? getFullSub(sortedSubjek[0].nama) : 'Tiada'}`;
+      document.getElementById('p2-desc').textContent = `Sasaran Pemulihan: ${uniqueIntervensiCount} Murid Terlibat`;
 
-      document.getElementById('inter-badge').textContent = senaraiIntervensi.length + " Keseluruhan Kes";
-      let htmlIntervensi = '';
-      senaraiIntervensi.sort((a,b) => a.tp - b.tp).forEach((murid, i) => {
-        let rowClass = murid.tp === 1 ? 'bg-red-100 text-red-900 border-b border-red-200' : 'bg-white text-slate-700 border-b border-slate-100';
-        htmlIntervensi += `<tr class="${rowClass} transition-colors"><td class="px-8 py-5 font-bold opacity-60">${i+1}</td><td class="px-8 py-5 uppercase font-black">${murid.nama}</td><td class="px-8 py-5 font-bold opacity-80">${murid.kelas}</td><td class="px-8 py-5 font-black opacity-60">${getFullSub(murid.subjek)}</td><td class="px-8 py-5 text-center"><span class="tp-badge tp${murid.tp} shadow-md">TP${murid.tp}</span></td></tr>`;
-      });
-      document.getElementById('table-inter').innerHTML = htmlIntervensi || `<tr><td colspan='5' class='text-center py-12 text-slate-400 font-bold uppercase tracking-widest'>Tiada Kes Intervensi Direkodkan</td></tr>`;
+      // Smart Table Intervensi
+      senaraiIntervensiGlobal = senaraiIntervensiTemp;
+      document.getElementById('inter-badge').textContent = senaraiIntervensiGlobal.length + " Keseluruhan Kes";
+      document.getElementById('search-intervensi').value = ""; 
+      senaraiIntervensiGlobal.sort((a, b) => a.tp - b.tp);
+      currentSortCol = 'tp';
+      currentSortDir = 'asc';
+      renderIntervensiTable(senaraiIntervensiGlobal);
 
       let totalMurid = filteredData.length;
       let htmlTpTable = `<thead class="bg-slate-50 border-b border-slate-200"><tr><th class="py-3 px-4">TAHAP (TP)</th><th class="py-3 px-4 text-center">BIL. MURID</th><th class="py-3 px-4 text-center">PERATUS (%)</th></tr></thead><tbody class="divide-y divide-slate-100">`;
@@ -608,6 +618,48 @@
       document.getElementById('bmtm-student-list').innerHTML = htmlBmtmList;
 
       renderChartsVisual(totalTPCount, statsSubjek, statsKelas);
+    }
+
+    function renderIntervensiTable(dataToRender) {
+      let htmlIntervensi = '';
+      dataToRender.forEach((murid, i) => {
+        let rowClass = murid.tp === 1 ? 'bg-red-100 text-red-900 border-b border-red-200' : 'bg-white text-slate-700 hover:bg-slate-50 border-b border-slate-100 transition-colors';
+        htmlIntervensi += `<tr class="${rowClass}"><td class="px-8 py-5 font-bold opacity-60">${i+1}</td><td class="px-8 py-5 uppercase font-black">${murid.nama}</td><td class="px-8 py-5 font-bold opacity-80">${murid.kelas}</td><td class="px-8 py-5 font-black opacity-60">${getFullSub(murid.subjek)}</td><td class="px-8 py-5 text-center"><span class="tp-badge tp${murid.tp} shadow-md">TP${murid.tp}</span></td></tr>`;
+      });
+      document.getElementById('table-inter').innerHTML = htmlIntervensi || `<tr><td colspan='5' class='text-center py-12 text-slate-400 font-bold uppercase tracking-widest'>Tiada Kes Intervensi Direkodkan</td></tr>`;
+    }
+
+    function searchIntervensi() {
+      const query = document.getElementById('search-intervensi').value.toLowerCase();
+      const filtered = senaraiIntervensiGlobal.filter(m => 
+        m.nama.toLowerCase().includes(query) || 
+        m.kelas.toLowerCase().includes(query) || 
+        getFullSub(m.subjek).toLowerCase().includes(query)
+      );
+      renderIntervensiTable(filtered);
+    }
+
+    function sortIntervensi(col) {
+      if (currentSortCol === col) {
+        currentSortDir = currentSortDir === 'asc' ? 'desc' : 'asc';
+      } else {
+        currentSortCol = col;
+        currentSortDir = 'asc';
+      }
+      senaraiIntervensiGlobal.sort((a, b) => {
+        let valA = a[col];
+        let valB = b[col];
+        if (col === 'subjek') {
+            valA = getFullSub(valA);
+            valB = getFullSub(valB);
+        }
+        if (typeof valA === 'string') valA = valA.toLowerCase();
+        if (typeof valB === 'string') valB = valB.toLowerCase();
+        if (valA < valB) return currentSortDir === 'asc' ? -1 : 1;
+        if (valA > valB) return currentSortDir === 'asc' ? 1 : -1;
+        return 0;
+      });
+      searchIntervensi();
     }
 
     function updateIndividual() {
