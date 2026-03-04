@@ -7,7 +7,10 @@
   
   <script src="https://cdn.tailwindcss.com/3.4.17"></script>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
+  
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 
   <style>
@@ -38,7 +41,7 @@
     <div id="emergency-btns" class="hidden mt-8 space-y-3 w-full max-w-sm px-6 text-center">
       <div class="bg-red-500/10 border border-red-500/30 p-4 rounded-2xl mb-4">
         <p class="text-xs font-black text-red-400 uppercase mb-1">Sambungan Gagal / Masa Tamat</p>
-        <p class="text-[10px] text-slate-300">Sila semak URL Apps Script atau muat naik fail di tab Admin.</p>
+        <p class="text-[10px] text-slate-300">Sila semak URL Apps Script atau Deployment (Mesti 'Anyone').</p>
       </div>
       <button onclick="batalLoadingKeAdmin()" class="w-full py-4 bg-emerald-600 hover:bg-emerald-700 rounded-xl font-black text-xs uppercase shadow-lg transition-all">⚙️ Buka Tab Admin</button>
       <button onclick="location.reload(true)" class="w-full py-4 bg-slate-800 hover:bg-slate-700 rounded-xl font-black text-xs uppercase border border-slate-600 transition-all">🔄 Muat Semula Page</button>
@@ -239,9 +242,16 @@
         <div class="overflow-x-auto">
           <table class="w-full text-left text-xs font-bold border-collapse">
             <thead class="bg-white text-slate-400 uppercase text-[10px] tracking-widest border-b-2 border-slate-100">
-              <tr><th class="px-8 py-5">Bil</th><th class="px-8 py-5">Nama Murid</th><th class="px-8 py-5">Tahun / Kelas</th><th class="px-8 py-5">Subjek</th><th class="px-8 py-5 text-center">Tahap</th></tr>
+              <tr>
+                <th class="px-8 py-5">Bil</th>
+                <th class="px-8 py-5">Nama Murid</th>
+                <th class="px-8 py-5">Tahun / Kelas</th>
+                <th class="px-8 py-5">Subjek</th>
+                <th class="px-8 py-5 text-center">Tahap</th>
+              </tr>
             </thead>
-            <tbody id="table-inter" class="divide-y divide-slate-100 text-slate-700"></tbody>
+            <tbody id="table-inter" class="divide-y divide-slate-100 text-slate-700">
+            </tbody>
           </table>
         </div>
       </div>
@@ -275,11 +285,13 @@
   </main>
 
   <footer class="py-8 bg-slate-100 border-t border-slate-200 text-center text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] w-full mt-auto">
-    <p>© 2026 Sistem Analisis PBD Bersepadu | SK Paya Resak | Hak Cipta Terpelihara</p>
+    <p>© 2026 Sistem Analisis PBD Bersepadu | SK Paya Resak</p>
   </footer>
 
   <script>
-    // TIMER PAKSAAN: Jika browser "sangkut" lebih 15 saat, paksa keluar butang.
+    // Mendaftar plugin ChartDataLabels untuk peratusan Carta Pai
+    Chart.register(ChartDataLabels);
+
     let systemReady = false;
     setTimeout(function() {
       if (!systemReady) {
@@ -293,13 +305,35 @@
       }
     }, 15000);
 
-    // ==========================================
-    // URL API BAHARU CIKGU DI SINI
-    // ==========================================
     const GAS_URL = "https://script.google.com/macros/s/AKfycbyph_fEqUwVKlkKwIOG9rUbvR7KUb-iXOjhKektC0KoreDmC8iJxFyylWj3Z5a-7zSozQ/exec";
     
     let appData = [];
     const subjects = ['BM', 'BI', 'MM', 'SAINS', 'SEJ', 'PAI', 'PM', 'BC', 'BT', 'BIN', 'RBT', 'AR', 'PJPK', 'PMZ', 'PSV'];
+    
+    // Kamus Nama Penuh Subjek
+    const subjectMap = {
+      'BM': 'Bahasa Melayu',
+      'BI': 'Bahasa Inggeris',
+      'MM': 'Matematik',
+      'SAINS': 'Sains',
+      'SEJ': 'Sejarah',
+      'PAI': 'Pendidikan Islam',
+      'PM': 'Pendidikan Moral',
+      'BC': 'Bahasa Cina',
+      'BT': 'Bahasa Tamil',
+      'BIN': 'Bahasa Iban',
+      'RBT': 'Reka Bentuk & Teknologi',
+      'AR': 'Bahasa Arab',
+      'PJPK': 'PJPK',
+      'PMZ': 'Pendidikan Muzik',
+      'PSV': 'Pendidikan Seni Visual'
+    };
+
+    // Fungsi kecil tukar kod kepada nama penuh
+    function getFullSub(code) {
+      return subjectMap[code] || code;
+    }
+
     let charts = { dashPie: null, trend: null, bar: null };
 
     window.onload = loadFromCloud;
@@ -327,11 +361,8 @@
       try {
         let res = await fetch(GAS_URL);
         let data2D = await res.json();
-        
         systemReady = true; 
-        
         if (data2D.status === "error") throw new Error(data2D.message);
-        
         parseData(data2D);
         switchTab('dashboard');
       } catch (err) {
@@ -502,7 +533,7 @@
       let sortedSubjek = Object.keys(statsSubjek).map(n => ({ nama: n, avg: statsSubjek[n].sum / statsSubjek[n].count })).sort((a,b) => a.avg - b.avg);
       let htmlSubKritikal = '';
       sortedSubjek.slice(0, 4).forEach((sub, i) => {
-        htmlSubKritikal += `<div class="flex justify-between items-center p-4 bg-red-50 rounded-2xl border border-red-100"><span class="font-bold text-xs text-red-900 uppercase">${i+1}. ${sub.nama}</span><span class="font-black text-red-600 bg-white px-3 py-1 rounded-full text-[10px] shadow-sm">${sub.avg.toFixed(2)}</span></div>`;
+        htmlSubKritikal += `<div class="flex justify-between items-center p-4 bg-red-50 rounded-2xl border border-red-100"><span class="font-bold text-xs text-red-900 uppercase">${i+1}. ${getFullSub(sub.nama)}</span><span class="font-black text-red-600 bg-white px-3 py-1 rounded-full text-[10px] shadow-sm">${sub.avg.toFixed(2)}</span></div>`;
       });
       document.getElementById('dash-rank-subjek').innerHTML = htmlSubKritikal || '<p class="text-xs text-slate-400">Tiada rekod.</p>';
 
@@ -512,13 +543,13 @@
         htmlKelas += `<div class="flex justify-between items-center p-4 bg-emerald-50 rounded-2xl border border-emerald-100"><span class="font-bold text-xs text-emerald-900 uppercase">${i+1}. ${cls.nama}</span><span class="font-black text-emerald-600 bg-white px-3 py-1 rounded-full text-[10px] shadow-sm">${cls.avg.toFixed(2)}</span></div>`;
       });
       document.getElementById('rank-kelas').innerHTML = htmlKelas;
-      document.getElementById('p1-desc').textContent = `Fokus Panitia: ${sortedSubjek[0] ? sortedSubjek[0].nama : 'Tiada'}`;
+      document.getElementById('p1-desc').textContent = `Fokus Panitia: ${sortedSubjek[0] ? getFullSub(sortedSubjek[0].nama) : 'Tiada'}`;
 
       document.getElementById('inter-badge').textContent = senaraiIntervensi.length + " Keseluruhan Kes";
       let htmlIntervensi = '';
       senaraiIntervensi.sort((a,b) => a.tp - b.tp).forEach((murid, i) => {
         let rowClass = murid.tp === 1 ? 'bg-red-100 text-red-900 border-b border-red-200' : 'bg-white text-slate-700 border-b border-slate-100';
-        htmlIntervensi += `<tr class="${rowClass} transition-colors"><td class="px-8 py-5 font-bold opacity-60">${i+1}</td><td class="px-8 py-5 uppercase font-black">${murid.nama}</td><td class="px-8 py-5 font-bold opacity-80">${murid.kelas}</td><td class="px-8 py-5 font-black opacity-60">${murid.subjek}</td><td class="px-8 py-5 text-center"><span class="tp-badge tp${murid.tp} shadow-md">TP${murid.tp}</span></td></tr>`;
+        htmlIntervensi += `<tr class="${rowClass} transition-colors"><td class="px-8 py-5 font-bold opacity-60">${i+1}</td><td class="px-8 py-5 uppercase font-black">${murid.nama}</td><td class="px-8 py-5 font-bold opacity-80">${murid.kelas}</td><td class="px-8 py-5 font-black opacity-60">${getFullSub(murid.subjek)}</td><td class="px-8 py-5 text-center"><span class="tp-badge tp${murid.tp} shadow-md">TP${murid.tp}</span></td></tr>`;
       });
       document.getElementById('table-inter').innerHTML = htmlIntervensi || `<tr><td colspan='5' class='text-center py-12 text-slate-400 font-bold uppercase tracking-widest'>Tiada Kes Intervensi Direkodkan</td></tr>`;
 
@@ -538,7 +569,7 @@
       let htmlTopBmtm = '';
       if (bmtmSubjectsArr.length > 0) {
           bmtmSubjectsArr.slice(0, 5).forEach((item, index) => {
-              htmlTopBmtm += `<div class="flex justify-between items-center bg-red-50 p-4 rounded-2xl mb-3 border border-red-100 shadow-sm"><span class="font-black text-red-900 text-[10px] uppercase">${index+1}. ${item.subjek}</span><span class="bg-red-500 text-white px-3 py-1 rounded-full text-[9px] font-bold shadow-sm">${item.murid.length} ORANG</span></div>`;
+              htmlTopBmtm += `<div class="flex justify-between items-center bg-red-50 p-4 rounded-2xl mb-3 border border-red-100 shadow-sm"><span class="font-black text-red-900 text-[10px] uppercase">${index+1}. ${getFullSub(item.subjek)}</span><span class="bg-red-500 text-white px-3 py-1 rounded-full text-[9px] font-bold shadow-sm">${item.murid.length} ORANG</span></div>`;
           });
       } else {
           htmlTopBmtm = `<p class="text-xs text-emerald-600 font-bold bg-emerald-50 p-4 rounded-xl text-center border border-emerald-100">Tahniah! Tiada murid BMTM direkodkan.</p>`;
@@ -549,7 +580,7 @@
       if (bmtmSubjectsArr.length > 0) {
           bmtmSubjectsArr.forEach(item => {
               let namesHtml = item.murid.map(name => `<li class="text-[10px] text-slate-600 mb-1.5 border-b border-slate-50 pb-1">${name}</li>`).join('');
-              htmlBmtmList += `<div class="bg-white border border-slate-200 rounded-3xl p-5 shadow-sm hover:shadow-md transition-shadow"><div class="flex justify-between items-center mb-4 border-b border-slate-100 pb-3"><span class="font-black text-slate-800 text-xs uppercase">${item.subjek}</span><span class="text-[9px] font-bold text-red-500 bg-red-50 border border-red-100 px-3 py-1 rounded-full">${item.murid.length} Murid</span></div><ul class="max-h-40 overflow-y-auto pr-2 custom-scrollbar">${namesHtml}</ul></div>`;
+              htmlBmtmList += `<div class="bg-white border border-slate-200 rounded-3xl p-5 shadow-sm hover:shadow-md transition-shadow"><div class="flex justify-between items-center mb-4 border-b border-slate-100 pb-3"><span class="font-black text-slate-800 text-xs uppercase">${getFullSub(item.subjek)}</span><span class="text-[9px] font-bold text-red-500 bg-red-50 border border-red-100 px-3 py-1 rounded-full">${item.murid.length} Murid</span></div><ul class="max-h-40 overflow-y-auto pr-2 custom-scrollbar">${namesHtml}</ul></div>`;
           });
       } else {
            htmlBmtmList = `<div class="col-span-full text-center text-xs text-slate-400 font-bold p-6">Tiada data BMTM.</div>`;
@@ -577,8 +608,8 @@
         if (val >= 5) strongSubs.push(subjek); if (val <= 2) weakSubs.push(subjek); 
       }
       document.getElementById('ind-avg').textContent = count > 0 ? (sum/count).toFixed(2) : '0.00';
-      document.getElementById('ind-weak').textContent = weakSubs.length > 0 ? weakSubs.join(', ') : 'Tiada';
-      document.getElementById('ind-strong').textContent = strongSubs.length > 0 ? strongSubs.join(', ') : 'Tiada';
+      document.getElementById('ind-weak').textContent = weakSubs.length > 0 ? weakSubs.map(getFullSub).join(', ') : 'Tiada';
+      document.getElementById('ind-strong').textContent = strongSubs.length > 0 ? strongSubs.map(getFullSub).join(', ') : 'Tiada';
     }
 
     function renderChartsVisual(tpCount, statsSubjek, statsKelas) {
@@ -586,20 +617,67 @@
       Chart.defaults.color = '#94a3b8';
 
       if (charts.dashPie) charts.dashPie.destroy();
-      charts.dashPie = new Chart(document.getElementById('chart-dash-pie'), { type: 'doughnut', data: { labels: ['TP1', 'TP2', 'TP3', 'TP4', 'TP5', 'TP6'], datasets: [{ data: [1,2,3,4,5,6].map(i => tpCount[i]), backgroundColor: ['#ef4444','#f97316','#eab308','#3b82f6','#10b981','#059669'], borderWidth: 0 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'right', labels: { boxWidth: 12, font: { weight: 'bold', size: 10 } } } }, cutout: '70%' } });
+      charts.dashPie = new Chart(document.getElementById('chart-dash-pie'), { 
+        type: 'doughnut', 
+        data: { 
+          labels: ['TP1', 'TP2', 'TP3', 'TP4', 'TP5', 'TP6'], 
+          datasets: [{ 
+            data: [1,2,3,4,5,6].map(i => tpCount[i]), 
+            backgroundColor: ['#ef4444','#f97316','#eab308','#3b82f6','#10b981','#059669'], 
+            borderWidth: 0 
+          }] 
+        }, 
+        options: { 
+          responsive: true, maintainAspectRatio: false, cutout: '70%',
+          plugins: { 
+            legend: { position: 'right', labels: { boxWidth: 12, font: { weight: 'bold', size: 10 } } },
+            // Plugin DataLabels untuk Peratus
+            datalabels: {
+              color: '#ffffff',
+              font: { weight: 'bold', size: 10 },
+              formatter: (value, ctx) => {
+                let sum = ctx.chart.data.datasets[0].data.reduce((a, b) => a + b, 0);
+                if(value === 0 || sum === 0) return null; // Sembunyi kalau kosong
+                return (value * 100 / sum).toFixed(1) + "%";
+              }
+            }
+          } 
+        } 
+      });
 
       if (charts.trend) charts.trend.destroy();
       const top4Subjects = Object.keys(statsSubjek).slice(0, 4); 
       const trendColors = ['#3b82f6', '#ef4444', '#10b981', '#f59e0b'];
       let datasetTrend = top4Subjects.map((sub, i) => {
         let fasa1Avg = calculateAverageFasa(sub, 'FASA 1'); let fasa2Avg = calculateAverageFasa(sub, 'FASA 2');
-        return { label: sub, data: [fasa1Avg, fasa2Avg], borderColor: trendColors[i], tension: 0.4, fill: false, borderWidth: 3 };
+        return { label: getFullSub(sub), data: [fasa1Avg, fasa2Avg], borderColor: trendColors[i], tension: 0.4, fill: false, borderWidth: 3 };
       });
-      charts.trend = new Chart(document.getElementById('chart-trend'), { type: 'line', data: { labels: ['FASA 1', 'FASA 2'], datasets: datasetTrend }, options: { responsive: true, maintainAspectRatio: false, scales: { y: { min: 1, max: 6 } } } });
+      charts.trend = new Chart(document.getElementById('chart-trend'), { 
+        type: 'line', 
+        data: { labels: ['FASA 1', 'FASA 2'], datasets: datasetTrend }, 
+        options: { 
+          responsive: true, maintainAspectRatio: false, scales: { y: { min: 1, max: 6 } },
+          plugins: { datalabels: { display: false } } // Tutup label peratusan di sini
+        } 
+      });
 
       if (charts.bar) charts.bar.destroy();
       const namaKelasArray = Object.keys(statsKelas);
-      charts.bar = new Chart(document.getElementById('chart-bar-kelas'), { type: 'bar', data: { labels: namaKelasArray, datasets: [ { label: 'TP1-2', data: namaKelasArray.map(c => statsKelas[c].tpDist[1]), backgroundColor: '#ef4444' }, { label: 'TP3-4', data: namaKelasArray.map(c => statsKelas[c].tpDist[3]), backgroundColor: '#f59e0b' }, { label: 'TP5-6', data: namaKelasArray.map(c => statsKelas[c].tpDist[5]), backgroundColor: '#10b981' } ] }, options: { responsive: true, maintainAspectRatio: false, scales: { x: { stacked: true }, y: { stacked: true } } } });
+      charts.bar = new Chart(document.getElementById('chart-bar-kelas'), { 
+        type: 'bar', 
+        data: { 
+          labels: namaKelasArray, 
+          datasets: [ 
+            { label: 'TP1-2', data: namaKelasArray.map(c => statsKelas[c].tpDist[1]), backgroundColor: '#ef4444' }, 
+            { label: 'TP3-4', data: namaKelasArray.map(c => statsKelas[c].tpDist[3]), backgroundColor: '#f59e0b' }, 
+            { label: 'TP5-6', data: namaKelasArray.map(c => statsKelas[c].tpDist[5]), backgroundColor: '#10b981' } 
+          ] 
+        }, 
+        options: { 
+          responsive: true, maintainAspectRatio: false, scales: { x: { stacked: true }, y: { stacked: true } },
+          plugins: { datalabels: { display: false } } // Tutup label peratusan di sini
+        } 
+      });
     }
 
     function calculateAverageFasa(subjek, targetFasa) {
@@ -621,14 +699,12 @@
       
       for (let file of failDipilih) {
         let namaFailAsal = file.name.replace(/\.[^/.]+$/, "").trim().toUpperCase(); 
-        let bahagianFail = namaFailAsal.split(" ");
-        let extractedTahun = bahagianFail[0]; 
         
+        let extractedTahun = namaFailAsal.match(/^\d{4}/) ? namaFailAsal.match(/^\d{4}/)[0] : new Date().getFullYear().toString(); 
         let matchFasa = namaFailAsal.match(/FASA\s*(\d)/);
         let extractedFasa = matchFasa ? "FASA " + matchFasa[1] : "FASA 1";
         
-        let regexFasa = /FASA\s*\d/g;
-        let extractedKelas = namaFailAsal.replace(extractedTahun, "").replace(regexFasa, "").trim();
+        let extractedKelas = namaFailAsal.replace(extractedTahun, "").replace(/FASA\s*\d/g, "").trim();
 
         let jsonDataExcel = await new Promise(resolve => {
           let reader = new FileReader();
