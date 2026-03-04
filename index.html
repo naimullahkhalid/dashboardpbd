@@ -12,345 +12,241 @@
   <style>
     * { font-family: 'Poppins', sans-serif; }
     .card-shadow { box-shadow: 0 4px 20px rgba(0, 51, 102, 0.08); }
-    .card-hover { transition: all 0.3s ease; }
-    .card-hover:hover { transform: translateY(-4px); box-shadow: 0 8px 30px rgba(0, 51, 102, 0.12); }
     .gradient-header { background: linear-gradient(135deg, #0a1628 0%, #1e3a5f 50%, #0d2137 100%); }
-    .gradient-accent { background: linear-gradient(135deg, #10b981 0%, #059669 100%); }
-    .tp-badge { display: inline-block; padding: 0.25rem 0.75rem; border-radius: 9999px; font-weight: bold; font-size: 0.75rem; color: white; }
-    .tp1 { background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%); }
-    .tp2 { background: linear-gradient(135deg, #f97316 0%, #ea580c 100%); }
-    .tp3 { background: linear-gradient(135deg, #eab308 0%, #ca8a04 100%); }
-    .tp4 { background: linear-gradient(135deg, #84cc16 0%, #65a30d 100%); }
-    .tp5 { background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%); }
-    .tp6 { background: linear-gradient(135deg, #10b981 0%, #059669 100%); }
-    .scrollbar-thin::-webkit-scrollbar { width: 6px; height: 6px; }
-    .scrollbar-thin::-webkit-scrollbar-track { background: #f1f5f9; border-radius: 3px; }
-    .scrollbar-thin::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
-    /* Animasi Loading Spinner */
+    .tp-badge { display: inline-block; padding: 0.2rem 0.6rem; border-radius: 9999px; font-weight: bold; font-size: 0.7rem; color: white; text-align: center; min-width: 45px; }
+    .tp1 { background: #dc2626; } .tp2 { background: #f97316; } .tp3 { background: #eab308; }
+    .tp4 { background: #84cc16; } .tp5 { background: #22c55e; } .tp6 { background: #10b981; }
     .loader { border: 4px solid rgba(255, 255, 255, 0.3); border-radius: 50%; border-top: 4px solid #10b981; width: 50px; height: 50px; animation: spin 1s linear infinite; }
     @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    th.sortable { cursor: pointer; position: relative; }
+    th.sortable:hover { background-color: #f1f5f9; }
+    th.sortable::after { content: '↕'; position: absolute; right: 8px; opacity: 0.3; }
   </style>
 </head>
-<body class="h-full bg-slate-50 overflow-auto scrollbar-thin flex flex-col">
+<body class="h-full bg-slate-50 overflow-auto flex flex-col">
   
-  <div id="loading-overlay" class="fixed inset-0 bg-slate-900/90 z-[100] flex flex-col items-center justify-center text-white transition-opacity duration-300">
+  <div id="loading-overlay" class="fixed inset-0 bg-slate-900/90 z-[100] flex flex-col items-center justify-center text-white transition-opacity duration-300 hidden">
     <div class="loader mb-4"></div>
-    <h2 id="loading-text" class="text-xl font-bold tracking-wider">Menyambung ke Pangkalan Data...</h2>
-    <p class="text-sm text-emerald-400 mt-2">Sila tunggu sebentar</p>
+    <h2 id="loading-text" class="text-xl font-bold tracking-wider">Memproses...</h2>
   </div>
 
   <header class="text-white sticky top-0 z-50 gradient-header shadow-lg">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-      <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div class="flex items-center gap-4">
-          <div class="w-12 h-12 bg-white/10 rounded-xl flex items-center justify-center border border-white/20">
-            <svg class="w-7 h-7 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
-            </svg>
-          </div>
-          <div>
-            <h1 class="text-xl font-bold tracking-tight">Sistem Analisis PBD Pintar</h1>
-            <p class="text-emerald-300 text-xs flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-green-400 animate-pulse"></span> Bersambung dengan Cloud (Live)</p>
-          </div>
+    <div class="max-w-7xl mx-auto px-4 py-4 flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div class="flex items-center gap-4">
+        <div class="w-12 h-12 bg-white/10 rounded-xl flex items-center justify-center border border-white/20">
+          <svg class="w-7 h-7 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" /></svg>
         </div>
-        <div class="flex flex-wrap gap-2">
-          <button id="nav-dashboard" onclick="switchTab('dashboard')" class="px-4 py-2 rounded-lg bg-emerald-500/30 border border-emerald-400/50 text-white text-sm font-medium transition-all">📊 Dashboard Ringkas</button> 
-          <button id="nav-laporan" onclick="switchTab('laporan')" class="px-4 py-2 rounded-lg border border-white/20 text-white/70 text-sm font-medium hover:bg-white/10 transition-all">📈 Laporan Lengkap</button>
-          <button id="nav-admin" onclick="switchTab('admin')" class="px-4 py-2 rounded-lg border border-white/20 text-white/70 text-sm font-medium hover:bg-white/10 transition-all">⚙️ Pengurusan Data</button>
+        <div>
+          <h1 class="text-xl font-bold tracking-tight">Sistem Analisis PBD</h1>
+          <p class="text-emerald-300 text-xs uppercase font-bold tracking-widest">Sekolah Kebangsaan</p>
         </div>
+      </div>
+      <div class="flex flex-wrap gap-2">
+        <button id="nav-dashboard" onclick="switchTab('dashboard')" class="px-4 py-2 rounded-lg bg-emerald-500/30 border border-emerald-400/50 text-white text-xs font-bold transition-all uppercase">📊 Dashboard</button> 
+        <button id="nav-laporan" onclick="switchTab('laporan')" class="px-4 py-2 rounded-lg border border-white/20 text-white/70 text-xs font-bold hover:bg-white/10 transition-all uppercase">📈 Laporan Lengkap</button>
+        <button id="nav-admin" onclick="switchTab('admin')" class="px-4 py-2 rounded-lg border border-white/20 text-white/70 text-xs font-bold hover:bg-white/10 transition-all uppercase">⚙️ Admin</button>
       </div>
     </div>
   </header>
 
-  <div id="global-filters" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 w-full hidden">
+  <div id="global-filters" class="max-w-7xl mx-auto px-4 pt-6 w-full hidden">
     <div class="bg-white p-4 rounded-xl card-shadow flex flex-wrap gap-4 items-end border border-slate-200">
-      <div>
-        <label class="block text-xs font-semibold text-slate-500 mb-1">Tapis Fasa</label>
-        <select id="filter-fasa" onchange="processAllViews()" class="bg-slate-50 border border-slate-300 text-slate-800 text-sm rounded-lg focus:ring-emerald-500 focus:border-emerald-500 block w-full p-2.5">
+      <div class="w-full md:w-auto">
+        <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Fasa</label>
+        <select id="filter-fasa" onchange="processAllViews()" class="bg-slate-50 border border-slate-200 text-sm rounded-lg p-2 w-full md:w-40 font-semibold text-slate-700">
           <option value="Semua">Semua Fasa</option>
           <option value="Fasa 1">Fasa 1</option>
           <option value="Fasa 2">Fasa 2</option>
         </select>
       </div>
-      <div>
-        <label class="block text-xs font-semibold text-slate-500 mb-1">Tapis Kelas</label>
-        <select id="filter-kelas" onchange="processAllViews()" class="bg-slate-50 border border-slate-300 text-slate-800 text-sm rounded-lg focus:ring-emerald-500 focus:border-emerald-500 block w-full p-2.5">
+      <div class="w-full md:w-auto">
+        <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Tahun / Kelas</label>
+        <select id="filter-kelas" onchange="processAllViews()" class="bg-slate-50 border border-slate-200 text-sm rounded-lg p-2 w-full md:w-56 font-semibold text-slate-700">
           <option value="Semua">Semua Kelas</option>
         </select>
       </div>
-      <div class="ml-auto text-right">
-        <p class="text-xs text-slate-500">Jumlah Rekod (Ditapis):</p>
-        <p id="stat-total-records" class="text-xl font-bold text-emerald-600">0 Murid</p>
+      <div class="ml-auto flex items-center gap-3">
+        <div class="text-right">
+          <p class="text-[10px] text-slate-400 font-bold uppercase">Rekod Aktif</p>
+          <p id="stat-total-records" class="text-xl font-black text-emerald-600">0</p>
+        </div>
       </div>
     </div>
   </div>
 
-  <main id="dashboard-view" class="flex-grow max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 w-full hidden">
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-      <div class="bg-white rounded-2xl p-5 card-shadow border border-slate-100">
-        <p class="text-sm font-medium text-slate-500">Kadar Menguasai (TP3-TP6)</p>
-        <h3 id="dash-lulus" class="text-3xl font-bold text-emerald-500 mt-2">0%</h3>
+  <main id="dashboard-view" class="flex-grow max-w-7xl mx-auto px-4 py-6 w-full hidden">
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+      <div class="bg-white rounded-2xl p-5 card-shadow border-t-4 border-emerald-500">
+        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-tighter">Lulus (TP3-TP6)</p>
+        <h3 id="dash-lulus" class="text-3xl font-black text-emerald-500 mt-1">0%</h3>
       </div>
-      <div class="bg-white rounded-2xl p-5 card-shadow border border-slate-100">
-        <p class="text-sm font-medium text-slate-500">Kadar Cemerlang (TP5-TP6)</p>
-        <h3 id="dash-cemerlang" class="text-3xl font-bold text-blue-500 mt-2">0%</h3>
+      <div class="bg-white rounded-2xl p-5 card-shadow border-t-4 border-blue-500">
+        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-tighter">Cemerlang (TP5-TP6)</p>
+        <h3 id="dash-cemerlang" class="text-3xl font-black text-blue-500 mt-1">0%</h3>
       </div>
-      <div class="bg-white rounded-2xl p-5 card-shadow border border-red-100">
-        <p class="text-sm font-medium text-red-500">Jumlah Intervensi (Subjek)</p>
-        <h3 id="dash-gagal" class="text-3xl font-bold text-red-500 mt-2">0</h3>
+      <div class="bg-white rounded-2xl p-5 card-shadow border-t-4 border-red-500">
+        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-tighter">Intervensi (Subjek)</p>
+        <h3 id="dash-gagal" class="text-3xl font-black text-red-500 mt-1">0</h3>
       </div>
-      <div class="bg-white rounded-2xl p-5 card-shadow border border-slate-100">
-        <p class="text-sm font-medium text-slate-500">Purata Keseluruhan (GPS)</p>
-        <h3 id="dash-purata" class="text-3xl font-bold text-slate-700 mt-2">0.00</h3>
+      <div class="bg-white rounded-2xl p-5 card-shadow border-t-4 border-slate-700">
+        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-tighter">Purata TP (GPS)</p>
+        <h3 id="dash-purata" class="text-3xl font-black text-slate-700 mt-1">0.00</h3>
       </div>
     </div>
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-      <div class="bg-white p-5 rounded-2xl card-shadow border border-slate-100">
-        <h3 class="text-sm font-bold text-slate-700 mb-4">Purata Tahap Penguasaan Mengikut Subjek</h3>
-        <div class="h-64 relative"><canvas id="chart-dash-subject"></canvas></div>
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 min-h-[400px]">
+      <div class="bg-white p-6 rounded-2xl card-shadow border border-slate-100 flex flex-col">
+        <h3 class="text-xs font-black text-slate-700 mb-6 uppercase">Prestasi Mengikut Subjek</h3>
+        <div class="flex-grow relative"><canvas id="chart-dash-subject"></canvas></div>
       </div>
-      <div class="bg-white p-5 rounded-2xl card-shadow border border-slate-100">
-        <h3 class="text-sm font-bold text-slate-700 mb-4">Agihan TP Keseluruhan</h3>
-        <div class="h-64 relative"><canvas id="chart-dash-pie"></canvas></div>
+      <div class="bg-white p-6 rounded-2xl card-shadow border border-slate-100 flex flex-col">
+        <h3 class="text-xs font-black text-slate-700 mb-6 uppercase">Agihan Tahap Penguasaan</h3>
+        <div class="flex-grow relative"><canvas id="chart-dash-pie"></canvas></div>
       </div>
     </div>
   </main>
 
-  <main id="laporan-view" class="hidden flex-grow max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 w-full space-y-8">
-    <section>
-      <div class="flex items-center gap-3 mb-4">
-        <div class="w-1 h-8 rounded-full gradient-accent"></div>
-        <h2 class="text-xl font-bold text-slate-800">Ringkasan Eksekutif</h2>
-      </div>
-      <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
-        <div class="bg-white rounded-2xl p-4 card-shadow border border-slate-100 text-center">
-          <p class="text-xs text-slate-500 mb-1">Jumlah Murid Terlibat</p>
-          <p id="lap-total" class="text-2xl font-bold text-slate-800">0</p>
-        </div>
-        <div class="bg-white rounded-2xl p-4 card-shadow border border-slate-100 text-center">
-          <p class="text-xs text-slate-500 mb-1">Peratus Lulus (TP3-TP6)</p>
-          <p id="lap-lulus" class="text-2xl font-bold text-emerald-600">0%</p>
-        </div>
-        <div class="bg-white rounded-2xl p-4 card-shadow border border-slate-100 text-center">
-          <p class="text-xs text-slate-500 mb-1">Peratus Cemerlang (TP5-TP6)</p>
-          <p id="lap-cemerlang" class="text-2xl font-bold text-teal-600">0%</p>
-        </div>
-        <div class="bg-white rounded-2xl p-4 card-shadow border border-red-100 text-center">
-          <p class="text-xs text-slate-500 mb-1">Murid Intervensi (TP1-TP2)</p>
-          <p id="lap-gagal" class="text-2xl font-bold text-red-500">0</p>
-        </div>
-        <div class="bg-white rounded-2xl p-4 card-shadow border border-orange-100 text-center">
-          <p class="text-xs text-slate-500 mb-1">Subjek Paling Lemah</p>
-          <p id="lap-subjek-lemah" class="text-lg font-bold text-orange-600">-</p>
-        </div>
-      </div>
-    </section>
-
-    <section class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-      <div class="bg-white rounded-2xl p-5 card-shadow border border-slate-100">
-        <h3 class="text-sm font-semibold text-slate-700 mb-4">Ranking Kelas (Berdasarkan Purata TP)</h3>
-        <div id="lap-ranking-kelas" class="space-y-3"></div>
-      </div>
-      <div class="bg-white rounded-2xl p-5 card-shadow border border-slate-100">
-        <h3 class="text-sm font-semibold text-slate-700 mb-4">Ranking Subjek (Berdasarkan Purata TP)</h3>
-        <div id="lap-ranking-subjek" class="space-y-3"></div>
-      </div>
-    </section>
-
-    <section>
-      <div class="flex items-center gap-3 mb-4">
-        <div class="w-1 h-8 rounded-full gradient-accent"></div>
-        <h2 class="text-xl font-bold text-slate-800">Analisis Agihan Tahap Penguasaan</h2>
-      </div>
-      <div class="bg-white p-5 rounded-2xl card-shadow border border-slate-100">
-        <div class="h-80 relative"><canvas id="chart-lap-kelas"></canvas></div>
-      </div>
-    </section>
-
-    <section>
-      <div class="flex items-center gap-3 mb-4">
-        <div class="w-1 h-8 rounded-full bg-red-500"></div>
-        <h2 class="text-xl font-bold text-slate-800">Senarai Intervensi (TP1 & TP2)</h2>
-      </div>
-      <div class="bg-white rounded-2xl card-shadow border border-slate-100 overflow-hidden">
-        <div class="overflow-x-auto">
-          <table class="w-full text-left border-collapse">
-            <thead>
-              <tr class="bg-slate-50 text-slate-500 text-xs uppercase">
-                <th class="px-6 py-3 font-semibold">Nama Murid</th>
-                <th class="px-6 py-3 font-semibold">Kelas</th>
-                <th class="px-6 py-3 font-semibold">Subjek</th>
-                <th class="px-6 py-3 font-semibold">Tahap</th>
-              </tr>
-            </thead>
-            <tbody id="lap-table-intervensi" class="text-sm divide-y divide-slate-100"></tbody>
-          </table>
-        </div>
-      </div>
-    </section>
-
-    <section>
-      <div class="bg-gradient-to-br from-slate-800 to-slate-900 rounded-2xl p-6 card-shadow text-white">
-        <h3 class="text-lg font-bold text-emerald-400 mb-3">Ringkasan Analisis Profesional (Janaan Sistem)</h3>
-        <div id="lap-ai-insight" class="space-y-3 text-sm text-slate-200 leading-relaxed"></div>
-      </div>
-    </section>
-  </main>
-
-  <main id="admin-view" class="hidden flex-grow max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full">
+  <main id="laporan-view" class="hidden flex-grow max-w-7xl mx-auto px-4 py-6 w-full space-y-6">
     
-    <div class="bg-emerald-50 border border-emerald-200 rounded-xl p-5 mb-6 flex items-start gap-4">
-      <span class="text-2xl">☁️</span>
-      <div>
-        <h3 class="font-bold text-emerald-800">Sistem Pangkalan Data Cloud (Google Sheets)</h3>
-        <p class="text-sm text-emerald-700 mt-1">Semua data akan disegerakkan terus ke <i>Cloud</i> secara masa nyata (*real-time*). Rakan guru dan pentadbir boleh terus melihat data terbaharu di peranti mereka.</p>
+    <section class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div class="lg:col-span-2 bg-white rounded-2xl p-6 card-shadow border border-slate-100 flex flex-col">
+        <h3 class="text-xs font-black text-slate-700 mb-6 uppercase">Agihan TP Mengikut Kelas</h3>
+        <div class="flex-grow relative min-h-[300px]"><canvas id="chart-lap-kelas"></canvas></div>
       </div>
-    </div>
-
-    <div class="bg-white rounded-2xl card-shadow p-6 md:p-8 border border-slate-200 mb-8">
-      <div class="mb-6 pb-6 border-b border-slate-100 flex justify-between items-center">
-        <div>
-          <h2 class="text-xl font-bold text-slate-800">1. Muat Naik Data Mentah Excel (Pukal)</h2>
-          <p class="text-sm text-slate-500 mt-1">Sistem akan gunakan <strong>Nama Fail</strong> sebagai Nama Kelas (Cth: 5 Topaz.xlsx).</p>
+      <div class="space-y-6">
+        <div class="bg-white rounded-2xl p-6 card-shadow border border-slate-100">
+          <h3 class="text-xs font-black text-slate-700 mb-4 uppercase tracking-widest">🏆 Kelas Terbaik</h3>
+          <div id="lap-ranking-kelas" class="space-y-2"></div>
         </div>
-        <button onclick="clearDataCloud()" class="px-4 py-2 bg-slate-100 text-slate-600 text-xs font-bold rounded-lg hover:bg-slate-200 transition">🗑️ Padam Semua Sistem</button>
-      </div>
-
-      <div class="mb-6">
-        <label class="block text-sm font-semibold text-slate-700 mb-2">Pilih Fasa untuk Semua Fail Ini</label>
-        <select id="input-fasa" class="bg-slate-50 border border-slate-300 text-slate-800 text-sm rounded-lg focus:ring-emerald-500 focus:border-emerald-500 block w-full md:w-1/2 p-3">
-          <option value="Fasa 1">Fasa 1</option>
-          <option value="Fasa 2">Fasa 2</option>
-        </select>
-      </div>
-
-      <div class="mb-6">
-        <label class="block text-sm font-semibold text-slate-700 mb-2">Pilih Fail Excel (Boleh pilih banyak serentak)</label>
-        <div class="border-2 border-dashed border-slate-300 rounded-xl p-8 text-center bg-slate-50 hover:bg-slate-100 transition cursor-pointer" onclick="document.getElementById('file-upload').click()">
-          <input type="file" id="file-upload" accept=".xls,.xlsx,.csv" multiple class="hidden" onchange="handleFileSelect(event)">
-          <button class="inline-flex items-center gap-2 px-6 py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-medium rounded-lg transition shadow-md pointer-events-none">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
-            Klik untuk cari fail Excel
-          </button>
-          <div id="file-name-display" class="text-sm text-slate-500 mt-4 pointer-events-none">Tiada fail dipilih</div>
+        <div class="bg-white rounded-2xl p-6 card-shadow border border-slate-100">
+          <h3 class="text-xs font-black text-slate-700 mb-4 uppercase tracking-widest">📚 Subjek Terbaik</h3>
+          <div id="lap-ranking-subjek" class="space-y-2"></div>
         </div>
       </div>
+    </section>
 
-      <button onclick="processUploadAndSync()" class="w-full py-4 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl shadow-lg transition text-lg flex items-center justify-center gap-2">
-        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" /></svg>
-        Proses & Hantar Ke Cloud
-      </button>
-    </div>
-
-    <div class="bg-red-50 rounded-2xl card-shadow p-6 md:p-8 border border-red-200">
-      <div class="mb-4 border-b border-red-200 pb-4 flex items-center gap-3">
-        <span class="text-2xl">🗑️</span>
+    <section class="bg-white rounded-2xl card-shadow border border-slate-100 overflow-hidden">
+      <div class="p-5 bg-slate-50 border-b flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h2 class="text-lg font-bold text-red-800">2. Padam Data Kelas Tertentu</h2>
-          <p class="text-sm text-red-700 mt-1">Gunakan fungsi ini jika anda tersalah muat naik Fasa atau Kelas.</p>
+          <h3 class="text-sm font-black text-slate-800 uppercase">Senarai Markah Murid Keseluruhan</h3>
+          <p class="text-[10px] text-slate-500 font-bold uppercase">Klik pada tajuk lajur untuk menyusun data</p>
+        </div>
+        <div class="relative w-full md:w-64">
+          <input type="text" id="search-murid" onkeyup="filterTableBySearch()" placeholder="Cari nama murid..." class="w-full pl-10 pr-4 py-2 border rounded-lg text-sm focus:ring-emerald-500">
+          <svg class="w-4 h-4 absolute left-3 top-3 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
         </div>
       </div>
-      
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+      <div class="overflow-x-auto max-h-[500px] scrollbar-thin">
+        <table id="main-data-table" class="w-full text-left border-collapse">
+          <thead class="bg-slate-100 sticky top-0 z-10 shadow-sm">
+            <tr class="text-slate-500 text-[10px] uppercase font-black">
+              <th class="px-6 py-4 sortable" onclick="sortTable(0)">Nama Murid</th>
+              <th class="px-6 py-4 sortable text-center" onclick="sortTable(1)">Kelas / Tahun</th>
+              <th class="px-6 py-4 sortable text-center" onclick="sortTable(2)">Fasa</th>
+              <th class="px-6 py-4 sortable text-center" onclick="sortTable(3)">Subjek</th>
+              <th class="px-6 py-4 sortable text-center" onclick="sortTable(4)">Tahap (TP)</th>
+            </tr>
+          </thead>
+          <tbody id="lap-table-main" class="text-xs divide-y divide-slate-100 font-semibold text-slate-700">
+            </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="bg-slate-900 rounded-2xl p-8 card-shadow text-white border-b-8 border-emerald-500">
+      <h3 class="text-sm font-black text-emerald-400 mb-4 uppercase tracking-widest">Analisis Profesional PBD</h3>
+      <div id="lap-ai-insight" class="text-sm leading-relaxed text-slate-300"></div>
+    </section>
+  </main>
+
+  <main id="admin-view" class="hidden flex-grow max-w-4xl mx-auto px-4 py-8 w-full">
+    <div class="bg-white rounded-2xl card-shadow p-6 border border-slate-200 mb-8">
+      <h2 class="text-xl font-bold text-slate-800 border-b pb-4 mb-6 uppercase">Upload Data Excel (Pukal)</h2>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
         <div>
-          <label class="block text-sm font-semibold text-red-800 mb-2">Pilih Fasa</label>
-          <select id="delete-fasa" class="bg-white border border-red-300 text-slate-800 text-sm rounded-lg focus:ring-red-500 focus:border-red-500 block w-full p-3">
+          <label class="text-xs font-bold text-slate-400 uppercase">1. Pilih Fasa</label>
+          <select id="input-fasa" class="bg-slate-50 border border-slate-200 text-sm rounded-lg p-3 w-full mt-1">
             <option value="Fasa 1">Fasa 1</option>
             <option value="Fasa 2">Fasa 2</option>
           </select>
         </div>
         <div>
-          <label class="block text-sm font-semibold text-red-800 mb-2">Pilih Kelas</label>
-          <select id="delete-kelas" class="bg-white border border-red-300 text-slate-800 text-sm rounded-lg focus:ring-red-500 focus:border-red-500 block w-full p-3">
-            <option value="">Tiada Data</option>
-            </select>
+          <label class="text-xs font-bold text-slate-400 uppercase">2. Pilih Fail-Fail Excel</label>
+          <input type="file" id="file-upload" accept=".xls,.xlsx,.csv" multiple class="hidden" onchange="handleFileSelect(event)">
+          <div onclick="document.getElementById('file-upload').click()" class="border-2 border-dashed border-emerald-200 rounded-lg p-3 mt-1 text-center bg-emerald-50/50 cursor-pointer hover:bg-emerald-50 transition">
+            <p id="file-name-display" class="text-xs font-bold text-emerald-600">Klik untuk pilih fail</p>
+          </div>
         </div>
       </div>
-      <button onclick="deleteSpecificClass()" class="w-full md:w-auto px-8 py-3 bg-red-600 hover:bg-red-700 text-white font-bold rounded-lg shadow-md transition">
-        Padam Kelas Ini Sahaja
-      </button>
+      <button onclick="processUploadAndSync()" class="w-full py-4 bg-emerald-600 hover:bg-emerald-700 text-white font-black rounded-xl shadow-lg transition text-lg">HANTAR DATA KE CLOUD 🚀</button>
+    </div>
+
+    <div class="bg-red-50 rounded-2xl card-shadow p-6 border border-red-100">
+      <h2 class="text-lg font-bold text-red-800 border-b border-red-200 pb-4 mb-4 uppercase">Padam Data</h2>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+        <div><label class="text-[10px] font-bold text-red-400 uppercase">Fasa</label><select id="delete-fasa" class="bg-white border border-red-200 text-sm rounded-lg p-3 w-full mt-1"><option value="Fasa 1">Fasa 1</option><option value="Fasa 2">Fasa 2</option></select></div>
+        <div><label class="text-[10px] font-bold text-red-400 uppercase">Nama Fail (Kelas)</label><select id="delete-kelas" class="bg-white border border-red-200 text-sm rounded-lg p-3 w-full mt-1"></select></div>
+      </div>
+      <div class="flex gap-2">
+        <button onclick="deleteSpecificClass()" class="px-6 py-3 bg-red-600 text-white font-bold rounded-lg text-xs uppercase tracking-wider">🗑️ Padam Kelas</button>
+        <button onclick="clearDataCloud()" class="px-6 py-3 bg-slate-800 text-white font-bold rounded-lg text-xs uppercase tracking-wider">🗑️ Reset Semua</button>
+      </div>
     </div>
   </main>
 
-  <footer class="bg-slate-900 text-slate-400 py-6 text-center text-xs mt-auto">
-    <div class="max-w-7xl mx-auto px-4">
-      <p>© <span id="current-year"></span> Sistem Analisis PBD Bersepadu | Bersambung dengan Pangkalan Data Google</p>
-    </div>
+  <footer class="bg-slate-900 text-slate-500 py-6 text-center text-[10px] uppercase font-bold tracking-widest mt-auto border-t border-slate-800">
+    <p>© <span id="current-year"></span> Sistem Analisis PBD Bersepadu | Cloud Database System</p>
   </footer>
 
   <script>
-    document.getElementById('current-year').textContent = new Date().getFullYear();
-
-    // ==========================================
-    // URL API GOOGLE SHEETS CIKGU NAIMULLAH
-    // ==========================================
     const GAS_URL = "https://script.google.com/macros/s/AKfycbwYKVgs6XsXaOUqQ7ZYmQdvyaEA0-lcNuBnbFyqPVCRZzKydKYESZWfzS0JMPnwzt_zDg/exec";
-    
     let appData = [];
     const knownSubjects = ['BM', 'BI', 'MM', 'SAINS', 'SEJ', 'PAI', 'PM', 'BC', 'BT', 'BIN', 'RBT', 'AR', 'PJPK', 'PMZ', 'PSV'];
     let charts = { dashSubject: null, dashPie: null, lapKelas: null };
+    let currentSort = { column: null, dir: 'asc' };
 
-    window.onload = () => {
-      loadDataFromCloud();
-    };
+    window.onload = () => loadDataFromCloud();
 
-    function showLoading(show, text = "Menyambung ke Pangkalan Data...") {
+    function showLoading(show, text = "Memproses...") {
       const overlay = document.getElementById('loading-overlay');
       document.getElementById('loading-text').textContent = text;
-      if(show) overlay.classList.remove('hidden');
-      else overlay.classList.add('hidden');
+      if(show) overlay.classList.remove('hidden'); else overlay.classList.add('hidden');
     }
 
-    // --- FUNGSI CLOUD ---
     async function loadDataFromCloud() {
-      showLoading(true, "Menyemak dan menarik data terbaharu dari Cloud...");
+      showLoading(true, "Menarik data terkini dari Cloud...");
       try {
         let res = await fetch(GAS_URL);
         let data2D = await res.json();
         parse2DArrayToData(data2D);
         switchTab('dashboard');
-      } catch (err) {
-        console.error(err);
-        alert("Ralat! Pangkalan Data tidak dapat dihubungi.");
-        showLoading(false);
-      }
+      } catch (err) { alert("Gagal menghubungi Database."); showLoading(false); }
     }
 
     async function saveDataToCloud() {
-      showLoading(true, "Sedang menyelaras & menyimpan ke Cloud (Sila tunggu)...");
+      showLoading(true, "Menyimpan perubahan...");
       try {
         let array2D = build2DArrayFromData();
-        let payload = { action: "SIMPAN_DATA", data: array2D };
-        
         await fetch(GAS_URL, {
           method: "POST",
           headers: { "Content-Type": "text/plain;charset=utf-8" },
-          body: JSON.stringify(payload)
+          body: JSON.stringify({ action: "SIMPAN_DATA", data: array2D })
         });
-        
         showLoading(false);
-        updateFilterDropdowns(); // Update the delete dropdown too!
-        processAllViews();
-        alert("Selesai! Pangkalan data telah dikemas kini.");
-      } catch (err) {
-        console.error(err);
-        showLoading(false);
-        alert("Ralat! Gagal menghantar data ke Cloud.");
-      }
+        alert("Pangkalan Data Berjaya Dikemas Kini!");
+        loadDataFromCloud();
+      } catch (err) { showLoading(false); alert("Gagal menyimpan data."); }
     }
 
     function parse2DArrayToData(data) {
       appData = [];
       if (!data || data.length < 2) return; 
-      
       let headers = data[0];
       for (let i = 1; i < data.length; i++) {
         let row = data[i];
         let record = { id: String(row[0]), nama: row[1], jantina: row[2], kelas: row[3], fasa: row[4], scores: {} };
         for (let j = 5; j < headers.length; j++) {
-          let sub = headers[j];
           let val = row[j];
-          if (val !== '' && val !== null && val !== undefined) record.scores[sub] = parseInt(val);
+          if (val !== '' && val !== undefined) record.scores[headers[j]] = parseInt(val);
         }
         appData.push(record);
       }
@@ -367,327 +263,182 @@
       return rows;
     }
 
-    // --- LOGIK PADAM KELAS SPESIFIK ---
-    function deleteSpecificClass() {
-      const fasa = document.getElementById('delete-fasa').value;
-      const kelas = document.getElementById('delete-kelas').value;
-
-      if(!kelas) return alert("Sila pilih kelas yang ingin dipadam.");
-
-      if(confirm(`AWAS! Anda pasti mahu memadam SEMUA DATA untuk kelas ${kelas} bagi ${fasa}?`)) {
-         const oldLength = appData.length;
-         appData = appData.filter(d => !(d.fasa === fasa && d.kelas === kelas));
-         const deletedCount = oldLength - appData.length;
-
-         if(deletedCount > 0) {
-             alert(`${deletedCount} rekod murid telah dibuang dari sistem. Klik OK untuk selaraskan di Cloud.`);
-             saveDataToCloud(); 
-         } else {
-             alert(`Tiada rekod dijumpai untuk ${kelas} (${fasa}).`);
-         }
+    function switchTab(tab) {
+      ['dashboard-view', 'laporan-view', 'admin-view', 'global-filters'].forEach(id => document.getElementById(id).classList.add('hidden'));
+      ['nav-dashboard', 'nav-laporan', 'nav-admin'].forEach(id => document.getElementById(id).className = "px-4 py-2 rounded-lg border border-white/20 text-white/70 text-xs font-bold hover:bg-white/10 transition-all uppercase");
+      const activeBtn = "px-4 py-2 rounded-lg bg-emerald-500/30 border border-emerald-400/50 text-white text-xs font-bold transition-all uppercase";
+      if (tab === 'dashboard') {
+        document.getElementById('dashboard-view').classList.remove('hidden');
+        document.getElementById('global-filters').classList.remove('hidden');
+        document.getElementById('nav-dashboard').className = activeBtn;
+      } else if (tab === 'laporan') {
+        document.getElementById('laporan-view').classList.remove('hidden');
+        document.getElementById('global-filters').classList.remove('hidden');
+        document.getElementById('nav-laporan').className = activeBtn;
+      } else {
+        document.getElementById('admin-view').classList.remove('hidden');
+        document.getElementById('nav-admin').className = activeBtn;
       }
+      if(tab !== 'admin') { updateFilterDropdowns(); processAllViews(); }
     }
 
-    function clearDataCloud() {
-      if(confirm("AWAS! Anda pasti mahu padam SEMUA data di sistem dan Cloud?")) {
-        appData = [];
-        saveDataToCloud(); 
-      }
-    }
-
-    // --- UPLOAD EXCEL LOGIC ---
     let selectedFiles = [];
     function handleFileSelect(event) {
       selectedFiles = Array.from(event.target.files);
-      if (selectedFiles.length > 0) {
-        document.getElementById('file-name-display').innerHTML = `<strong class="text-emerald-600">${selectedFiles.length} fail sedia diproses:</strong><br><span class="text-xs text-slate-500">${selectedFiles.map(f=>f.name).join(', ')}</span>`;
-      }
+      document.getElementById('file-name-display').textContent = selectedFiles.length + " fail dipilih.";
     }
 
     async function processUploadAndSync() {
       const fasa = document.getElementById('input-fasa').value;
-      if (selectedFiles.length === 0) return alert("Sila pilih fail-fail Excel terlebih dahulu.");
-
-      let totalAddedOrUpdated = 0;
+      if (selectedFiles.length === 0) return alert("Pilih fail dahulu.");
+      showLoading(true, "Membaca data...");
       for (let file of selectedFiles) {
         let kelas = file.name.replace(/\.[^/.]+$/, "").trim(); 
-        try {
-          let jsonData = await readExcelAsync(file);
-          totalAddedOrUpdated += parseExcelJSONBulk(jsonData, fasa, kelas);
-        } catch (error) { console.error("Ralat fail " + file.name, error); }
+        let jsonData = await readExcelAsync(file);
+        parseExcelJSON(jsonData, fasa, kelas);
       }
-
-      document.getElementById('file-upload').value = '';
-      selectedFiles = [];
-      document.getElementById('file-name-display').textContent = 'Tiada fail dipilih';
-
-      if(totalAddedOrUpdated > 0) {
-        saveDataToCloud(); 
-      } else {
-        alert("Tiada data sah dijumpai dalam fail tersebut.");
-      }
+      saveDataToCloud();
     }
 
     function readExcelAsync(file) {
-      return new Promise((resolve, reject) => {
+      return new Promise((resolve) => {
         const reader = new FileReader();
-        reader.onload = function(e) {
-          try {
-            const data = new Uint8Array(e.target.result);
-            const workbook = XLSX.read(data, {type: 'array'});
-            const worksheet = workbook.Sheets[workbook.SheetNames[0]];
-            resolve(XLSX.utils.sheet_to_json(worksheet, {raw: true, defval: ""}));
-          } catch (err) { reject(err); }
+        reader.onload = (e) => {
+          const workbook = XLSX.read(new Uint8Array(e.target.result), {type: 'array'});
+          resolve(XLSX.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames[0]], {raw: true, defval: ""}));
         };
-        reader.onerror = reject;
         reader.readAsArrayBuffer(file);
       });
     }
 
-    function parseExcelJSONBulk(jsonData, fasa, kelas) {
-      if (!jsonData || jsonData.length === 0) return 0;
-      const keys = Object.keys(jsonData[0]);
-      const keyNama = keys.find(k => k.toUpperCase().includes('NAMA'));
-      const keyId = keys.find(k => k.toUpperCase().includes('KID') || k.toUpperCase().includes('ID'));
-      const keyJantina = keys.find(k => k.toUpperCase().includes('JANTINA'));
-      
-      if (!keyNama) return 0;
-      
-      const subjectKeys = {};
-      knownSubjects.forEach(sub => {
-        const match = keys.find(k => k.toUpperCase().trim() === sub);
-        if (match) subjectKeys[sub] = match;
-      });
-
-      let processedCount = 0;
+    function parseExcelJSON(jsonData, fasa, kelas) {
+      const keys = Object.keys(jsonData[0] || {});
+      const kNama = keys.find(k => k.toUpperCase().includes('NAMA')), kId = keys.find(k => k.toUpperCase().includes('KID') || k.toUpperCase().includes('ID')), kJantina = keys.find(k => k.toUpperCase().includes('JANTINA'));
+      if (!kNama) return;
+      const subKeys = {}; knownSubjects.forEach(s => { let m = keys.find(k => k.toUpperCase().trim() === s); if(m) subKeys[s] = m; });
       jsonData.forEach((row, idx) => {
-        const nama = row[keyNama];
-        if (!nama || String(nama).trim() === '') return;
-
-        let strId = `ID_${kelas}_${idx}`;
-        if (keyId && row[keyId]) strId = String(row[keyId]).replace(/[- ]/g, '').trim();
-
-        let record = { nama: String(nama).trim(), id: strId, jantina: keyJantina && row[keyJantina] ? String(row[keyJantina]).trim() : '', kelas: kelas, fasa: fasa, scores: {} };
-
-        for (let sub in subjectKeys) {
-          let val = String(row[subjectKeys[sub]]);
-          let tpNum = parseInt(val.replace(/\D/g, ''));
-          if (!isNaN(tpNum) && tpNum >= 1 && tpNum <= 6) record.scores[sub] = tpNum;
-        }
-
-        const existingRecord = appData.find(d => d.fasa === fasa && d.kelas === kelas && (d.id === record.id || d.nama === record.nama));
-        if(existingRecord) {
-           Object.assign(existingRecord, record);
-           processedCount++;
-        } else {
-           appData.push(record); 
-           processedCount++;
-        }
+        if (!row[kNama]) return;
+        let id = kId && row[kId] ? String(row[kId]).replace(/[- ]/g, '').trim() : `ID_${kelas}_${idx}`;
+        let rec = { nama: String(row[kNama]).trim().toUpperCase(), id: id, jantina: kJantina ? row[kJantina] : '', kelas: kelas, fasa: fasa, scores: {} };
+        for (let s in subKeys) { let v = String(row[subKeys[s]]); let n = parseInt(v.replace(/\D/g, '')); if(!isNaN(n) && n>=1 && n<=6) rec.scores[s] = n; }
+        let exist = appData.find(d => d.fasa === fasa && d.kelas === kelas && (d.id === rec.id || d.nama === rec.nama));
+        if(exist) Object.assign(exist, rec); else appData.push(rec);
       });
-      return processedCount;
     }
 
-    // --- TAB SWITCHER ---
-    function switchTab(tab) {
-      document.getElementById('dashboard-view').classList.add('hidden');
-      document.getElementById('laporan-view').classList.add('hidden');
-      document.getElementById('admin-view').classList.add('hidden');
-      document.getElementById('global-filters').classList.add('hidden');
-      
-      const navs = ['nav-dashboard', 'nav-laporan', 'nav-admin'];
-      navs.forEach(n => { document.getElementById(n).className = "px-4 py-2 rounded-lg border border-white/20 text-white/70 text-sm font-medium hover:bg-white/10 transition-all"; });
-
-      const activeBtnClass = "px-4 py-2 rounded-lg bg-emerald-500/30 border border-emerald-400/50 text-white text-sm font-medium transition-all";
-
-      if (tab === 'dashboard') {
-        document.getElementById('dashboard-view').classList.remove('hidden');
-        document.getElementById('global-filters').classList.remove('hidden');
-        document.getElementById('nav-dashboard').className = activeBtnClass;
-      } else if (tab === 'laporan') {
-        document.getElementById('laporan-view').classList.remove('hidden');
-        document.getElementById('global-filters').classList.remove('hidden');
-        document.getElementById('nav-laporan').className = activeBtnClass;
-      } else {
-        document.getElementById('admin-view').classList.remove('hidden');
-        document.getElementById('nav-admin').className = activeBtnClass;
-      }
-      
-      if(tab !== 'admin') {
-        updateFilterDropdowns();
-        processAllViews();
-      }
-      showLoading(false);
-    }
-
-    // --- ANALISIS & LOGIK PAPARAN ---
     function updateFilterDropdowns() {
       const uniqueKelas = [...new Set(appData.map(d => d.kelas))].sort();
-      
-      // Update Filter Utama
-      const kelasSelect = document.getElementById('filter-kelas');
-      const currentVal = kelasSelect.value;
-      let html = `<option value="Semua">Semua Kelas</option>`;
-      uniqueKelas.forEach(k => html += `<option value="${k}">${k}</option>`);
-      kelasSelect.innerHTML = html;
-      if(uniqueKelas.includes(currentVal)) kelasSelect.value = currentVal;
-
-      // Update Filter Padam Kelas
-      const deleteKelasSelect = document.getElementById('delete-kelas');
-      if(deleteKelasSelect) {
-         const currentDelVal = deleteKelasSelect.value;
-         let htmlDel = '';
-         uniqueKelas.forEach(k => htmlDel += `<option value="${k}">${k}</option>`);
-         deleteKelasSelect.innerHTML = htmlDel || '<option value="">Tiada Kelas</option>';
-         if(uniqueKelas.includes(currentDelVal)) deleteKelasSelect.value = currentDelVal;
-      }
+      let h = '<option value="Semua">Semua Kelas</option>';
+      uniqueKelas.forEach(k => h += `<option value="${k}">${k}</option>`);
+      document.getElementById('filter-kelas').innerHTML = h;
+      let hd = ''; uniqueKelas.forEach(k => hd += `<option value="${k}">${k}</option>`);
+      document.getElementById('delete-kelas').innerHTML = hd || '<option value="">Tiada Data</option>';
     }
 
+    function deleteSpecificClass() {
+      const f = document.getElementById('delete-fasa').value, k = document.getElementById('delete-kelas').value;
+      if(!k || !confirm(`Padam DATA ${k} (${f})?`)) return;
+      appData = appData.filter(d => !(d.fasa === f && d.kelas === k));
+      saveDataToCloud();
+    }
+
+    function clearDataCloud() { if(confirm("RESET SEMUA DATA?")) { appData = []; saveDataToCloud(); } }
+
     function processAllViews() {
-      const fasaFilter = document.getElementById('filter-fasa').value;
-      const kelasFilter = document.getElementById('filter-kelas').value;
+      const f = document.getElementById('filter-fasa').value, k = document.getElementById('filter-kelas').value;
+      let fd = appData.filter(d => (f === 'Semua' || d.fasa === f) && (k === 'Semua' || d.kelas === k));
+      document.getElementById('stat-total-records').textContent = fd.length;
+      if(fd.length === 0) { document.querySelectorAll('h3[id^="dash-"], p[id^="lap-"]').forEach(el => el.textContent = '0'); return; }
 
-      let filteredData = appData.filter(d => {
-        return (fasaFilter === 'Semua' || d.fasa === fasaFilter) && 
-               (kelasFilter === 'Semua' || d.kelas === kelasFilter);
-      });
-
-      document.getElementById('stat-total-records').textContent = `${filteredData.length} Murid`;
+      let totalS = 0, cL = 0, cC = 0, subS = {}, tpD = {1:0, 2:0, 3:0, 4:0, 5:0, 6:0}, clS = {}, iL = [], flattened = [];
       
-      if(filteredData.length === 0) {
-        document.querySelectorAll('h3[id^="dash-"], p[id^="lap-"]').forEach(el => el.textContent = el.id.includes('subjek') ? '-' : '0');
-        document.getElementById('lap-table-intervensi').innerHTML = `<tr><td colspan="4" class="text-center py-4">Tiada data ditemui untuk tapisan ini.</td></tr>`;
-        Object.values(charts).forEach(c => { if(c) c.destroy(); });
-        document.getElementById('lap-ai-insight').innerHTML = "Tiada data untuk dijana.";
-        document.getElementById('lap-ranking-kelas').innerHTML = "";
-        document.getElementById('lap-ranking-subjek').innerHTML = "";
-        return;
-      }
-
-      let totalSubjects = 0, countLulus = 0, countCemerlang = 0, countIntervensiStud = 0;
-      let subjectStats = {}; 
-      let tpDist = {1:0, 2:0, 3:0, 4:0, 5:0, 6:0};
-      let classStats = {};
-      let interventionList = [];
-
-      filteredData.forEach(student => {
-        let hasIntervensi = false;
-        let studentTotalScore = 0;
-        let studentSubjCount = 0;
-
-        if(!classStats[student.kelas]) classStats[student.kelas] = { sum:0, count:0, tpDist: {1:0, 2:0, 3:0, 4:0, 5:0, 6:0} };
-
-        for (let sub in student.scores) {
-          let score = student.scores[sub];
-          totalSubjects++;
-          studentTotalScore += score;
-          studentSubjCount++;
-          tpDist[score]++;
-          classStats[student.kelas].tpDist[score]++;
-
-          if(!subjectStats[sub]) subjectStats[sub] = {sum: 0, count: 0};
-          subjectStats[sub].sum += score;
-          subjectStats[sub].count++;
-
-          if (score >= 3) countLulus++;
-          if (score >= 5) countCemerlang++;
-          if (score <= 2) {
-            hasIntervensi = true;
-            interventionList.push({ ...student, failedSub: sub, failScore: score });
-          }
+      fd.forEach(s => {
+        let stS = 0, stC = 0;
+        if(!clS[s.kelas]) clS[s.kelas] = { sum:0, count:0, tpData: {1:0, 2:0, 3:0, 4:0, 5:0, 6:0} };
+        for (let sub in s.scores) {
+          let sc = s.scores[sub]; totalS++; stS += sc; stC++; tpD[sc]++; clS[s.kelas].tpData[sc]++;
+          if(!subS[sub]) subS[sub] = {sum: 0, count: 0}; subS[sub].sum += sc; subS[sub].count++;
+          if (sc >= 3) cL++; if (sc >= 5) cC++;
+          if (sc <= 2) iL.push(s);
+          // Flatten for main table
+          flattened.push({ n: s.nama, k: s.kelas, f: s.fasa, s: sub, t: sc });
         }
-        
-        if(hasIntervensi) countIntervensiStud++;
-        if(studentSubjCount > 0) {
-            classStats[student.kelas].sum += (studentTotalScore / studentSubjCount);
-            classStats[student.kelas].count++;
-        }
+        if(stC > 0) { clS[s.kelas].sum += (stS / stC); clS[s.kelas].count++; }
       });
 
-      let totalPurata = Object.values(subjectStats).reduce((a,b)=>a+b.sum,0) / Object.values(subjectStats).reduce((a,b)=>a+b.count,0);
-      
-      document.getElementById('dash-lulus').textContent = ((countLulus / totalSubjects) * 100).toFixed(1) + '%';
-      document.getElementById('dash-cemerlang').textContent = ((countCemerlang / totalSubjects) * 100).toFixed(1) + '%';
-      document.getElementById('dash-gagal').textContent = interventionList.length;
-      document.getElementById('dash-purata').textContent = totalPurata.toFixed(2);
+      // Update KPIs
+      document.getElementById('dash-lulus').textContent = ((cL / totalS) * 100).toFixed(1) + '%';
+      document.getElementById('dash-cemerlang').textContent = ((cC / totalS) * 100).toFixed(1) + '%';
+      document.getElementById('dash-gagal').textContent = [...new Set(iL.map(x=>x.id))].length;
+      document.getElementById('dash-purata').textContent = (Object.values(subS).reduce((a,b)=>a+b.sum,0)/totalS).toFixed(2);
+      document.getElementById('inter-count').textContent = [...new Set(iL.map(x=>x.id))].length + " Murid";
 
-      document.getElementById('lap-total').textContent = filteredData.length;
-      document.getElementById('lap-lulus').textContent = ((countLulus / totalSubjects) * 100).toFixed(1) + '%';
-      document.getElementById('lap-cemerlang').textContent = ((countCemerlang / totalSubjects) * 100).toFixed(1) + '%';
-      document.getElementById('lap-gagal').textContent = countIntervensiStud; 
+      // Ranking
+      let sSub = Object.keys(subS).map(n => ({ n, a: subS[n].sum/subS[n].count })).sort((a,b)=>b.a-a.a);
+      let sCls = Object.keys(clS).map(n => ({ n, a: clS[n].sum/clS[n].count, d: clS[n].tpData })).sort((a,b)=>b.a-a.a);
+      let rSH = ''; sSub.forEach((s,i)=>rSH+=`<div class='flex justify-between p-2 bg-slate-50 rounded border border-slate-100'><span>${i+1}. ${s.n}</span><span class='font-black text-emerald-600'>${s.a.toFixed(2)}</span></div>`);
+      document.getElementById('lap-ranking-subjek').innerHTML = rSH;
+      let rCH = ''; sCls.forEach((s,i)=>rCH+=`<div class='flex justify-between p-2 bg-slate-50 rounded border border-slate-100'><span>${i<3?['🥇','🥈','🥉'][i]:i+1+'.'} ${s.n}</span><span class='font-black text-blue-600'>${s.a.toFixed(2)}</span></div>`);
+      document.getElementById('lap-ranking-kelas').innerHTML = rCH;
 
-      let sortedSubjects = Object.keys(subjectStats).map(sub => {
-        return { name: sub, avg: subjectStats[sub].sum / subjectStats[sub].count };
-      }).sort((a,b) => b.avg - a.avg);
+      // Populate Main Table
+      window.currentFlattened = flattened;
+      renderMainTable(flattened);
 
-      let sortedClasses = Object.keys(classStats).map(cls => {
-        return { name: cls, avg: classStats[cls].sum / classStats[cls].count, tpData: classStats[cls].tpDist };
-      }).sort((a,b) => b.avg - a.avg);
-
-      let subjekLemah = sortedSubjects.length > 0 ? sortedSubjects[sortedSubjects.length-1] : {name: '-', avg:0};
-      document.getElementById('lap-subjek-lemah').textContent = subjekLemah.name;
-
-      let rankSubHTML = '';
-      sortedSubjects.forEach((sub, i) => {
-        let color = i === sortedSubjects.length-1 ? 'red' : 'emerald';
-        rankSubHTML += `<div class="flex justify-between items-center p-2 bg-slate-50 rounded border border-slate-100"><span class="font-medium text-slate-700">${i+1}. ${sub.name}</span><span class="font-bold text-${color}-600">${sub.avg.toFixed(2)}</span></div>`;
+      // Intervention Table
+      let iH = ''; [...new Set(iL.map(x=>x.id))].forEach(id => {
+         let x = iL.find(m => m.id === id);
+         let subs = iL.filter(m => m.id === id).map(m => m.failedSub);
+         iH+=`<tr><td class='px-6 py-2 uppercase font-black'>${x.nama}</td><td class='px-6'>${x.kelas}</td><td class='px-6 font-bold'>DILAPORKAN</td><td class='px-6'><span class='tp-badge tp2'>REKOD</span></td></tr>`;
       });
-      document.getElementById('lap-ranking-subjek').innerHTML = rankSubHTML;
 
-      let rankClassHTML = '';
-      let pingat = ['🥇', '🥈', '🥉'];
-      sortedClasses.forEach((cls, i) => {
-        let icon = i < 3 ? pingat[i] : `${i+1}.`;
-        rankClassHTML += `<div class="flex justify-between items-center p-2 bg-slate-50 rounded border border-slate-100"><span class="font-medium text-slate-700">${icon} ${cls.name}</span><span class="font-bold text-emerald-600">${cls.avg.toFixed(2)}</span></div>`;
-      });
-      document.getElementById('lap-ranking-kelas').innerHTML = rankClassHTML;
+      // AI Text
+      document.getElementById('lap-ai-insight').innerHTML = `Berdasarkan data terkini, sekolah merekodkan kadar menguasai <strong>${((cL/totalS)*100).toFixed(1)}%</strong> dengan purata GPS <strong>${(Object.values(subS).reduce((a,b)=>a+b.sum,0)/totalS).toFixed(2)}</strong>. Kelas <strong>${sCls[0]?.n}</strong> menunjukkan prestasi paling stabil manakala subjek <strong>${sSub[sSub.length-1]?.n}</strong> memerlukan perhatian khusus.`;
 
-      interventionList.sort((a,b) => a.failScore - b.failScore || a.kelas.localeCompare(b.kelas));
-      let interHTML = '';
-      interventionList.forEach(item => {
-        let badge = item.failScore === 1 ? 'tp1' : 'tp2';
-        interHTML += `<tr class="border-b"><td class="py-2">${item.nama}</td><td>${item.kelas}</td><td class="font-medium text-slate-600">${item.failedSub}</td><td><span class="tp-badge ${badge}">TP${item.failScore}</span></td></tr>`;
-      });
-      document.getElementById('lap-table-intervensi').innerHTML = interHTML || `<tr><td colspan="4" class="text-center py-6 text-slate-400 font-medium">✨ Tahniah! Tiada murid yang memerlukan intervensi untuk carian ini.</td></tr>`;
-
-      let aiText = `Berdasarkan analisis data pangkalan terkini, pencapaian keseluruhan murid berada pada kadar <strong>${((countLulus / totalSubjects) * 100).toFixed(1)}% tahap menguasai (Lulus)</strong>. `;
-      if (countIntervensiStud > 0) {
-        aiText += `Walau bagaimanapun, tumpuan serius perlu diberikan kepada subjek <strong>${subjekLemah.name}</strong> yang merekodkan purata TP terendah (${subjekLemah.avg.toFixed(2)}). `;
-        aiText += `Terdapat sejumlah <strong>${countIntervensiStud} murid</strong> yang telah dikenal pasti berada pada tahap kritikal dan disyorkan untuk menyertai program pemulihan/intervensi secara berfokus. `;
-      } else {
-        aiText += `Kecemerlangan dapat dilihat dengan jelas apabila tiada murid yang berada di tahap intervensi. Guru-guru digalakkan untuk meneruskan modul pengayaan berprestasi tinggi. `;
-      }
-      if(sortedClasses.length > 1) {
-          aiText += `Penyelarasan amalan terbaik dari kelas <strong>${sortedClasses[0].name}</strong> (purata tertinggi) boleh diaplikasikan kepada kelas-kelas lain bagi menaikkan purata pencapaian seluruh sekolah.`;
-      }
-      document.getElementById('lap-ai-insight').innerHTML = aiText;
-
+      // Charts
       if(charts.dashSubject) charts.dashSubject.destroy();
-      charts.dashSubject = new Chart(document.getElementById('chart-dash-subject'), {
-        type: 'bar',
-        data: { labels: sortedSubjects.map(s=>s.name), datasets: [{ label: 'Purata TP', data: sortedSubjects.map(s=>s.avg), backgroundColor: '#10b981', borderRadius: 6 }] },
-        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { max: 6 } } }
-      });
-
+      charts.dashSubject = new Chart(document.getElementById('chart-dash-subject'), { type: 'bar', data: { labels: sSub.map(x=>x.n), datasets: [{ data: sSub.map(x=>x.a), backgroundColor: '#10b981', borderRadius: 6 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { max: 6, ticks: { stepSize: 1 } } } } });
       if(charts.dashPie) charts.dashPie.destroy();
-      charts.dashPie = new Chart(document.getElementById('chart-dash-pie'), {
-        type: 'doughnut',
-        data: { labels: ['TP1', 'TP2', 'TP3', 'TP4', 'TP5', 'TP6'], datasets: [{ data: [tpDist[1], tpDist[2], tpDist[3], tpDist[4], tpDist[5], tpDist[6]], backgroundColor: ['#ef4444', '#f97316', '#f59e0b', '#84cc16', '#10b981', '#059669'], borderWidth: 0 }] },
-        options: { responsive: true, maintainAspectRatio: false, cutout: '65%', plugins: { legend: { position: 'right' } } }
-      });
-
+      charts.dashPie = new Chart(document.getElementById('chart-dash-pie'), { type: 'doughnut', data: { labels: ['TP1','TP2','TP3','TP4','TP5','TP6'], datasets: [{ data: [tpD[1],tpD[2],tpD[3],tpD[4],tpD[5],tpD[6]], backgroundColor: ['#dc2626','#f97316','#eab308','#84cc16','#22c55e','#10b981'], borderWidth: 0 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { boxWidth: 10, font: { size: 9 } } } } } });
       if(charts.lapKelas) charts.lapKelas.destroy();
-      charts.lapKelas = new Chart(document.getElementById('chart-lap-kelas'), {
-        type: 'bar',
-        data: {
-          labels: sortedClasses.map(c=>c.name),
-          datasets: [
-            { label: 'Belum Menguasai (TP1-2)', data: sortedClasses.map(c => c.tpData[1]+c.tpData[2]), backgroundColor: '#ef4444', borderRadius: 4 },
-            { label: 'Menguasai (TP3-4)', data: sortedClasses.map(c => c.tpData[3]+c.tpData[4]), backgroundColor: '#f59e0b', borderRadius: 4 },
-            { label: 'Cemerlang (TP5-6)', data: sortedClasses.map(c => c.tpData[5]+c.tpData[6]), backgroundColor: '#10b981', borderRadius: 4 }
-          ]
-        },
-        options: { responsive: true, maintainAspectRatio: false, scales: { x: { stacked: true }, y: { stacked: true } } }
+      charts.lapKelas = new Chart(document.getElementById('chart-lap-kelas'), { type: 'bar', data: { labels: sCls.map(x=>x.n), datasets: [{ label: 'TP1-2', data: sCls.map(x=>x.d[1]+x.d[2]), backgroundColor: '#dc2626' }, { label: 'TP3-4', data: sCls.map(x=>x.d[3]+x.d[4]), backgroundColor: '#f59e0b' }, { label: 'TP5-6', data: sCls.map(x=>x.d[5]+x.d[6]), backgroundColor: '#10b981' }] }, options: { responsive: true, maintainAspectRatio: false, scales: { x: { stacked: true }, y: { stacked: true } }, plugins: { legend: { position: 'top', labels: { boxWidth: 10, font: { size: 10 } } } } } });
+    }
+
+    function renderMainTable(data) {
+      let html = '';
+      data.forEach(x => {
+        html += `<tr>
+          <td class="px-6 py-3 uppercase font-bold text-slate-800">${x.n}</td>
+          <td class="px-6 py-3 text-center">${x.k}</td>
+          <td class="px-6 py-3 text-center text-slate-500">${x.f}</td>
+          <td class="px-6 py-3 text-center font-black text-slate-600">${x.s}</td>
+          <td class="px-6 py-3 text-center"><span class="tp-badge tp${x.t}">TP${x.t}</span></td>
+        </tr>`;
       });
+      document.getElementById('lap-table-main').innerHTML = html || "<tr><td colspan='5' class='text-center py-10 text-slate-400'>Tiada rekod data dijumpai.</td></tr>";
+    }
+
+    function filterTableBySearch() {
+      const query = document.getElementById('search-murid').value.toUpperCase();
+      const filtered = window.currentFlattened.filter(x => x.n.includes(query));
+      renderMainTable(filtered);
+    }
+
+    function sortTable(colIdx) {
+      const keys = ['n', 'k', 'f', 's', 't'];
+      const key = keys[colIdx];
+      const dir = (currentSort.column === colIdx && currentSort.dir === 'asc') ? 'desc' : 'asc';
+      currentSort = { column: colIdx, dir: dir };
+
+      window.currentFlattened.sort((a, b) => {
+        let valA = a[key], valB = b[key];
+        if (typeof valA === 'string') {
+          return dir === 'asc' ? valA.localeCompare(valB) : valB.localeCompare(valA);
+        } else {
+          return dir === 'asc' ? valA - valB : valB - valA;
+        }
+      });
+      renderMainTable(window.currentFlattened);
     }
   </script>
 </body>
