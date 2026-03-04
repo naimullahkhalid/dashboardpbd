@@ -24,7 +24,6 @@
     
     .sub-nav-active { background-color: #047857; color: white; border-color: #047857; }
     
-    /* Scrollbar untuk senarai BMTM */
     .custom-scrollbar::-webkit-scrollbar { width: 4px; }
     .custom-scrollbar::-webkit-scrollbar-track { background: #f1f5f9; border-radius: 4px; }
     .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
@@ -39,7 +38,7 @@
     <div id="emergency-btns" class="hidden mt-8 space-y-3 w-full max-w-sm px-6 text-center">
       <div class="bg-red-500/10 border border-red-500/30 p-4 rounded-2xl mb-4">
         <p class="text-xs font-black text-red-400 uppercase mb-1">Sambungan Gagal / Masa Tamat</p>
-        <p class="text-[10px] text-slate-300">Sila semak URL Apps Script atau Deployment (Mesti 'Anyone').</p>
+        <p class="text-[10px] text-slate-300">Sila semak URL Apps Script atau muat naik fail di tab Admin.</p>
       </div>
       <button onclick="batalLoadingKeAdmin()" class="w-full py-4 bg-emerald-600 hover:bg-emerald-700 rounded-xl font-black text-xs uppercase shadow-lg transition-all">⚙️ Buka Tab Admin</button>
       <button onclick="location.reload(true)" class="w-full py-4 bg-slate-800 hover:bg-slate-700 rounded-xl font-black text-xs uppercase border border-slate-600 transition-all">🔄 Muat Semula Page</button>
@@ -160,26 +159,22 @@
             <h4 class="text-xs font-black text-slate-600 uppercase tracking-widest mb-4">1. Agihan TP Keseluruhan Murid</h4>
             <p class="text-[10px] font-bold text-slate-400 uppercase mb-3">Berdasarkan Purata Keseluruhan Individu</p>
             <div class="overflow-x-auto rounded-2xl border border-slate-200">
-              <table class="w-full text-left text-xs font-bold border-collapse" id="table-tp-summary">
-                </table>
+              <table class="w-full text-left text-xs font-bold border-collapse" id="table-tp-summary"></table>
             </div>
           </div>
-
           <div>
             <h4 class="text-xs font-black text-slate-600 uppercase tracking-widest mb-4">2. Subjek Kritikal BMTM (Teramai)</h4>
             <p class="text-[10px] font-bold text-slate-400 uppercase mb-3">Bilangan Murid TP1 & TP2 Mengikut Subjek</p>
-            <div id="bmtm-top-subjects" class="space-y-2">
-               </div>
+            <div id="bmtm-top-subjects" class="space-y-2"></div>
           </div>
         </div>
 
         <div>
           <h4 class="text-xs font-black text-slate-600 uppercase tracking-widest mb-4">3. Senarai Murid BMTM Mengikut Subjek</h4>
-          <div id="bmtm-student-list" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
-            </div>
+          <div id="bmtm-student-list" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5"></div>
         </div>
       </div>
-      </div>
+    </div>
 
     <div id="sub-view-individu" class="hidden space-y-8">
       <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
@@ -244,16 +239,9 @@
         <div class="overflow-x-auto">
           <table class="w-full text-left text-xs font-bold border-collapse">
             <thead class="bg-white text-slate-400 uppercase text-[10px] tracking-widest border-b-2 border-slate-100">
-              <tr>
-                <th class="px-8 py-5">Bil</th>
-                <th class="px-8 py-5">Nama Murid</th>
-                <th class="px-8 py-5">Tahun / Kelas</th>
-                <th class="px-8 py-5">Subjek</th>
-                <th class="px-8 py-5 text-center">Tahap</th>
-              </tr>
+              <tr><th class="px-8 py-5">Bil</th><th class="px-8 py-5">Nama Murid</th><th class="px-8 py-5">Tahun / Kelas</th><th class="px-8 py-5">Subjek</th><th class="px-8 py-5 text-center">Tahap</th></tr>
             </thead>
-            <tbody id="table-inter" class="divide-y divide-slate-100 text-slate-700">
-            </tbody>
+            <tbody id="table-inter" class="divide-y divide-slate-100 text-slate-700"></tbody>
           </table>
         </div>
       </div>
@@ -291,7 +279,24 @@
   </footer>
 
   <script>
-    const GAS_URL = "https://script.google.com/macros/s/AKfycbxyuiQInWhGYkMuIBVt0R6fSw9G3NEhFzuRjyw4WHBjpBAnz2PaVj0b7JVUmfUD-VAVIg/exec";
+    // TIMER PAKSAAN: Jika browser "sangkut" lebih 15 saat, paksa keluar butang.
+    let systemReady = false;
+    setTimeout(function() {
+      if (!systemReady) {
+        const loadingScreen = document.getElementById('loading-overlay');
+        const emergencyBox = document.getElementById('emergency-btns');
+        if (!loadingScreen.classList.contains('hidden') && emergencyBox.classList.contains('hidden')) {
+          document.getElementById('loader-spinner').classList.add('hidden');
+          document.getElementById('loading-text').textContent = "RALAT: BROWSER SANGKUT";
+          emergencyBox.classList.remove('hidden');
+        }
+      }
+    }, 15000);
+
+    // ==========================================
+    // URL API BAHARU CIKGU DI SINI
+    // ==========================================
+    const GAS_URL = "https://script.google.com/macros/s/AKfycbyph_fEqUwVKlkKwIOG9rUbvR7KUb-iXOjhKektC0KoreDmC8iJxFyylWj3Z5a-7zSozQ/exec";
     
     let appData = [];
     const subjects = ['BM', 'BI', 'MM', 'SAINS', 'SEJ', 'PAI', 'PM', 'BC', 'BT', 'BIN', 'RBT', 'AR', 'PJPK', 'PMZ', 'PSV'];
@@ -312,26 +317,25 @@
     }
 
     function batalLoadingKeAdmin() {
+      systemReady = true;
       document.getElementById('loading-overlay').classList.add('hidden');
       switchTab('admin');
     }
 
     async function loadFromCloud() {
       showLoading(true, "Menarik data dari Cloud...");
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 15000); 
-
       try {
-        let res = await fetch(GAS_URL, { signal: controller.signal });
-        clearTimeout(timeoutId);
+        let res = await fetch(GAS_URL);
         let data2D = await res.json();
+        
+        systemReady = true; 
         
         if (data2D.status === "error") throw new Error(data2D.message);
         
         parseData(data2D);
         switchTab('dashboard');
       } catch (err) {
-        clearTimeout(timeoutId);
+        systemReady = true;
         document.getElementById('loader-spinner').classList.add('hidden');
         document.getElementById('loading-text').textContent = "RALAT SAMBUNGAN";
         document.getElementById('emergency-btns').classList.remove('hidden');
@@ -354,6 +358,8 @@
 
     async function syncToCloud() {
       showLoading(true, "Menyimpan ke Cloud...");
+      systemReady = false; 
+      
       let headerRow = ['ID', 'NAMA', 'TAHUN', 'KELAS', 'FASA', ...subjects];
       let rowsToSave = [headerRow];
       
@@ -363,20 +369,16 @@
         rowsToSave.push(row);
       });
 
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 15000);
-
       try {
         await fetch(GAS_URL, { 
           method: "POST", 
           headers: { "Content-Type": "text/plain;charset=utf-8" },
-          body: JSON.stringify({ action: "SIMPAN_DATA", data: rowsToSave }),
-          signal: controller.signal
+          body: JSON.stringify({ action: "SIMPAN_DATA", data: rowsToSave })
         });
-        clearTimeout(timeoutId);
+        systemReady = true;
         window.location.reload(true); 
       } catch (error) {
-        clearTimeout(timeoutId);
+        systemReady = true;
         document.getElementById('loader-spinner').classList.add('hidden');
         document.getElementById('loading-text').textContent = "GAGAL MENYIMPAN";
         document.getElementById('emergency-btns').classList.remove('hidden');
@@ -385,8 +387,8 @@
 
     function switchTab(targetTab) {
       ['dashboard-view', 'laporan-view', 'admin-view', 'global-filters'].forEach(id => document.getElementById(id).classList.add('hidden'));
-      const styleActive = "px-5 py-2.5 rounded-xl text-[10px] font-black uppercase transition-all bg-emerald-600 text-white border-transparent shadow-md";
-      const styleInactive = "px-5 py-2.5 rounded-xl text-[10px] font-black uppercase transition-all bg-transparent text-slate-300 hover:text-white border-transparent hover:bg-white/10";
+      const styleActive = "px-5 py-2.5 rounded-xl text-[10px] font-black uppercase transition-all bg-emerald-600 text-white shadow-md";
+      const styleInactive = "px-5 py-2.5 rounded-xl text-[10px] font-black uppercase transition-all bg-transparent text-slate-300 hover:text-white";
       ['nav-dashboard', 'nav-laporan', 'nav-admin'].forEach(id => document.getElementById(id).className = styleInactive);
       
       document.getElementById(targetTab + '-view').classList.remove('hidden');
@@ -397,15 +399,14 @@
         updateFiltersDropdowns();
         processAllViews();
       }
+      showLoading(false);
     }
 
     function switchSubTab(targetSubTab) {
       document.getElementById('sub-view-kelas').classList.add('hidden');
       document.getElementById('sub-view-individu').classList.add('hidden');
-      
       document.getElementById('btn-sub-kelas').className = "px-8 py-3 rounded-full text-xs font-black uppercase transition-all text-slate-500 hover:text-slate-800 border border-transparent";
       document.getElementById('btn-sub-individu').className = "px-8 py-3 rounded-full text-xs font-black uppercase transition-all text-slate-500 hover:text-slate-800 border border-transparent";
-      
       document.getElementById('sub-view-' + targetSubTab).classList.remove('hidden');
       let activeBtn = document.getElementById('btn-sub-' + targetSubTab);
       activeBtn.classList.add('sub-nav-active');
@@ -452,8 +453,6 @@
 
       let totalSubjekDiambil = 0, countLulus = 0, countCemerlang = 0;
       let statsSubjek = {}, statsKelas = {}, senaraiIntervensi = [], totalTPCount = {1:0, 2:0, 3:0, 4:0, 5:0, 6:0}; 
-      
-      // Variable RUMUSAN BMTM
       let tpPurataMuridCount = {1:0, 2:0, 3:0, 4:0, 5:0, 6:0};
       let bmtmBySubject = {};
       subjects.forEach(s => bmtmBySubject[s] = []);
@@ -472,7 +471,6 @@
           if (score >= 5) countCemerlang++;
           if (score <= 2) {
              senaraiIntervensi.push({ nama: student.nama, kelas: student.kelas, subjek: subjek, tp: score });
-             // Masukkan dalam senarai BMTM ikut subjek
              if (!bmtmBySubject[subjek]) bmtmBySubject[subjek] = [];
              bmtmBySubject[subjek].push(`${student.nama} (${student.kelas})`);
           }
@@ -488,8 +486,6 @@
         if (studentSubCount > 0) {
           statsKelas[classKey].sum += (studentTotalScore / studentSubCount);
           statsKelas[classKey].count++;
-          
-          // Kira Purata TP Murid secara individu untuk table Rumusan
           let purataIndividu = Math.round(studentTotalScore / studentSubCount);
           if (purataIndividu < 1) purataIndividu = 1;
           if (purataIndividu > 6) purataIndividu = 6;
@@ -497,14 +493,12 @@
         }
       });
 
-      // --- KEMASKINI DASHBOARD KPI ---
       document.getElementById('dash-total').textContent = filteredData.length;
       document.getElementById('dash-lulus').textContent = totalSubjekDiambil > 0 ? ((countLulus / totalSubjekDiambil) * 100).toFixed(1) + '%' : '0%';
       document.getElementById('dash-cemerlang').textContent = totalSubjekDiambil > 0 ? ((countCemerlang / totalSubjekDiambil) * 100).toFixed(1) + '%' : '0%';
       let uniqueIntervensiCount = [...new Set(senaraiIntervensi.map(x => x.nama))].length;
       document.getElementById('dash-inter').textContent = uniqueIntervensiCount;
 
-      // --- KEMASKINI RANKING ---
       let sortedSubjek = Object.keys(statsSubjek).map(n => ({ nama: n, avg: statsSubjek[n].sum / statsSubjek[n].count })).sort((a,b) => a.avg - b.avg);
       let htmlSubKritikal = '';
       sortedSubjek.slice(0, 4).forEach((sub, i) => {
@@ -520,7 +514,6 @@
       document.getElementById('rank-kelas').innerHTML = htmlKelas;
       document.getElementById('p1-desc').textContent = `Fokus Panitia: ${sortedSubjek[0] ? sortedSubjek[0].nama : 'Tiada'}`;
 
-      // --- KEMASKINI SENARAI INTERVENSI ---
       document.getElementById('inter-badge').textContent = senaraiIntervensi.length + " Keseluruhan Kes";
       let htmlIntervensi = '';
       senaraiIntervensi.sort((a,b) => a.tp - b.tp).forEach((murid, i) => {
@@ -529,69 +522,34 @@
       });
       document.getElementById('table-inter').innerHTML = htmlIntervensi || `<tr><td colspan='5' class='text-center py-12 text-slate-400 font-bold uppercase tracking-widest'>Tiada Kes Intervensi Direkodkan</td></tr>`;
 
-      // ==========================================
-      // BAHAGIAN BARU: RUMUSAN & BMTM GENERATOR
-      // ==========================================
       let totalMurid = filteredData.length;
-      
-      // 1. Jadual Agihan TP
-      let htmlTpTable = `
-        <thead class="bg-slate-50 border-b border-slate-200">
-          <tr><th class="py-3 px-4">TAHAP (TP)</th><th class="py-3 px-4 text-center">BIL. MURID</th><th class="py-3 px-4 text-center">PERATUS (%)</th></tr>
-        </thead>
-        <tbody class="divide-y divide-slate-100">
-      `;
+      let htmlTpTable = `<thead class="bg-slate-50 border-b border-slate-200"><tr><th class="py-3 px-4">TAHAP (TP)</th><th class="py-3 px-4 text-center">BIL. MURID</th><th class="py-3 px-4 text-center">PERATUS (%)</th></tr></thead><tbody class="divide-y divide-slate-100">`;
       for (let i = 6; i >= 1; i--) {
           let count = tpPurataMuridCount[i];
           let perc = totalMurid > 0 ? ((count / totalMurid) * 100).toFixed(1) : 0;
           let badgeClass = 'tp' + i;
-          htmlTpTable += `<tr class="hover:bg-slate-50 transition-colors">
-              <td class="py-3 px-4"><span class="tp-badge ${badgeClass} w-16 block shadow-sm">TP${i}</span></td>
-              <td class="py-3 px-4 text-center font-black text-slate-700">${count}</td>
-              <td class="py-3 px-4 text-center text-slate-500">${perc}%</td>
-          </tr>`;
+          htmlTpTable += `<tr class="hover:bg-slate-50 transition-colors"><td class="py-3 px-4"><span class="tp-badge ${badgeClass} w-16 block shadow-sm">TP${i}</span></td><td class="py-3 px-4 text-center font-black text-slate-700">${count}</td><td class="py-3 px-4 text-center text-slate-500">${perc}%</td></tr>`;
       }
       htmlTpTable += `</tbody>`;
       document.getElementById('table-tp-summary').innerHTML = htmlTpTable;
 
-      // 2 & 3. Pemprosesan Subjek BMTM
-      let bmtmSubjectsArr = Object.keys(bmtmBySubject)
-          .map(sub => ({ subjek: sub, murid: bmtmBySubject[sub] }))
-          .filter(item => item.murid.length > 0) 
-          .sort((a, b) => b.murid.length - a.murid.length); 
+      let bmtmSubjectsArr = Object.keys(bmtmBySubject).map(sub => ({ subjek: sub, murid: bmtmBySubject[sub] })).filter(item => item.murid.length > 0).sort((a, b) => b.murid.length - a.murid.length); 
 
-      // 2. Subjek Teramai BMTM (Kad)
       let htmlTopBmtm = '';
       if (bmtmSubjectsArr.length > 0) {
           bmtmSubjectsArr.slice(0, 5).forEach((item, index) => {
-              htmlTopBmtm += `
-                  <div class="flex justify-between items-center bg-red-50 p-4 rounded-2xl mb-3 border border-red-100 shadow-sm">
-                      <span class="font-black text-red-900 text-[10px] uppercase">${index+1}. ${item.subjek}</span>
-                      <span class="bg-red-500 text-white px-3 py-1 rounded-full text-[9px] font-bold shadow-sm">${item.murid.length} ORANG</span>
-                  </div>
-              `;
+              htmlTopBmtm += `<div class="flex justify-between items-center bg-red-50 p-4 rounded-2xl mb-3 border border-red-100 shadow-sm"><span class="font-black text-red-900 text-[10px] uppercase">${index+1}. ${item.subjek}</span><span class="bg-red-500 text-white px-3 py-1 rounded-full text-[9px] font-bold shadow-sm">${item.murid.length} ORANG</span></div>`;
           });
       } else {
           htmlTopBmtm = `<p class="text-xs text-emerald-600 font-bold bg-emerald-50 p-4 rounded-xl text-center border border-emerald-100">Tahniah! Tiada murid BMTM direkodkan.</p>`;
       }
       document.getElementById('bmtm-top-subjects').innerHTML = htmlTopBmtm;
 
-      // 3. Senarai Murid BMTM Ikut Subjek
       let htmlBmtmList = '';
       if (bmtmSubjectsArr.length > 0) {
           bmtmSubjectsArr.forEach(item => {
               let namesHtml = item.murid.map(name => `<li class="text-[10px] text-slate-600 mb-1.5 border-b border-slate-50 pb-1">${name}</li>`).join('');
-              htmlBmtmList += `
-                  <div class="bg-white border border-slate-200 rounded-3xl p-5 shadow-sm hover:shadow-md transition-shadow">
-                      <div class="flex justify-between items-center mb-4 border-b border-slate-100 pb-3">
-                          <span class="font-black text-slate-800 text-xs uppercase">${item.subjek}</span>
-                          <span class="text-[9px] font-bold text-red-500 bg-red-50 border border-red-100 px-3 py-1 rounded-full">${item.murid.length} Murid</span>
-                      </div>
-                      <ul class="max-h-40 overflow-y-auto pr-2 custom-scrollbar">
-                          ${namesHtml}
-                      </ul>
-                  </div>
-              `;
+              htmlBmtmList += `<div class="bg-white border border-slate-200 rounded-3xl p-5 shadow-sm hover:shadow-md transition-shadow"><div class="flex justify-between items-center mb-4 border-b border-slate-100 pb-3"><span class="font-black text-slate-800 text-xs uppercase">${item.subjek}</span><span class="text-[9px] font-bold text-red-500 bg-red-50 border border-red-100 px-3 py-1 rounded-full">${item.murid.length} Murid</span></div><ul class="max-h-40 overflow-y-auto pr-2 custom-scrollbar">${namesHtml}</ul></div>`;
           });
       } else {
            htmlBmtmList = `<div class="col-span-full text-center text-xs text-slate-400 font-bold p-6">Tiada data BMTM.</div>`;
@@ -628,7 +586,7 @@
       Chart.defaults.color = '#94a3b8';
 
       if (charts.dashPie) charts.dashPie.destroy();
-      charts.dashPie = new Chart(document.getElementById('chart-dash-pie'), { type: 'doughnut', data: { labels: ['TP1', 'TP2', 'TP3', 'TP4', 'TP5', 'TP6'], datasets: [{ data: [1,2,3,4,5,6].map(i => tpCount[i]), backgroundColor: ['#ef4444','#f97316','#eab308','#3b82f6','#10b981','#059669'], borderWidth: 0, hoverOffset: 4 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'right', labels: { boxWidth: 12, font: { weight: 'bold', size: 10 } } } }, cutout: '70%' } });
+      charts.dashPie = new Chart(document.getElementById('chart-dash-pie'), { type: 'doughnut', data: { labels: ['TP1', 'TP2', 'TP3', 'TP4', 'TP5', 'TP6'], datasets: [{ data: [1,2,3,4,5,6].map(i => tpCount[i]), backgroundColor: ['#ef4444','#f97316','#eab308','#3b82f6','#10b981','#059669'], borderWidth: 0 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'right', labels: { boxWidth: 12, font: { weight: 'bold', size: 10 } } } }, cutout: '70%' } });
 
       if (charts.trend) charts.trend.destroy();
       const top4Subjects = Object.keys(statsSubjek).slice(0, 4); 
