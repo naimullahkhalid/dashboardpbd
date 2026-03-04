@@ -17,12 +17,12 @@
     
     /* Warna Lencana TP */
     .tp-badge { display: inline-block; padding: 0.25rem 0.75rem; border-radius: 9999px; font-weight: 800; font-size: 0.7rem; color: white; min-width: 50px; text-align: center; letter-spacing: 0.05em; }
-    .tp1 { background-color: #ef4444; } /* Merah */
-    .tp2 { background-color: #f97316; } /* Oren */
-    .tp3 { background-color: #eab308; } /* Kuning */
-    .tp4 { background-color: #3b82f6; } /* Biru */
-    .tp5 { background-color: #10b981; } /* Hijau Muda */
-    .tp6 { background-color: #059669; } /* Hijau Gelap */
+    .tp1 { background-color: #ef4444; } 
+    .tp2 { background-color: #f97316; } 
+    .tp3 { background-color: #eab308; } 
+    .tp4 { background-color: #3b82f6; } 
+    .tp5 { background-color: #10b981; } 
+    .tp6 { background-color: #059669; } 
     
     /* Animasi Loader */
     .loader { border: 4px solid rgba(255, 255, 255, 0.2); border-radius: 50%; border-top: 4px solid #34d399; width: 50px; height: 50px; animation: spin 1s linear infinite; }
@@ -40,11 +40,11 @@
     
     <div id="emergency-btns" class="hidden mt-8 space-y-3 w-full max-w-sm px-6 text-center">
       <div class="bg-red-500/10 border border-red-500/30 p-4 rounded-2xl mb-4">
-        <p class="text-xs font-black text-red-400 uppercase mb-1">Masa Tamat (Timeout)</p>
-        <p class="text-[10px] text-slate-300">Sistem gagal menghubungi pangkalan data Cloud.</p>
+        <p class="text-xs font-black text-red-400 uppercase mb-1">Sambungan Gagal / Masa Tamat</p>
+        <p class="text-[10px] text-slate-300">Sila semak URL Apps Script atau Deployment (Mesti 'Anyone').</p>
       </div>
       <button onclick="batalLoadingKeAdmin()" class="w-full py-4 bg-emerald-600 hover:bg-emerald-700 rounded-xl font-black text-xs uppercase shadow-lg transition-all">⚙️ Buka Tab Admin</button>
-      <button onclick="location.reload()" class="w-full py-4 bg-slate-800 hover:bg-slate-700 rounded-xl font-black text-xs uppercase border border-slate-600 transition-all">🔄 Cuba Muat Semula</button>
+      <button onclick="location.reload(true)" class="w-full py-4 bg-slate-800 hover:bg-slate-700 rounded-xl font-black text-xs uppercase border border-slate-600 transition-all">🔄 Muat Semula Page</button>
     </div>
   </div>
 
@@ -156,7 +156,6 @@
     </div>
 
     <div id="sub-view-individu" class="hidden space-y-8">
-      
       <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
         <div class="bg-white p-8 rounded-3xl card-shadow border border-slate-100 space-y-6">
           <h3 class="text-xs font-black text-slate-800 uppercase tracking-widest border-l-4 border-blue-500 pl-3">Carian Profil Murid</h3>
@@ -241,8 +240,8 @@
       <h3 class="font-black text-lg flex items-center gap-3 tracking-widest uppercase mb-4">💡 Format Fail Wajib</h3>
       <div class="bg-white/10 p-5 rounded-2xl border border-white/20 text-sm font-bold leading-relaxed">
         <p class="mb-2"><span class="text-yellow-400">Nama Fail:</span> Mesti ikut format <code class="bg-black/30 px-2 py-1 rounded">TAHUN KELAS FASA.xls</code></p>
-        <p class="text-xs text-blue-200">Contoh yang betul: <span class="text-white">2025 4 EMERALD FASA 1.xls</span></p>
-        <p class="text-xs text-blue-200 mt-2">Pastikan lajur di dalam Excel ada perkataan <span class="text-white">NAMA</span> dan <span class="text-white">ID</span>.</p>
+        <p class="text-xs text-blue-200">Contoh yang betul: <span class="text-white">2025 4 EMERALD FASA 1.xls</span> atau <span class="text-white">2025 4 EMERALD FASA1.xls</span></p>
+        <p class="text-xs text-blue-200 mt-2">Pastikan di dalam fail Excel ada lajur bernama <span class="text-white">NAMA</span>.</p>
       </div>
     </div>
 
@@ -281,6 +280,7 @@
   </footer>
 
   <script>
+    // URL API TERKINI CIKGU
     const GAS_URL = "https://script.google.com/macros/s/AKfycbxyuiQInWhGYkMuIBVt0R6fSw9G3NEhFzuRjyw4WHBjpBAnz2PaVj0b7JVUmfUD-VAVIg/exec";
     
     let appData = [];
@@ -289,7 +289,7 @@
 
     window.onload = loadFromCloud;
 
-    // --- FUNGSI LOADING UI ---
+    // --- FUNGSI LOADING UI & TIMEOUT FAILSAFE ---
     function showLoading(show, text = "Memproses...") {
       const overlay = document.getElementById('loading-overlay');
       document.getElementById('loading-text').textContent = text;
@@ -308,35 +308,39 @@
       switchTab('admin');
     }
 
-    // --- 1. TARIK DATA (DENGAN 15s TIMEOUT) ---
+    // --- 1. TARIK DATA DENGAN ABORTCONTROLLER (15s) ---
     async function loadFromCloud() {
       showLoading(true, "Menarik data dari Cloud...");
       
-      // Timer Paksaan 15 Saat
+      const controller = new AbortController();
       const timeoutId = setTimeout(() => {
-        document.getElementById('loader-spinner').classList.add('hidden');
-        document.getElementById('loading-text').textContent = "SAMBUNGAN GAGAL";
-        document.getElementById('emergency-btns').classList.remove('hidden');
+        controller.abort(); 
       }, 15000); 
 
       try {
-        let res = await fetch(GAS_URL);
-        clearTimeout(timeoutId); // Berjaya sambung, matikan timer
+        let res = await fetch(GAS_URL, { signal: controller.signal });
+        clearTimeout(timeoutId);
         
         let data2D = await res.json();
+        
+        if (data2D.status === "error") {
+           throw new Error(data2D.message);
+        }
+        
         parseData(data2D);
         switchTab('dashboard');
       } catch (err) {
         clearTimeout(timeoutId);
+        console.error("Fetch Error:", err);
         document.getElementById('loader-spinner').classList.add('hidden');
-        document.getElementById('loading-text').textContent = "RALAT SISTEM";
+        document.getElementById('loading-text').textContent = "RALAT SAMBUNGAN";
         document.getElementById('emergency-btns').classList.remove('hidden');
       }
     }
 
     function parseData(data) {
       appData = [];
-      if (!data || data.length < 2) return; 
+      if (!Array.isArray(data) || data.length < 2) return; 
       
       let header = data[0];
       for (let i = 1; i < data.length; i++) {
@@ -351,7 +355,7 @@
       }
     }
 
-    // --- 2. HANTAR DATA KE CLOUD (DENGAN 15s TIMEOUT) ---
+    // --- 2. HANTAR DATA KE CLOUD (15s TIMEOUT) ---
     async function syncToCloud() {
       showLoading(true, "Menyimpan ke Cloud...");
       
@@ -366,24 +370,26 @@
         rowsToSave.push(row);
       });
 
+      const controller = new AbortController();
       const timeoutId = setTimeout(() => {
-        document.getElementById('loader-spinner').classList.add('hidden');
-        document.getElementById('loading-text').textContent = "SIMPANAN GAGAL";
-        document.getElementById('emergency-btns').classList.remove('hidden');
+        controller.abort();
       }, 15000);
 
       try {
         await fetch(GAS_URL, { 
           method: "POST", 
           headers: { "Content-Type": "text/plain;charset=utf-8" },
-          body: JSON.stringify({ action: "SIMPAN_DATA", data: rowsToSave }) 
+          body: JSON.stringify({ action: "SIMPAN_DATA", data: rowsToSave }),
+          signal: controller.signal
         });
         clearTimeout(timeoutId);
-        location.reload(); 
+        
+        // Force refresh selepas berjaya simpan supaya tarik data terbaru
+        window.location.reload(true); 
       } catch (error) {
         clearTimeout(timeoutId);
         document.getElementById('loader-spinner').classList.add('hidden');
-        document.getElementById('loading-text').textContent = "RALAT MENYIMPAN";
+        document.getElementById('loading-text').textContent = "GAGAL MENYIMPAN";
         document.getElementById('emergency-btns').classList.remove('hidden');
       }
     }
@@ -594,17 +600,14 @@
       showLoading(true, "Menganalisis Maklumat Excel...");
       
       for (let file of failDipilih) {
-        // PENAMBAHBAIKAN LOGIK BACA NAMA FAIL
         let namaFailAsal = file.name.replace(/\.[^/.]+$/, "").trim().toUpperCase(); 
         
         let bahagianFail = namaFailAsal.split(" ");
         let extractedTahun = bahagianFail[0]; 
         
-        // Cari perkataan "FASA", abaikan nombor yang melekat (Cth: FASA1)
         let matchFasa = namaFailAsal.match(/FASA\s*(\d)/);
         let extractedFasa = matchFasa ? "FASA " + matchFasa[1] : "FASA 1";
         
-        // Buang perkataan Tahun dan perkataan Fasa untuk dapatkan nama Kelas
         let regexFasa = /FASA\s*\d/g;
         let extractedKelas = namaFailAsal.replace(extractedTahun, "").replace(regexFasa, "").trim();
 
