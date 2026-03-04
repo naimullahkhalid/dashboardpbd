@@ -18,7 +18,6 @@
     * { font-family: 'Inter', sans-serif; }
     .card-shadow { box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.04); }
     
-    /* Tema Palet Warna Baharu */
     .gradient-header { background: linear-gradient(135deg, #050A44 0%, #0A21C0 100%); }
     .sub-nav-active { background-color: #0A21C0; color: white; border-color: #0A21C0; }
     
@@ -86,15 +85,20 @@
           <label class="block text-[9px] md:text-[10px] font-bold text-[#0A21C0] uppercase mb-1 ml-1">Subjek</label>
           <select id="filter-subjek" class="bg-[#0A21C0]/5 text-[10px] md:text-xs font-bold text-[#050A44] rounded-lg p-2 w-full border border-[#0A21C0]/30 focus:border-[#0A21C0] outline-none transition-all"></select>
         </div>
-        <div class="flex-1 min-w-[160px] md:min-w-[200px]">
-          <label class="block text-[9px] md:text-[10px] font-bold text-[#0A21C0] uppercase mb-1 ml-1">Cari Nama (Pilihan)</label>
+        <div class="flex-1 min-w-[160px] md:min-w-[180px]">
+          <label class="block text-[9px] md:text-[10px] font-bold text-[#0A21C0] uppercase mb-1 ml-1">Cari Nama</label>
           <input type="text" id="filter-nama-global" list="list-nama-global" placeholder="Semua Murid" class="bg-white text-[10px] md:text-xs font-bold text-[#141619] rounded-lg p-2 w-full border border-[#0A21C0]/30 focus:border-[#0A21C0] outline-none transition-all placeholder-[#B3B4BD]">
           <datalist id="list-nama-global"></datalist>
         </div>
         
-        <button onclick="processAllViews()" class="h-[34px] md:h-[36px] px-4 md:px-6 bg-[#0A21C0] hover:bg-[#050A44] text-white rounded-lg font-black text-[10px] md:text-xs uppercase shadow-sm transition-colors flex items-center justify-center whitespace-nowrap w-full lg:w-auto mt-2 lg:mt-0">
-            🔍 Terapkan
-        </button>
+        <div class="flex gap-2 w-full lg:w-auto mt-2 lg:mt-0">
+          <button onclick="processAllViews()" class="flex-1 lg:flex-none h-[34px] md:h-[36px] px-4 bg-[#0A21C0] hover:bg-[#050A44] text-white rounded-lg font-black text-[10px] uppercase shadow-sm transition-colors flex items-center justify-center whitespace-nowrap">
+              🔍 Terapkan
+          </button>
+          <button onclick="resetGlobalFilters()" class="flex-1 lg:flex-none h-[34px] md:h-[36px] px-4 bg-slate-200 hover:bg-slate-300 text-slate-700 rounded-lg font-black text-[10px] uppercase transition-colors flex items-center justify-center whitespace-nowrap border border-slate-300">
+              ✖ Reset
+          </button>
+        </div>
       </div>
       
       <div class="w-full xl:w-auto text-center xl:text-right bg-[#0A21C0]/5 px-4 py-2 rounded-xl border border-[#0A21C0]/20 flex xl:flex-col justify-between items-center xl:items-end min-w-[120px]">
@@ -106,8 +110,8 @@
 
   <main id="dashboard-view" class="hidden max-w-[1400px] mx-auto px-4 md:px-6 py-4 md:py-6 w-full space-y-4 md:space-y-6 flex-grow">
     <div id="empty-state-msg" class="hidden bg-white border border-[#B3B4BD]/50 p-8 rounded-2xl text-center card-shadow">
-      <h3 class="text-lg font-black text-[#2C2E3A] uppercase mb-1">Pangkalan Data Kosong / Tiada Rekod</h3>
-      <p class="text-xs font-bold text-[#B3B4BD]">Sila pastikan tapisan di atas betul atau muat naik fail Excel di tab Admin.</p>
+      <h3 class="text-lg font-black text-[#2C2E3A] uppercase mb-1">Tiada Rekod Dijumpai</h3>
+      <p class="text-xs font-bold text-[#B3B4BD]">Sila semak tapisan carian atau muat naik fail Excel di tab Admin.</p>
     </div>
 
     <div id="dashboard-content" class="space-y-4 md:space-y-6">
@@ -198,47 +202,54 @@
 
     <div id="sub-view-individu" class="hidden space-y-4 md:space-y-6">
       
-      <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6 items-start">
-        <div class="bg-white p-5 md:p-6 rounded-2xl card-shadow border border-[#B3B4BD]/30 space-y-4 md:space-y-5">
-          <h3 class="text-[10px] md:text-xs font-black text-[#141619] uppercase tracking-widest border-l-4 border-[#0A21C0] pl-2.5">Panel Carian Individu</h3>
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-6 items-start">
+        
+        <div class="lg:col-span-2 bg-white p-5 md:p-6 rounded-2xl card-shadow border border-[#B3B4BD]/30 space-y-4">
+          <div class="flex justify-between items-center mb-1">
+             <h3 class="text-[10px] md:text-xs font-black text-[#141619] uppercase tracking-widest border-l-4 border-[#0A21C0] pl-2.5">Carian Sejarah Individu</h3>
+             <button onclick="resetProfilCarian()" class="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-lg text-[9px] font-bold uppercase transition-colors">✖ Reset</button>
+          </div>
           
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-            <select id="profil-tahun" onchange="updateProfilDropdown()" class="w-full p-2 bg-slate-50 border border-[#B3B4BD]/40 rounded-lg text-[10px] font-bold text-[#141619] focus:border-[#0A21C0] outline-none uppercase"></select>
-            <select id="profil-kelas" onchange="updateProfilDropdown()" class="w-full p-2 bg-slate-50 border border-[#B3B4BD]/40 rounded-lg text-[10px] font-bold text-[#141619] focus:border-[#0A21C0] outline-none uppercase"></select>
-            
+          <div class="grid grid-cols-1 md:grid-cols-4 gap-3">
+            <div class="md:col-span-1">
+               <label class="block text-[8px] font-bold text-[#B3B4BD] uppercase mb-1">Tapis Tahun</label>
+               <select id="profil-tahun" onchange="updateProfilDropdown()" class="w-full p-2 bg-slate-50 border border-[#B3B4BD]/40 rounded-lg text-[10px] font-bold text-[#141619] focus:border-[#0A21C0] outline-none uppercase"></select>
+            </div>
+            <div class="md:col-span-1">
+               <label class="block text-[8px] font-bold text-[#B3B4BD] uppercase mb-1">Tapis Kelas</label>
+               <select id="profil-kelas" onchange="updateProfilDropdown()" class="w-full p-2 bg-slate-50 border border-[#B3B4BD]/40 rounded-lg text-[10px] font-bold text-[#141619] focus:border-[#0A21C0] outline-none uppercase"></select>
+            </div>
             <div class="md:col-span-2">
-               <input type="text" id="search-profil-murid" list="list-murid" onchange="updateIndividual()" placeholder="🔍 Taip atau pilih nama murid..." class="w-full p-3 bg-white border border-[#0A21C0]/30 rounded-xl text-xs md:text-sm font-bold text-[#050A44] focus:border-[#0A21C0] focus:ring-1 focus:ring-[#0A21C0] outline-none transition-all uppercase placeholder-[#B3B4BD]">
+               <label class="block text-[8px] font-bold text-[#0A21C0] uppercase mb-1">Taip Nama Murid</label>
+               <input type="text" id="search-profil-murid" list="list-murid" onchange="updateIndividual()" placeholder="🔍 Taip carian di sini..." class="w-full p-2.5 bg-white border border-[#0A21C0]/30 rounded-lg text-xs font-bold text-[#050A44] focus:border-[#0A21C0] focus:ring-1 focus:ring-[#0A21C0] outline-none transition-all uppercase placeholder-[#B3B4BD]">
                <datalist id="list-murid"></datalist>
             </div>
           </div>
-          
-          <div id="ind-card-container" class="grid grid-cols-1 gap-4 mt-4">
-             </div>
-
         </div>
         
-        <div class="bg-white p-5 md:p-6 rounded-2xl card-shadow border border-[#B3B4BD]/30">
-          <h3 class="text-[10px] md:text-xs font-black text-[#141619] uppercase mb-4 md:mb-6 tracking-widest border-l-4 border-orange-500 pl-2.5">⚡ Prioriti Tindakan Panitia</h3>
-          <div class="space-y-4">
-            <div class="p-4 md:p-5 bg-red-50 rounded-2xl border-l-8 border-red-500 flex justify-between items-center shadow-sm">
+        <div class="lg:col-span-1 bg-white p-5 md:p-6 rounded-2xl card-shadow border border-[#B3B4BD]/30 h-full">
+          <h3 class="text-[10px] md:text-xs font-black text-[#141619] uppercase mb-3 md:mb-5 tracking-widest border-l-4 border-orange-500 pl-2.5">⚡ Status Keseluruhan</h3>
+          <div class="space-y-3">
+            <div class="p-3 bg-red-50 rounded-xl border-l-4 border-red-500 flex justify-between items-center shadow-sm">
               <div>
-                <p class="text-[10px] md:text-xs font-black text-red-800 uppercase tracking-widest">TINDAKAN SEGERA (KRITIKAL)</p>
-                <p id="p1-desc" class="text-[9px] text-red-600 font-bold uppercase mt-1.5"></p>
+                <p class="text-[9px] md:text-[10px] font-black text-red-800 uppercase tracking-widest">TINDAKAN SEGERA</p>
+                <p id="p1-desc" class="text-[8px] text-red-600 font-bold uppercase mt-1"></p>
               </div>
-              <span class="text-3xl text-red-200 font-black">!</span>
             </div>
-            <div class="p-4 md:p-5 bg-orange-50 rounded-2xl border-l-8 border-orange-500 flex justify-between items-center shadow-sm">
+            <div class="p-3 bg-orange-50 rounded-xl border-l-4 border-orange-500 flex justify-between items-center shadow-sm">
               <div>
-                <p class="text-[10px] md:text-xs font-black text-orange-800 uppercase tracking-widest">SOKONGAN BERTERUSAN</p>
-                <p id="p2-desc" class="text-[9px] text-orange-600 font-bold uppercase mt-1.5"></p>
+                <p class="text-[9px] md:text-[10px] font-black text-orange-800 uppercase tracking-widest">PEMULIHAN</p>
+                <p id="p2-desc" class="text-[8px] text-orange-600 font-bold uppercase mt-1"></p>
               </div>
-              <span class="text-3xl text-orange-200 font-black">?</span>
             </div>
           </div>
         </div>
       </div>
       
-      <div class="bg-white rounded-2xl card-shadow border border-[#B3B4BD]/30 overflow-hidden">
+      <div id="ind-card-container" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 md:gap-5 mt-2">
+         </div>
+      
+      <div class="bg-white rounded-2xl card-shadow border border-[#B3B4BD]/30 overflow-hidden mt-8">
         <div class="px-4 py-4 md:px-6 md:py-5 bg-[#f8f9fa] border-b border-[#B3B4BD]/30">
           <div class="flex flex-col md:flex-row md:items-center justify-between gap-3 mb-3">
             <div>
@@ -248,7 +259,7 @@
             <span id="inter-badge" class="bg-red-500 text-white text-[9px] px-3 py-1.5 md:px-4 md:py-2 rounded-full font-black uppercase shadow-sm self-start md:self-auto">0 Kes</span>
           </div>
           
-          <div class="grid grid-cols-2 md:grid-cols-5 gap-2 bg-white p-2 md:p-3 rounded-xl border border-[#B3B4BD]/40 shadow-sm">
+          <div class="grid grid-cols-2 md:grid-cols-6 gap-2 bg-white p-2 md:p-3 rounded-xl border border-[#B3B4BD]/40 shadow-sm">
             <select id="filter-inter-nama" onchange="applyIntervensiFilters()" class="p-1.5 md:p-2 border border-[#B3B4BD]/30 bg-slate-50 rounded-lg text-[9px] md:text-[10px] font-bold text-[#2C2E3A] focus:border-[#0A21C0] outline-none w-full uppercase"><option value="Semua">Semua Nama</option></select>
             <select id="filter-inter-kelas" onchange="applyIntervensiFilters()" class="p-1.5 md:p-2 border border-[#B3B4BD]/30 bg-slate-50 rounded-lg text-[9px] md:text-[10px] font-bold text-[#2C2E3A] focus:border-[#0A21C0] outline-none w-full uppercase"><option value="Semua">Semua Kelas</option></select>
             <select id="filter-inter-subjek" onchange="applyIntervensiFilters()" class="p-1.5 md:p-2 border border-[#B3B4BD]/30 bg-slate-50 rounded-lg text-[9px] md:text-[10px] font-bold text-[#2C2E3A] focus:border-[#0A21C0] outline-none w-full uppercase"><option value="Semua">Semua Subjek</option></select>
@@ -257,7 +268,8 @@
                 <option value="1">TP 1 Sahaja</option>
                 <option value="2">TP 2 Sahaja</option>
             </select>
-            <input type="text" id="search-intervensi" onkeyup="applyIntervensiFilters()" placeholder="🔍 Carian bebas..." class="col-span-2 md:col-span-1 p-1.5 md:p-2 border border-[#B3B4BD]/40 bg-white rounded-lg text-[9px] md:text-[10px] font-bold text-[#141619] focus:border-[#0A21C0] outline-none w-full placeholder-[#B3B4BD]">
+            <input type="text" id="search-intervensi" onkeyup="applyIntervensiFilters()" placeholder="🔍 Carian..." class="p-1.5 md:p-2 border border-[#B3B4BD]/40 bg-white rounded-lg text-[9px] md:text-[10px] font-bold text-[#141619] focus:border-[#0A21C0] outline-none w-full placeholder-[#B3B4BD]">
+            <button onclick="resetIntervensiFilters()" class="p-1.5 md:p-2 bg-slate-200 hover:bg-slate-300 text-slate-700 rounded-lg font-black text-[9px] md:text-[10px] uppercase transition-colors">✖ Reset</button>
           </div>
         </div>
 
@@ -462,6 +474,18 @@
       activeBtn.classList.remove('text-[#2C2E3A]', 'hover:text-[#050A44]');
     }
 
+    // ===============================================
+    // FUNGSI RESET KESELURUHAN (GLOBAL)
+    // ===============================================
+    function resetGlobalFilters() {
+      document.getElementById('filter-tahun').value = 'Semua';
+      document.getElementById('filter-fasa').value = 'Semua';
+      document.getElementById('filter-kelas').value = 'Semua';
+      document.getElementById('filter-subjek').value = 'Semua';
+      document.getElementById('filter-nama-global').value = '';
+      processAllViews(); // Kemaskini skrin lepas reset
+    }
+
     function updateFiltersDropdowns() {
       const curTahun = document.getElementById('filter-tahun') ? document.getElementById('filter-tahun').value : 'Semua';
       const curFasa = document.getElementById('filter-fasa') ? document.getElementById('filter-fasa').value : 'Semua';
@@ -549,7 +573,7 @@
           if (score >= 3) countLulus++;
           if (score >= 5) countCemerlang++;
           if (score <= 2) {
-             senaraiIntervensiTemp.push({ nama: student.nama, kelas: student.kelas, subjek: subjek, tp: score });
+             senaraiIntervensiTemp.push({ nama: student.nama, kelas: student.kelas, subjek: subjek, fasa: student.fasa, tahun: student.tahun, tp: score });
              if (!bmtmBySubject[subjek]) bmtmBySubject[subjek] = [];
              bmtmBySubject[subjek].push(`${student.nama} (${student.kelas})`);
           }
@@ -640,8 +664,16 @@
     }
 
     // =========================================================
-    // LOGIK NAIK TARAF: KAD PROFIL INDIVIDU BERSUSUN (MULTIPLE YEARS)
+    // FUNGSI RESET UNTUK PROFIL INDIVIDU (BARU)
     // =========================================================
+    function resetProfilCarian() {
+      document.getElementById('profil-tahun').value = 'Semua';
+      document.getElementById('profil-kelas').value = 'Semua';
+      document.getElementById('search-profil-murid').value = '';
+      document.getElementById('ind-card-container').innerHTML = ''; // Kosongkan kad
+      updateProfilDropdown();
+    }
+
     function populateProfilUtamaDropdowns() {
       const uniqueTahun = [...new Set(appData.map(d => String(d.tahun)))].sort().reverse();
       let hTahun = '<option value="Semua">Semua Tahun</option>';
@@ -660,15 +692,16 @@
       const fT = document.getElementById('profil-tahun').value;
       const fK = document.getElementById('profil-kelas').value;
       
+      // Kosongkan input list
       document.getElementById('search-profil-murid').value = '';
       
       const uniqueMurid = [...new Set(appData.filter(d => (fT === 'Semua' || String(d.tahun) === fT) && (fK === 'Semua' || d.kelas === fK)).map(d => d.nama))].sort();
       
       let htmlMurid = '';
       uniqueMurid.forEach(m => htmlMurid += `<option value="${m}">`);
-      
       document.getElementById('list-murid').innerHTML = htmlMurid;
-      document.getElementById('ind-card-container').innerHTML = ''; // Clear existing cards
+      
+      document.getElementById('ind-card-container').innerHTML = '';
     }
 
     function updateIndividual() {
@@ -680,7 +713,6 @@
       const fT = document.getElementById('profil-tahun').value;
       const fK = document.getElementById('profil-kelas').value;
       
-      // Ambil SEMUA rekod yang sepadan dengan kriteria carian (Mungkin ada Tahun 2024 & 2025)
       let matchedRecords = appData.filter(d => 
         d.nama === namaCarian && 
         (fT === 'Semua' || String(d.tahun) === fT) && 
@@ -688,15 +720,13 @@
       );
       
       if(matchedRecords.length === 0) { 
-          container.innerHTML = '<p class="text-sm text-red-500 font-bold p-4 bg-red-50 rounded-xl text-center border border-red-100">Rekod tidak dijumpai bagi kriteria yang dipilih.</p>'; 
+          container.innerHTML = '<div class="col-span-full p-4 bg-red-50 rounded-xl text-center border border-red-100 text-xs font-bold text-red-500">Tiada rekod dijumpai.</div>'; 
           return; 
       }
 
-      // Susun rekod dari tahun paling terkini (Desc)
       matchedRecords.sort((a,b) => parseInt(b.tahun) - parseInt(a.tahun));
 
       let htmlCards = '';
-      
       matchedRecords.forEach(muridRecord => {
           let sum = 0, count = 0, weakSubs = [], strongSubs = [];
           for (let subjek in muridRecord.scores) { 
@@ -708,39 +738,48 @@
           let strongStr = strongSubs.length > 0 ? strongSubs.map(getFullSub).join(', ') : 'Tiada';
 
           htmlCards += `
-            <div class="bg-[#f8f9fa] rounded-2xl p-2 border border-[#B3B4BD]/30 relative overflow-hidden shadow-sm hover:shadow-md transition-shadow">
-              <div class="absolute top-0 right-0 bg-[#0A21C0] text-white text-[9px] md:text-[10px] font-black px-4 py-1.5 rounded-bl-2xl uppercase tracking-widest shadow-md z-10">TAHUN ${muridRecord.tahun}</div>
+            <div class="bg-white rounded-2xl p-2 border border-[#B3B4BD]/30 relative overflow-hidden shadow-sm hover:shadow-md transition-shadow">
+              <div class="absolute top-0 right-0 bg-[#0A21C0] text-white text-[8px] md:text-[9px] font-black px-3 py-1 rounded-bl-xl uppercase tracking-widest shadow-sm z-10">${muridRecord.tahun} | ${muridRecord.fasa}</div>
               
-              <div class="flex items-center gap-4 bg-gradient-to-r from-[#0A21C0] to-[#050A44] p-4 md:p-5 rounded-xl text-white shadow-md relative">
-                <div class="w-12 h-12 md:w-14 md:h-14 bg-white/10 rounded-xl flex items-center justify-center font-black text-xl border border-white/20">ID</div>
-                <div class="pr-16">
-                  <p class="font-black uppercase text-xs md:text-sm tracking-wide">${muridRecord.nama}</p>
-                  <p class="text-[9px] font-bold text-[#B3B4BD] uppercase tracking-widest mt-0.5">KELAS ${muridRecord.kelas} | ${muridRecord.fasa}</p>
+              <div class="flex items-center gap-3 bg-[#f8f9fa] p-3 md:p-4 rounded-xl border border-[#B3B4BD]/20 mb-2 relative">
+                <div class="w-10 h-10 md:w-12 md:h-12 bg-[#0A21C0] text-white rounded-xl flex items-center justify-center font-black text-sm shadow-sm">ID</div>
+                <div class="pr-12">
+                  <p class="font-black text-[#141619] uppercase text-[10px] md:text-xs tracking-wide line-clamp-1">${muridRecord.nama}</p>
+                  <p class="text-[8px] font-bold text-[#B3B4BD] uppercase tracking-widest mt-0.5">KELAS ${muridRecord.kelas}</p>
                 </div>
               </div>
               
-              <div class="grid grid-cols-1 gap-2 mt-2 text-[9px] md:text-[10px] font-bold uppercase p-1">
-                <div class="bg-white p-3 md:p-4 rounded-xl flex justify-between items-center shadow-sm border border-[#B3B4BD]/20">
+              <div class="grid grid-cols-1 gap-2 text-[8px] md:text-[9px] font-bold uppercase px-1">
+                <div class="bg-[#f8f9fa] p-2.5 rounded-xl flex justify-between items-center border border-[#B3B4BD]/20">
                   <span class="text-[#2C2E3A]">Purata Keseluruhan (GPS)</span>
-                  <span class="font-black text-base md:text-lg text-[#0A21C0]">${avg}</span>
+                  <span class="font-black text-sm md:text-base text-[#0A21C0]">${avg}</span>
                 </div>
-                <div class="bg-red-50 p-3 md:p-4 rounded-xl flex justify-between items-center shadow-sm border border-red-100">
-                  <span class="text-red-500 w-1/3">Subjek Lemah (TP1-2)</span>
-                  <span class="font-black text-red-700 text-right w-2/3 leading-relaxed whitespace-normal">${weakStr}</span>
+                <div class="bg-red-50 p-2.5 rounded-xl flex justify-between items-center border border-red-100">
+                  <span class="text-red-500 w-1/3">Lemah (TP1-2)</span>
+                  <span class="font-black text-red-700 text-right w-2/3 line-clamp-2">${weakStr}</span>
                 </div>
-                <div class="bg-emerald-50 p-3 md:p-4 rounded-xl flex justify-between items-center shadow-sm border border-emerald-100">
-                  <span class="text-emerald-600 w-1/3">Subjek Kuat (TP5-6)</span>
-                  <span class="font-black text-emerald-700 text-right w-2/3 leading-relaxed whitespace-normal">${strongStr}</span>
+                <div class="bg-emerald-50 p-2.5 rounded-xl flex justify-between items-center border border-emerald-100">
+                  <span class="text-emerald-600 w-1/3">Kuat (TP5-6)</span>
+                  <span class="font-black text-emerald-700 text-right w-2/3 line-clamp-2">${strongStr}</span>
                 </div>
               </div>
             </div>
           `;
       });
-      
       container.innerHTML = htmlCards;
     }
 
     // ====================================================
+    // FUNGSI RESET UNTUK JADUAL INTERVENSI (BARU)
+    // ====================================================
+    function resetIntervensiFilters() {
+      document.getElementById('filter-inter-nama').value = 'Semua';
+      document.getElementById('filter-inter-kelas').value = 'Semua';
+      document.getElementById('filter-inter-subjek').value = 'Semua';
+      document.getElementById('filter-inter-tp').value = 'Semua';
+      document.getElementById('search-intervensi').value = '';
+      applyIntervensiFilters(); // Kemaskini jadual lepas reset
+    }
 
     function populateIntervensiDropdowns() {
       const names = [...new Set(senaraiIntervensiGlobal.map(m => m.nama))].sort();
@@ -783,7 +822,7 @@
       let htmlIntervensi = '';
       dataToRender.forEach((murid, i) => {
         let rowClass = murid.tp === 1 ? 'bg-red-50 text-red-900 border-b border-red-100' : 'bg-white text-[#2C2E3A] hover:bg-slate-50 border-b border-[#B3B4BD]/20 transition-colors';
-        htmlIntervensi += `<tr class="${rowClass}"><td class="px-4 py-3 md:px-6 md:py-4 font-bold opacity-60">${i+1}</td><td class="px-4 py-3 md:px-6 md:py-4 uppercase font-black whitespace-nowrap text-[#141619]">${murid.nama}</td><td class="px-4 py-3 md:px-6 md:py-4 font-bold opacity-80 whitespace-nowrap">${murid.kelas}</td><td class="px-4 py-3 md:px-6 md:py-4 font-black opacity-60 whitespace-nowrap">${getFullSub(murid.subjek)}</td><td class="px-4 py-3 md:px-6 md:py-4 text-center"><span class="tp-badge tp${murid.tp} shadow-sm">TP${murid.tp}</span></td></tr>`;
+        htmlIntervensi += `<tr class="${rowClass}"><td class="px-4 py-3 md:px-6 md:py-4 font-bold opacity-60">${i+1}</td><td class="px-4 py-3 md:px-6 md:py-4 uppercase font-black whitespace-nowrap text-[#141619]">${murid.nama}</td><td class="px-4 py-3 md:px-6 md:py-4 font-bold opacity-80 whitespace-nowrap">${murid.tahun} | ${murid.kelas}</td><td class="px-4 py-3 md:px-6 md:py-4 font-black opacity-60 whitespace-nowrap">${getFullSub(murid.subjek)}</td><td class="px-4 py-3 md:px-6 md:py-4 text-center"><span class="tp-badge tp${murid.tp} shadow-sm">TP${murid.tp}</span></td></tr>`;
       });
       document.getElementById('table-inter').innerHTML = htmlIntervensi || `<tr><td colspan='5' class='text-center py-10 text-[#B3B4BD] font-bold uppercase text-[10px] tracking-widest'>Tiada Data Jumpa</td></tr>`;
     }
