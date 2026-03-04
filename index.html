@@ -10,7 +10,6 @@
   
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
-  
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 
   <style>
@@ -66,21 +65,26 @@
 
   <div id="global-filters" class="max-w-7xl mx-auto px-6 pt-8 w-full hidden">
     <div class="bg-white p-6 rounded-3xl card-shadow border border-slate-100 flex flex-wrap items-center gap-6 justify-between">
-      <div class="flex flex-wrap gap-6 flex-1">
-        <div class="min-w-[160px]">
-          <label class="block text-[10px] font-black text-slate-400 uppercase mb-2">Tapis Fasa</label>
-          <select id="filter-fasa" onchange="processAllViews()" class="bg-slate-50 text-sm font-bold text-slate-800 rounded-xl p-3 w-full border-2 border-slate-100 focus:border-emerald-500 outline-none transition-all">
-            <option value="Semua">Semua Fasa</option>
-            <option value="FASA 1">Fasa 1</option>
-            <option value="FASA 2">Fasa 2</option>
-          </select>
+      <div class="flex flex-wrap gap-4 flex-1">
+        <div class="w-full md:w-auto flex-1 min-w-[120px]">
+          <label class="block text-[10px] font-black text-slate-400 uppercase mb-2">Tahun</label>
+          <select id="filter-tahun" onchange="processAllViews()" class="bg-slate-50 text-sm font-bold text-slate-800 rounded-xl p-3 w-full border-2 border-slate-100 focus:border-emerald-500 outline-none transition-all"></select>
         </div>
-        <div class="min-w-[220px]">
-          <label class="block text-[10px] font-black text-slate-400 uppercase mb-2">Tapis Tahun & Kelas</label>
+        <div class="w-full md:w-auto flex-1 min-w-[120px]">
+          <label class="block text-[10px] font-black text-slate-400 uppercase mb-2">Fasa</label>
+          <select id="filter-fasa" onchange="processAllViews()" class="bg-slate-50 text-sm font-bold text-slate-800 rounded-xl p-3 w-full border-2 border-slate-100 focus:border-emerald-500 outline-none transition-all"></select>
+        </div>
+        <div class="w-full md:w-auto flex-1 min-w-[160px]">
+          <label class="block text-[10px] font-black text-slate-400 uppercase mb-2">Kelas</label>
           <select id="filter-kelas" onchange="processAllViews()" class="bg-slate-50 text-sm font-bold text-slate-800 rounded-xl p-3 w-full border-2 border-slate-100 focus:border-emerald-500 outline-none transition-all"></select>
         </div>
+        <div class="w-full md:w-auto flex-1 min-w-[180px]">
+          <label class="block text-[10px] font-black text-slate-400 uppercase mb-2 text-emerald-600">Fokus Subjek</label>
+          <select id="filter-subjek" onchange="processAllViews()" class="bg-emerald-50 text-sm font-bold text-emerald-900 rounded-xl p-3 w-full border-2 border-emerald-200 focus:border-emerald-600 outline-none transition-all"></select>
+        </div>
       </div>
-      <div class="text-right bg-emerald-50 px-6 py-3 rounded-2xl border border-emerald-100">
+      
+      <div class="text-right bg-emerald-50 px-6 py-3 rounded-2xl border border-emerald-100 mt-4 md:mt-0">
         <p class="text-[10px] font-black text-emerald-600 uppercase mb-1">Jumlah Murid</p>
         <p id="stat-total-records" class="text-3xl font-black text-emerald-700 leading-none">0</p>
       </div>
@@ -160,20 +164,20 @@
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-10 mb-8 border-b border-slate-100 pb-8">
           <div>
             <h4 class="text-xs font-black text-slate-600 uppercase tracking-widest mb-4">1. Agihan TP Keseluruhan Murid</h4>
-            <p class="text-[10px] font-bold text-slate-400 uppercase mb-3">Berdasarkan Purata Keseluruhan Individu</p>
+            <p class="text-[10px] font-bold text-slate-400 uppercase mb-3">Berdasarkan Purata Terkini</p>
             <div class="overflow-x-auto rounded-2xl border border-slate-200">
               <table class="w-full text-left text-xs font-bold border-collapse" id="table-tp-summary"></table>
             </div>
           </div>
           <div>
-            <h4 class="text-xs font-black text-slate-600 uppercase tracking-widest mb-4">2. Subjek Kritikal BMTM (Teramai)</h4>
-            <p class="text-[10px] font-bold text-slate-400 uppercase mb-3">Bilangan Murid TP1 & TP2 Mengikut Subjek</p>
+            <h4 class="text-xs font-black text-slate-600 uppercase tracking-widest mb-4">2. Statistik BMTM (Teramai)</h4>
+            <p class="text-[10px] font-bold text-slate-400 uppercase mb-3">Bilangan Murid TP1 & TP2</p>
             <div id="bmtm-top-subjects" class="space-y-2"></div>
           </div>
         </div>
 
         <div>
-          <h4 class="text-xs font-black text-slate-600 uppercase tracking-widest mb-4">3. Senarai Murid BMTM Mengikut Subjek</h4>
+          <h4 class="text-xs font-black text-slate-600 uppercase tracking-widest mb-4">3. Senarai Murid BMTM</h4>
           <div id="bmtm-student-list" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5"></div>
         </div>
       </div>
@@ -309,23 +313,11 @@
     let appData = [];
     const subjects = ['BM', 'BI', 'MM', 'SAINS', 'SEJ', 'PAI', 'PM', 'BC', 'BT', 'BIN', 'RBT', 'AR', 'PJPK', 'PMZ', 'PSV'];
     
-    // Kamus Nama Penuh Subjek
     const subjectMap = {
-      'BM': 'Bahasa Melayu',
-      'BI': 'Bahasa Inggeris',
-      'MM': 'Matematik',
-      'SAINS': 'Sains',
-      'SEJ': 'Sejarah',
-      'PAI': 'Pendidikan Islam',
-      'PM': 'Pendidikan Moral',
-      'BC': 'Bahasa Cina',
-      'BT': 'Bahasa Tamil',
-      'BIN': 'Bahasa Iban',
-      'RBT': 'Reka Bentuk & Teknologi',
-      'AR': 'Bahasa Arab',
-      'PJPK': 'PJPK',
-      'PMZ': 'Pendidikan Muzik',
-      'PSV': 'Pendidikan Seni Visual'
+      'BM': 'Bahasa Melayu', 'BI': 'Bahasa Inggeris', 'MM': 'Matematik', 'SAINS': 'Sains',
+      'SEJ': 'Sejarah', 'PAI': 'Pendidikan Islam', 'PM': 'Pendidikan Moral', 'BC': 'Bahasa Cina',
+      'BT': 'Bahasa Tamil', 'BIN': 'Bahasa Iban', 'RBT': 'Reka Bentuk & Teknologi', 
+      'AR': 'Bahasa Arab', 'PJPK': 'PJPK', 'PMZ': 'Pendidikan Muzik', 'PSV': 'Pendidikan Seni Visual'
     };
 
     function getFullSub(code) { return subjectMap[code] || code; }
@@ -397,11 +389,7 @@
       });
 
       try {
-        await fetch(GAS_URL, { 
-          method: "POST", 
-          headers: { "Content-Type": "text/plain;charset=utf-8" },
-          body: JSON.stringify({ action: "SIMPAN_DATA", data: rowsToSave })
-        });
+        await fetch(GAS_URL, { method: "POST", headers: { "Content-Type": "text/plain;charset=utf-8" }, body: JSON.stringify({ action: "SIMPAN_DATA", data: rowsToSave }) });
         systemReady = true;
         window.location.reload(true); 
       } catch (error) {
@@ -441,30 +429,63 @@
     }
 
     function updateFiltersDropdowns() {
-      const uniqueKelas = [...new Set(appData.map(d => `${d.tahun} ${d.kelas}`))].sort();
-      let htmlKelas = '<option value="Semua">Semua Kelas</option>';
-      uniqueKelas.forEach(k => htmlKelas += `<option value="${k}">${k}</option>`);
-      document.getElementById('filter-kelas').innerHTML = htmlKelas;
+      const curTahun = document.getElementById('filter-tahun') ? document.getElementById('filter-tahun').value : 'Semua';
+      const curFasa = document.getElementById('filter-fasa') ? document.getElementById('filter-fasa').value : 'Semua';
+      const curKelas = document.getElementById('filter-kelas') ? document.getElementById('filter-kelas').value : 'Semua';
+      const curSubjek = document.getElementById('filter-subjek') ? document.getElementById('filter-subjek').value : 'Semua';
 
+      // 1. Tahun
+      const uniqueTahun = [...new Set(appData.map(d => d.tahun))].sort().reverse();
+      let hTahun = '<option value="Semua">Semua Tahun</option>';
+      uniqueTahun.forEach(t => hTahun += `<option value="${t}">${t}</option>`);
+      document.getElementById('filter-tahun').innerHTML = hTahun;
+      if(uniqueTahun.includes(curTahun)) document.getElementById('filter-tahun').value = curTahun;
+
+      // 2. Fasa
+      const uniqueFasa = [...new Set(appData.map(d => d.fasa))].sort();
+      let hFasa = '<option value="Semua">Semua Fasa</option>';
+      uniqueFasa.forEach(f => hFasa += `<option value="${f}">${f}</option>`);
+      document.getElementById('filter-fasa').innerHTML = hFasa;
+      if(uniqueFasa.includes(curFasa)) document.getElementById('filter-fasa').value = curFasa;
+
+      // 3. Kelas
+      const uniqueKelas = [...new Set(appData.map(d => d.kelas))].sort();
+      let hKelas = '<option value="Semua">Semua Kelas</option>';
+      uniqueKelas.forEach(k => hKelas += `<option value="${k}">${k}</option>`);
+      document.getElementById('filter-kelas').innerHTML = hKelas;
+      if(uniqueKelas.includes(curKelas)) document.getElementById('filter-kelas').value = curKelas;
+
+      // 4. Subjek
+      let hSubjek = '<option value="Semua">Semua Subjek</option>';
+      subjects.forEach(s => hSubjek += `<option value="${s}">${getFullSub(s)}</option>`);
+      document.getElementById('filter-subjek').innerHTML = hSubjek;
+      document.getElementById('filter-subjek').value = curSubjek; 
+
+      // 5. Admin Delete Dropdown
       const uniqueFiles = [...new Set(appData.map(d => `${d.tahun} ${d.kelas} ${d.fasa}`))].sort();
       let htmlDelete = '<option value="">Pilih Fail Untuk Dipadam</option>';
       uniqueFiles.forEach(f => htmlDelete += `<option value="${f}">${f}</option>`);
       document.getElementById('select-delete-file').innerHTML = htmlDelete;
 
-      const currentKelas = document.getElementById('filter-kelas').value;
-      const uniqueMurid = [...new Set(appData.filter(d => currentKelas === 'Semua' || `${d.tahun} ${d.kelas}` === currentKelas).map(d => d.nama))].sort();
+      // 6. Murid Profil Dropdown
+      const fT = document.getElementById('filter-tahun').value;
+      const fK = document.getElementById('filter-kelas').value;
+      const uniqueMurid = [...new Set(appData.filter(d => (fT === 'Semua' || d.tahun === fT) && (fK === 'Semua' || d.kelas === fK)).map(d => d.nama))].sort();
       let htmlMurid = '<option value="">Cari Nama Murid...</option>';
       uniqueMurid.forEach(m => htmlMurid += `<option value="${m}">${m}</option>`);
       document.getElementById('select-murid').innerHTML = htmlMurid;
     }
 
     function processAllViews() {
-      const selectedFasa = document.getElementById('filter-fasa').value;
-      const selectedKelas = document.getElementById('filter-kelas').value;
+      const fTahun = document.getElementById('filter-tahun').value;
+      const fFasa = document.getElementById('filter-fasa').value;
+      const fKelas = document.getElementById('filter-kelas').value;
+      const fSubjek = document.getElementById('filter-subjek').value;
       
       let filteredData = appData.filter(d => 
-        (selectedFasa === 'Semua' || d.fasa === selectedFasa) && 
-        (selectedKelas === 'Semua' || `${d.tahun} ${d.kelas}` === selectedKelas)
+        (fTahun === 'Semua' || d.tahun === fTahun) && 
+        (fFasa === 'Semua' || d.fasa === fFasa) && 
+        (fKelas === 'Semua' || d.kelas === fKelas)
       );
 
       document.getElementById('stat-total-records').textContent = filteredData.length;
@@ -491,6 +512,9 @@
         if (!statsKelas[classKey]) statsKelas[classKey] = { sum: 0, count: 0, tpDist: {1:0, 3:0, 5:0} };
         
         for (let subjek in student.scores) {
+          // TAPISAN SUBJEK DINAMIK
+          if (fSubjek !== 'Semua' && subjek !== fSubjek) continue;
+
           let score = student.scores[subjek];
           totalSubjekDiambil++; studentTotalScore += score; studentSubCount++; totalTPCount[score]++;
           
@@ -539,10 +563,7 @@
         htmlKelas += `<div class="flex justify-between items-center p-4 bg-emerald-50 rounded-2xl border border-emerald-100"><span class="font-bold text-xs text-emerald-900 uppercase">${i+1}. ${cls.nama}</span><span class="font-black text-emerald-600 bg-white px-3 py-1 rounded-full text-[10px] shadow-sm">${cls.avg.toFixed(2)}</span></div>`;
       });
       document.getElementById('rank-kelas').innerHTML = htmlKelas;
-      
-      // Update label Amaran & Fokus
-      document.getElementById('p1-desc').textContent = `Fokus Panitia: ${sortedSubjek[0] ? getFullSub(sortedSubjek[0].nama) : 'Tiada'}`;
-      document.getElementById('p2-desc').textContent = `Sasaran Pemulihan: ${uniqueIntervensiCount} Murid Terlibat`;
+      document.getElementById('p1-desc').textContent = `Fokus: ${sortedSubjek[0] ? getFullSub(sortedSubjek[0].nama) : 'Tiada'}`;
 
       document.getElementById('inter-badge').textContent = senaraiIntervensi.length + " Keseluruhan Kes";
       let htmlIntervensi = '';
@@ -644,7 +665,8 @@
       });
 
       if (charts.trend) charts.trend.destroy();
-      const top4Subjects = Object.keys(statsSubjek).slice(0, 4); 
+      const fSubjek = document.getElementById('filter-subjek').value;
+      const top4Subjects = fSubjek !== 'Semua' ? [fSubjek] : Object.keys(statsSubjek).slice(0, 4); 
       const trendColors = ['#3b82f6', '#ef4444', '#10b981', '#f59e0b'];
       let datasetTrend = top4Subjects.map((sub, i) => {
         let fasa1Avg = calculateAverageFasa(sub, 'FASA 1'); let fasa2Avg = calculateAverageFasa(sub, 'FASA 2');
