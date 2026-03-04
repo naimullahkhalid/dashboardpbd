@@ -16,26 +16,27 @@
 
   <style>
     * { font-family: 'Inter', sans-serif; }
-    .card-shadow { box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.05); }
-    .gradient-header { background: linear-gradient(135deg, #1e3a8a 0%, #312e81 100%); }
+    .card-shadow { box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.04); }
+    
+    /* Tema Palet Warna Baharu */
+    .gradient-header { background: linear-gradient(135deg, #050A44 0%, #0A21C0 100%); }
+    .sub-nav-active { background-color: #0A21C0; color: white; border-color: #0A21C0; }
     
     .tp-badge { display: inline-block; padding: 0.2rem 0.6rem; border-radius: 9999px; font-weight: 800; font-size: 0.65rem; color: white; min-width: 48px; text-align: center; letter-spacing: 0.05em; }
     .tp1 { background-color: #ef4444; } .tp2 { background-color: #f97316; } .tp3 { background-color: #eab308; }
     .tp4 { background-color: #3b82f6; } .tp5 { background-color: #10b981; } .tp6 { background-color: #059669; }
     
-    .loader { border: 4px solid rgba(255, 255, 255, 0.2); border-radius: 50%; border-top: 4px solid #4f46e5; width: 50px; height: 50px; animation: spin 1s linear infinite; }
+    .loader { border: 4px solid rgba(255, 255, 255, 0.2); border-radius: 50%; border-top: 4px solid #0A21C0; width: 50px; height: 50px; animation: spin 1s linear infinite; }
     @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-    
-    .sub-nav-active { background-color: #4f46e5; color: white; border-color: #4f46e5; }
     
     .custom-scrollbar::-webkit-scrollbar { width: 4px; height: 4px; }
     .custom-scrollbar::-webkit-scrollbar-track { background: #f1f5f9; border-radius: 4px; }
-    .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+    .custom-scrollbar::-webkit-scrollbar-thumb { background: #B3B4BD; border-radius: 4px; }
   </style>
 </head>
-<body class="h-full bg-slate-50 overflow-auto flex flex-col text-slate-800">
+<body class="h-full bg-[#f8f9fa] overflow-auto flex flex-col text-[#141619]">
   
-  <div id="loading-overlay" class="fixed inset-0 bg-slate-900/95 z-[100] flex flex-col items-center justify-center text-white hidden">
+  <div id="loading-overlay" class="fixed inset-0 bg-[#141619]/95 z-[100] flex flex-col items-center justify-center text-white hidden">
     <div id="loader-spinner" class="loader mb-6"></div>
     <h2 id="loading-text" class="text-lg md:text-xl font-black uppercase tracking-widest text-center">Sila Tunggu...</h2>
     
@@ -44,147 +45,152 @@
         <p class="text-xs font-black text-red-400 uppercase mb-1">Sambungan Gagal / Masa Tamat</p>
         <p class="text-[10px] text-slate-300">Sila semak URL Apps Script atau Deployment (Mesti 'Anyone').</p>
       </div>
-      <button onclick="batalLoadingKeAdmin()" class="w-full py-4 bg-indigo-600 hover:bg-indigo-700 rounded-xl font-black text-xs uppercase shadow-lg transition-all">⚙️ Buka Tab Admin</button>
-      <button onclick="location.reload(true)" class="w-full py-4 bg-slate-800 hover:bg-slate-700 rounded-xl font-black text-xs uppercase border border-slate-600 transition-all">🔄 Muat Semula Page</button>
+      <button onclick="batalLoadingKeAdmin()" class="w-full py-4 bg-[#0A21C0] hover:bg-[#050A44] rounded-xl font-black text-xs uppercase shadow-lg transition-all">⚙️ Buka Tab Admin</button>
+      <button onclick="location.reload(true)" class="w-full py-4 bg-[#2C2E3A] hover:bg-[#141619] rounded-xl font-black text-xs uppercase border border-[#B3B4BD]/20 transition-all">🔄 Muat Semula Page</button>
     </div>
   </div>
 
-  <header class="text-white sticky top-0 z-50 gradient-header shadow-md border-b border-indigo-900">
-    <div class="max-w-7xl mx-auto px-4 py-3 md:px-6 md:py-4 flex flex-col md:flex-row items-center justify-between gap-3 md:gap-5">
+  <header class="text-white sticky top-0 z-50 gradient-header shadow-md border-b border-[#050A44]">
+    <div class="max-w-[1400px] mx-auto px-4 py-3 md:px-6 md:py-4 flex flex-col md:flex-row items-center justify-between gap-3 md:gap-5">
       <div class="text-center md:text-left w-full md:w-auto">
         <h1 class="text-lg md:text-2xl font-black tracking-tight uppercase leading-tight">PBD Analisis SKPR</h1>
-        <p class="text-[8px] md:text-[10px] font-bold text-indigo-300 tracking-[0.15em] md:tracking-[0.2em] uppercase mt-0.5 flex items-center justify-center md:justify-start gap-1.5">
-          <span class="w-1.5 h-1.5 rounded-full bg-indigo-400 animate-pulse"></span> Sistem Pengurusan Bersepadu
+        <p class="text-[8px] md:text-[10px] font-bold text-[#B3B4BD] tracking-[0.15em] md:tracking-[0.2em] uppercase mt-0.5 flex items-center justify-center md:justify-start gap-1.5">
+          <span class="w-1.5 h-1.5 rounded-full bg-[#0A21C0] animate-pulse shadow-[0_0_5px_#0A21C0]"></span> Sistem Pengurusan Bersepadu
         </p>
       </div>
-      <nav class="flex flex-wrap justify-center gap-1.5 bg-black/20 p-1 md:p-1.5 rounded-xl backdrop-blur-sm w-full md:w-auto">
-        <button id="nav-dashboard" onclick="switchTab('dashboard')" class="flex-1 md:flex-none px-3 py-2 md:px-5 md:py-2.5 rounded-lg text-[9px] md:text-[10px] font-black uppercase transition-all border border-transparent">📊 Utama</button>
-        <button id="nav-laporan" onclick="switchTab('laporan')" class="flex-1 md:flex-none px-3 py-2 md:px-5 md:py-2.5 rounded-lg text-[9px] md:text-[10px] font-black uppercase transition-all border border-transparent">📈 Laporan</button>
-        <button id="nav-admin" onclick="switchTab('admin')" class="flex-1 md:flex-none px-3 py-2 md:px-5 md:py-2.5 rounded-lg text-[9px] md:text-[10px] font-black uppercase transition-all border border-transparent">⚙️ Admin</button>
+      <nav class="flex flex-wrap justify-center gap-1.5 bg-black/20 p-1 md:p-1.5 rounded-xl backdrop-blur-sm w-full md:w-auto border border-white/10">
+        <button id="nav-dashboard" onclick="switchTab('dashboard')" class="flex-1 md:flex-none px-3 py-2 md:px-5 md:py-2.5 rounded-lg text-[9px] md:text-[10px] font-black uppercase transition-all border border-transparent bg-[#0A21C0] text-white shadow-md">📊 Utama</button>
+        <button id="nav-laporan" onclick="switchTab('laporan')" class="flex-1 md:flex-none px-3 py-2 md:px-5 md:py-2.5 rounded-lg text-[9px] md:text-[10px] font-black uppercase transition-all bg-transparent text-[#B3B4BD] hover:text-white border border-transparent">📈 Laporan</button>
+        <button id="nav-admin" onclick="switchTab('admin')" class="flex-1 md:flex-none px-3 py-2 md:px-5 md:py-2.5 rounded-lg text-[9px] md:text-[10px] font-black uppercase transition-all bg-transparent text-[#B3B4BD] hover:text-white border border-transparent">⚙️ Admin</button>
       </nav>
     </div>
   </header>
 
-  <div id="global-filters" class="max-w-7xl mx-auto px-4 md:px-6 pt-4 md:pt-6 w-full hidden">
-    <div class="bg-white p-4 md:p-5 rounded-2xl card-shadow border border-slate-200 flex flex-col lg:flex-row items-end lg:items-center gap-4 justify-between">
+  <div id="global-filters" class="max-w-[1400px] mx-auto px-4 md:px-6 pt-4 md:pt-6 w-full hidden">
+    <div class="bg-white p-3 md:p-4 rounded-2xl card-shadow border border-[#B3B4BD]/30 flex flex-col xl:flex-row items-center gap-3 justify-between">
       
-      <div class="grid grid-cols-2 lg:flex lg:flex-wrap gap-2 md:gap-4 w-full flex-1 items-end">
-        <div class="w-full">
-          <label class="block text-[9px] md:text-[10px] font-bold text-slate-400 uppercase mb-1 ml-1">Tahun</label>
-          <select id="filter-tahun" class="bg-slate-50 text-xs md:text-sm font-bold text-slate-700 rounded-xl p-2 md:p-2.5 w-full border border-slate-200 focus:border-indigo-500 outline-none transition-all"></select>
+      <div class="flex flex-wrap lg:flex-nowrap gap-2 w-full flex-1 items-end">
+        <div class="flex-1 min-w-[100px]">
+          <label class="block text-[9px] md:text-[10px] font-bold text-[#2C2E3A] uppercase mb-1 ml-1">Tahun</label>
+          <select id="filter-tahun" class="bg-slate-50 text-[10px] md:text-xs font-bold text-[#141619] rounded-lg p-2 w-full border border-[#B3B4BD]/40 focus:border-[#0A21C0] outline-none transition-all"></select>
         </div>
-        <div class="w-full">
-          <label class="block text-[9px] md:text-[10px] font-bold text-slate-400 uppercase mb-1 ml-1">Fasa</label>
-          <select id="filter-fasa" class="bg-slate-50 text-xs md:text-sm font-bold text-slate-700 rounded-xl p-2 md:p-2.5 w-full border border-slate-200 focus:border-indigo-500 outline-none transition-all"></select>
+        <div class="flex-1 min-w-[100px]">
+          <label class="block text-[9px] md:text-[10px] font-bold text-[#2C2E3A] uppercase mb-1 ml-1">Fasa</label>
+          <select id="filter-fasa" class="bg-slate-50 text-[10px] md:text-xs font-bold text-[#141619] rounded-lg p-2 w-full border border-[#B3B4BD]/40 focus:border-[#0A21C0] outline-none transition-all"></select>
         </div>
-        <div class="w-full col-span-2 md:col-span-1 lg:min-w-[140px]">
-          <label class="block text-[9px] md:text-[10px] font-bold text-slate-400 uppercase mb-1 ml-1">Kelas</label>
-          <select id="filter-kelas" class="bg-slate-50 text-xs md:text-sm font-bold text-slate-700 rounded-xl p-2 md:p-2.5 w-full border border-slate-200 focus:border-indigo-500 outline-none transition-all"></select>
+        <div class="flex-1 min-w-[120px]">
+          <label class="block text-[9px] md:text-[10px] font-bold text-[#2C2E3A] uppercase mb-1 ml-1">Kelas</label>
+          <select id="filter-kelas" class="bg-slate-50 text-[10px] md:text-xs font-bold text-[#141619] rounded-lg p-2 w-full border border-[#B3B4BD]/40 focus:border-[#0A21C0] outline-none transition-all"></select>
         </div>
-        <div class="w-full col-span-2 md:col-span-1 lg:min-w-[160px]">
-          <label class="block text-[9px] md:text-[10px] font-bold text-indigo-600 uppercase mb-1 ml-1">Fokus Subjek</label>
-          <select id="filter-subjek" class="bg-indigo-50 text-xs md:text-sm font-bold text-indigo-900 rounded-xl p-2 md:p-2.5 w-full border border-indigo-200 focus:border-indigo-600 outline-none transition-all"></select>
+        <div class="flex-1 min-w-[140px]">
+          <label class="block text-[9px] md:text-[10px] font-bold text-[#0A21C0] uppercase mb-1 ml-1">Subjek</label>
+          <select id="filter-subjek" class="bg-[#0A21C0]/5 text-[10px] md:text-xs font-bold text-[#050A44] rounded-lg p-2 w-full border border-[#0A21C0]/30 focus:border-[#0A21C0] outline-none transition-all"></select>
+        </div>
+        <div class="flex-1 min-w-[160px] md:min-w-[200px]">
+          <label class="block text-[9px] md:text-[10px] font-bold text-[#0A21C0] uppercase mb-1 ml-1">Cari Nama (Pilihan)</label>
+          <input type="text" id="filter-nama-global" list="list-nama-global" placeholder="Semua Murid" class="bg-white text-[10px] md:text-xs font-bold text-[#141619] rounded-lg p-2 w-full border border-[#0A21C0]/30 focus:border-[#0A21C0] outline-none transition-all placeholder-[#B3B4BD]">
+          <datalist id="list-nama-global"></datalist>
         </div>
         
-        <button onclick="processAllViews()" class="col-span-2 md:col-span-1 h-[38px] md:h-[44px] px-5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-black text-xs uppercase shadow-sm transition-colors flex items-center justify-center gap-2">
-            🔍 Teruskan
+        <button onclick="processAllViews()" class="h-[34px] md:h-[36px] px-4 md:px-6 bg-[#0A21C0] hover:bg-[#050A44] text-white rounded-lg font-black text-[10px] md:text-xs uppercase shadow-sm transition-colors flex items-center justify-center whitespace-nowrap w-full lg:w-auto mt-2 lg:mt-0">
+            🔍 Terapkan
         </button>
       </div>
       
-      <div class="w-full lg:w-auto text-center lg:text-right bg-indigo-50 px-5 py-2.5 rounded-xl border border-indigo-100 flex lg:flex-col justify-between items-center lg:items-end mt-2 lg:mt-0">
-        <p class="text-[9px] md:text-[10px] font-bold text-indigo-600 uppercase md:mb-0.5">Jumlah Murid</p>
-        <p id="stat-total-records" class="text-xl md:text-3xl font-black text-indigo-800 leading-none">0</p>
+      <div class="w-full xl:w-auto text-center xl:text-right bg-[#0A21C0]/5 px-4 py-2 rounded-xl border border-[#0A21C0]/20 flex xl:flex-col justify-between items-center xl:items-end min-w-[120px]">
+        <p class="text-[9px] font-bold text-[#0A21C0] uppercase">Jumlah Murid</p>
+        <p id="stat-total-records" class="text-xl md:text-2xl font-black text-[#050A44] leading-none">0</p>
       </div>
     </div>
   </div>
 
-  <main id="dashboard-view" class="hidden max-w-7xl mx-auto px-4 md:px-6 py-4 md:py-6 w-full space-y-4 md:space-y-6 flex-grow">
-    <div id="empty-state-msg" class="hidden bg-slate-100 border border-slate-300 p-8 rounded-2xl text-center">
-      <h3 class="text-lg font-black text-slate-600 uppercase mb-1">Pangkalan Data Kosong</h3>
-      <p class="text-xs font-bold text-slate-500">Sila pergi ke tab <strong>Admin</strong> dan muat naik fail Excel.</p>
+  <main id="dashboard-view" class="hidden max-w-[1400px] mx-auto px-4 md:px-6 py-4 md:py-6 w-full space-y-4 md:space-y-6 flex-grow">
+    <div id="empty-state-msg" class="hidden bg-white border border-[#B3B4BD]/50 p-8 rounded-2xl text-center card-shadow">
+      <h3 class="text-lg font-black text-[#2C2E3A] uppercase mb-1">Pangkalan Data Kosong</h3>
+      <p class="text-xs font-bold text-[#B3B4BD]">Sila pergi ke tab <strong>Admin</strong> dan muat naik fail Excel.</p>
     </div>
 
     <div id="dashboard-content" class="space-y-4 md:space-y-6">
       <div class="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-5">
-        <div class="bg-white p-4 md:p-5 rounded-2xl card-shadow border border-slate-100 flex flex-col justify-center">
-          <p class="text-[9px] md:text-[10px] font-bold text-slate-400 uppercase tracking-wide mb-1">Keseluruhan</p>
-          <p id="dash-total" class="text-2xl md:text-3xl font-black text-slate-800">0</p>
+        <div class="bg-white p-4 md:p-5 rounded-2xl card-shadow border border-[#B3B4BD]/30 flex flex-col justify-center">
+          <p class="text-[9px] md:text-[10px] font-bold text-[#2C2E3A] uppercase tracking-wide mb-1">Keseluruhan</p>
+          <p id="dash-total" class="text-2xl md:text-3xl font-black text-[#141619]">0</p>
         </div>
         <div class="bg-white p-4 md:p-5 rounded-2xl card-shadow border-b-4 border-emerald-500 flex flex-col justify-center">
-          <p class="text-[9px] md:text-[10px] font-bold text-slate-400 uppercase tracking-wide mb-1">Menguasai (TP3-6)</p>
+          <p class="text-[9px] md:text-[10px] font-bold text-[#2C2E3A] uppercase tracking-wide mb-1">Menguasai (TP3-6)</p>
           <p id="dash-lulus" class="text-2xl md:text-3xl font-black text-emerald-600">0%</p>
         </div>
-        <div class="bg-white p-4 md:p-5 rounded-2xl card-shadow border-b-4 border-indigo-500 flex flex-col justify-center">
-          <p class="text-[9px] md:text-[10px] font-bold text-slate-400 uppercase tracking-wide mb-1">Cemerlang (TP5-6)</p>
-          <p id="dash-cemerlang" class="text-2xl md:text-3xl font-black text-indigo-600">0%</p>
+        <div class="bg-white p-4 md:p-5 rounded-2xl card-shadow border-b-4 border-[#0A21C0] flex flex-col justify-center">
+          <p class="text-[9px] md:text-[10px] font-bold text-[#2C2E3A] uppercase tracking-wide mb-1">Cemerlang (TP5-6)</p>
+          <p id="dash-cemerlang" class="text-2xl md:text-3xl font-black text-[#0A21C0]">0%</p>
         </div>
-        <div class="bg-white p-4 md:p-5 rounded-2xl card-shadow border-b-4 border-red-500 flex flex-col justify-center bg-red-50/30">
-          <p class="text-[9px] md:text-[10px] font-bold text-red-400 uppercase tracking-wide mb-1">Tindakan Segera</p>
+        <div class="bg-white p-4 md:p-5 rounded-2xl card-shadow border-b-4 border-red-500 flex flex-col justify-center bg-red-50/50">
+          <p class="text-[9px] md:text-[10px] font-bold text-red-500 uppercase tracking-wide mb-1">Tindakan Segera</p>
           <p id="dash-inter" class="text-2xl md:text-3xl font-black text-red-600">0</p>
         </div>
       </div>
 
       <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6">
-        <div class="bg-white p-5 md:p-6 rounded-2xl card-shadow border border-slate-100">
-          <h3 class="text-[10px] md:text-xs font-black text-slate-700 uppercase mb-4 md:mb-6 tracking-widest border-l-4 border-indigo-500 pl-2.5">Agihan Gred Keseluruhan</h3>
+        <div class="bg-white p-5 md:p-6 rounded-2xl card-shadow border border-[#B3B4BD]/30">
+          <h3 class="text-[10px] md:text-xs font-black text-[#141619] uppercase mb-4 md:mb-6 tracking-widest border-l-4 border-[#0A21C0] pl-2.5">Agihan Gred Keseluruhan</h3>
           <div class="h-56 md:h-64 relative"><canvas id="chart-dash-pie"></canvas></div>
         </div>
-        <div class="bg-white p-5 md:p-6 rounded-2xl card-shadow border border-slate-100 flex flex-col">
-          <h3 class="text-[10px] md:text-xs font-black text-slate-700 uppercase mb-3 md:mb-5 tracking-widest border-l-4 border-red-500 pl-2.5">Subjek Paling Kritikal</h3>
-          <p class="text-[9px] font-bold text-slate-400 mb-3 uppercase">Purata TP Terendah</p>
+        <div class="bg-white p-5 md:p-6 rounded-2xl card-shadow border border-[#B3B4BD]/30 flex flex-col">
+          <h3 class="text-[10px] md:text-xs font-black text-[#141619] uppercase mb-3 md:mb-5 tracking-widest border-l-4 border-red-500 pl-2.5">Subjek Paling Kritikal</h3>
+          <p class="text-[9px] font-bold text-[#B3B4BD] mb-3 uppercase">Purata TP Terendah</p>
           <div id="dash-rank-subjek" class="space-y-2.5 flex-grow"></div>
         </div>
       </div>
     </div>
   </main>
 
-  <main id="laporan-view" class="hidden max-w-7xl mx-auto px-4 md:px-6 py-4 md:py-6 w-full space-y-4 md:space-y-6 flex-grow">
+  <main id="laporan-view" class="hidden max-w-[1400px] mx-auto px-4 md:px-6 py-4 md:py-6 w-full space-y-4 md:space-y-6 flex-grow">
     
-    <div class="flex justify-center gap-2 mb-2 md:mb-4 bg-slate-200 p-1 md:p-1.5 rounded-full w-full md:w-fit mx-auto">
-      <button onclick="switchSubTab('kelas')" id="btn-sub-kelas" class="flex-1 md:flex-none px-4 py-2 md:px-8 md:py-2.5 rounded-full text-[10px] md:text-xs font-black uppercase transition-all sub-nav-active">Laporan Kelas</button>
-      <button onclick="switchSubTab('individu')" id="btn-sub-individu" class="flex-1 md:flex-none px-4 py-2 md:px-8 md:py-2.5 rounded-full text-[10px] md:text-xs font-black uppercase transition-all text-slate-500 hover:text-slate-800">Profil Individu</button>
+    <div class="flex justify-center gap-2 mb-2 md:mb-4 bg-[#B3B4BD]/20 p-1 md:p-1.5 rounded-full w-full md:w-fit mx-auto border border-[#B3B4BD]/30">
+      <button onclick="switchSubTab('kelas')" id="btn-sub-kelas" class="flex-1 md:flex-none px-4 py-2 md:px-8 md:py-2.5 rounded-full text-[10px] md:text-xs font-black uppercase transition-all sub-nav-active shadow-md">Laporan Kelas</button>
+      <button onclick="switchSubTab('individu')" id="btn-sub-individu" class="flex-1 md:flex-none px-4 py-2 md:px-8 md:py-2.5 rounded-full text-[10px] md:text-xs font-black uppercase transition-all text-[#2C2E3A] hover:text-[#050A44] border border-transparent">Profil Individu</button>
     </div>
 
     <div id="sub-view-kelas" class="space-y-4 md:space-y-6">
       
-      <div class="bg-white p-5 md:p-6 rounded-2xl card-shadow border border-slate-100">
-        <h3 class="text-[10px] md:text-xs font-black text-slate-700 uppercase mb-4 tracking-widest border-l-4 border-indigo-500 pl-2.5">Trend Prestasi TP (Fasa 1 vs Fasa 2)</h3>
+      <div class="bg-white p-5 md:p-6 rounded-2xl card-shadow border border-[#B3B4BD]/30">
+        <h3 class="text-[10px] md:text-xs font-black text-[#141619] uppercase mb-4 tracking-widest border-l-4 border-[#0A21C0] pl-2.5">Trend Prestasi TP (Fasa 1 vs Fasa 2)</h3>
         <div class="h-64 md:h-80 w-full relative"><canvas id="chart-trend"></canvas></div>
       </div>
       
       <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6">
-        <div class="bg-white p-5 md:p-6 rounded-2xl card-shadow border border-slate-100">
-          <h3 class="text-[10px] md:text-xs font-black text-slate-700 uppercase mb-3 md:mb-4 tracking-widest border-l-4 border-yellow-500 pl-2.5">🏆 Ranking Kelas Terbaik</h3>
-          <p class="text-[9px] font-bold text-slate-400 mb-3 uppercase">Purata TP tertinggi</p>
+        <div class="bg-white p-5 md:p-6 rounded-2xl card-shadow border border-[#B3B4BD]/30">
+          <h3 class="text-[10px] md:text-xs font-black text-[#141619] uppercase mb-3 md:mb-4 tracking-widest border-l-4 border-yellow-500 pl-2.5">🏆 Ranking Kelas Terbaik</h3>
+          <p class="text-[9px] font-bold text-[#B3B4BD] mb-3 uppercase">Purata TP tertinggi</p>
           <div id="rank-kelas" class="space-y-3"></div>
         </div>
-        <div class="bg-white p-5 md:p-6 rounded-2xl card-shadow border border-slate-100">
-          <h3 class="text-[10px] md:text-xs font-black text-slate-700 uppercase mb-4 md:mb-6 tracking-widest border-l-4 border-indigo-500 pl-2.5">Agihan Pencapaian Mengikut Kelas</h3>
+        <div class="bg-white p-5 md:p-6 rounded-2xl card-shadow border border-[#B3B4BD]/30">
+          <h3 class="text-[10px] md:text-xs font-black text-[#141619] uppercase mb-4 md:mb-6 tracking-widest border-l-4 border-[#0A21C0] pl-2.5">Agihan Pencapaian Mengikut Kelas</h3>
           <div class="h-56 md:h-64 w-full relative"><canvas id="chart-bar-kelas"></canvas></div>
         </div>
       </div>
 
-      <div class="bg-white p-5 md:p-8 rounded-2xl card-shadow border border-slate-200 mt-6 relative overflow-hidden">
-        <div class="absolute top-0 right-0 bg-red-100 text-red-800 text-[8px] md:text-[10px] font-black px-3 py-1 md:px-4 rounded-bl-xl uppercase tracking-widest">Zon Analisis BMTM</div>
-        <h3 class="text-xs md:text-sm font-black text-slate-800 uppercase mb-6 md:mb-8 tracking-widest border-l-4 border-purple-500 pl-2.5">Rumusan & Analisis BMTM (TP1-TP2)</h3>
+      <div class="bg-white p-5 md:p-8 rounded-2xl card-shadow border border-[#0A21C0]/20 mt-6 relative overflow-hidden">
+        <div class="absolute top-0 right-0 bg-red-100 text-red-800 text-[8px] md:text-[10px] font-black px-3 py-1 md:px-4 rounded-bl-xl uppercase tracking-widest border-b border-l border-red-200">Zon Analisis BMTM</div>
+        <h3 class="text-xs md:text-sm font-black text-[#141619] uppercase mb-6 md:mb-8 tracking-widest border-l-4 border-purple-500 pl-2.5">Rumusan & Analisis BMTM (TP1-TP2)</h3>
 
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 md:gap-10 mb-6 md:mb-8 border-b border-slate-100 pb-6 md:pb-8">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 md:gap-10 mb-6 md:mb-8 border-b border-[#B3B4BD]/30 pb-6 md:pb-8">
           <div>
-            <h4 class="text-[10px] md:text-xs font-black text-slate-600 uppercase tracking-widest mb-2 md:mb-4">1. Agihan TP Keseluruhan Murid</h4>
-            <p class="text-[9px] md:text-[10px] font-bold text-slate-400 uppercase mb-3">Berdasarkan Purata Terkini</p>
-            <div class="overflow-x-auto rounded-xl border border-slate-200">
+            <h4 class="text-[10px] md:text-xs font-black text-[#2C2E3A] uppercase tracking-widest mb-2 md:mb-4">1. Agihan TP Keseluruhan Murid</h4>
+            <p class="text-[9px] md:text-[10px] font-bold text-[#B3B4BD] uppercase mb-3">Berdasarkan Purata Terkini</p>
+            <div class="overflow-x-auto rounded-xl border border-[#B3B4BD]/30">
               <table class="w-full text-left text-[10px] md:text-xs font-bold border-collapse" id="table-tp-summary"></table>
             </div>
           </div>
           <div>
-            <h4 class="text-[10px] md:text-xs font-black text-slate-600 uppercase tracking-widest mb-2 md:mb-4">2. Statistik BMTM (Teramai)</h4>
-            <p class="text-[9px] md:text-[10px] font-bold text-slate-400 uppercase mb-3">Bilangan Murid TP1 & TP2</p>
+            <h4 class="text-[10px] md:text-xs font-black text-[#2C2E3A] uppercase tracking-widest mb-2 md:mb-4">2. Statistik BMTM (Teramai)</h4>
+            <p class="text-[9px] md:text-[10px] font-bold text-[#B3B4BD] uppercase mb-3">Bilangan Murid TP1 & TP2</p>
             <div id="bmtm-top-subjects" class="space-y-2"></div>
           </div>
         </div>
 
         <div>
-          <h4 class="text-[10px] md:text-xs font-black text-slate-600 uppercase tracking-widest mb-4">3. Senarai Murid BMTM Mengikut Subjek</h4>
+          <h4 class="text-[10px] md:text-xs font-black text-[#2C2E3A] uppercase tracking-widest mb-4">3. Senarai Murid BMTM Mengikut Subjek</h4>
           <div id="bmtm-student-list" class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4 md:gap-5"></div>
         </div>
       </div>
@@ -193,45 +199,46 @@
     <div id="sub-view-individu" class="hidden space-y-4 md:space-y-6">
       
       <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6">
-        <div class="bg-white p-5 md:p-6 rounded-2xl card-shadow border border-slate-100 space-y-4 md:space-y-5">
-          <h3 class="text-[10px] md:text-xs font-black text-slate-700 uppercase tracking-widest border-l-4 border-indigo-500 pl-2.5">Panel Carian Individu</h3>
+        <div class="bg-white p-5 md:p-6 rounded-2xl card-shadow border border-[#B3B4BD]/30 space-y-4 md:space-y-5">
+          <h3 class="text-[10px] md:text-xs font-black text-[#141619] uppercase tracking-widest border-l-4 border-[#0A21C0] pl-2.5">Panel Carian Individu</h3>
           
-          <div class="grid grid-cols-2 gap-2">
-            <select id="profil-tahun" onchange="updateProfilDropdown()" class="w-full p-2 bg-slate-50 border border-slate-200 rounded-lg text-[10px] font-bold focus:border-indigo-500 outline-none uppercase"></select>
-            <select id="profil-kelas" onchange="updateProfilDropdown()" class="w-full p-2 bg-slate-50 border border-slate-200 rounded-lg text-[10px] font-bold focus:border-indigo-500 outline-none uppercase"></select>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <select id="profil-tahun" onchange="updateProfilDropdown()" class="w-full p-2 bg-slate-50 border border-[#B3B4BD]/40 rounded-lg text-[10px] font-bold text-[#141619] focus:border-[#0A21C0] outline-none uppercase"></select>
+            <select id="profil-kelas" onchange="updateProfilDropdown()" class="w-full p-2 bg-slate-50 border border-[#B3B4BD]/40 rounded-lg text-[10px] font-bold text-[#141619] focus:border-[#0A21C0] outline-none uppercase"></select>
+            
+            <div class="md:col-span-2">
+               <input type="text" id="search-profil-murid" list="list-murid" onchange="updateIndividual()" placeholder="🔍 Taip atau pilih nama murid..." class="w-full p-3 bg-white border border-[#0A21C0]/30 rounded-xl text-xs md:text-sm font-bold text-[#050A44] focus:border-[#0A21C0] focus:ring-1 focus:ring-[#0A21C0] outline-none transition-all uppercase placeholder-[#B3B4BD]">
+               <datalist id="list-murid"></datalist>
+            </div>
           </div>
           
-          <select id="select-murid" onchange="updateIndividual()" class="w-full p-3 md:p-4 bg-slate-50 border border-slate-200 rounded-xl text-xs md:text-sm font-bold focus:border-indigo-500 outline-none transition-all">
-             <option value="">Pilih Tahun & Kelas Dahulu...</option>
-          </select>
-          
-          <div id="ind-card" class="hidden bg-slate-50 rounded-2xl p-2 border border-slate-100">
-            <div class="flex items-center gap-4 bg-gradient-to-r from-indigo-600 to-indigo-800 p-4 md:p-5 rounded-xl text-white shadow-md">
-              <div class="w-12 h-12 md:w-14 md:h-14 bg-white/20 rounded-xl flex items-center justify-center font-black text-xl shadow-inner border border-white/20">ID</div>
+          <div id="ind-card" class="hidden bg-[#f8f9fa] rounded-2xl p-2 border border-[#B3B4BD]/30 mt-4">
+            <div class="flex items-center gap-4 bg-gradient-to-r from-[#0A21C0] to-[#050A44] p-4 md:p-5 rounded-xl text-white shadow-md">
+              <div class="w-12 h-12 md:w-14 md:h-14 bg-white/10 rounded-xl flex items-center justify-center font-black text-xl border border-white/20">ID</div>
               <div>
                 <p id="ind-nama" class="font-black uppercase text-xs md:text-sm tracking-wide"></p>
-                <p id="ind-info" class="text-[9px] font-bold text-indigo-200 uppercase tracking-widest mt-0.5"></p>
+                <p id="ind-info" class="text-[9px] font-bold text-[#B3B4BD] uppercase tracking-widest mt-0.5"></p>
               </div>
             </div>
             <div class="grid grid-cols-1 gap-2 mt-2 text-[9px] md:text-[10px] font-bold uppercase p-1">
-              <div class="bg-white p-3 md:p-4 rounded-xl flex justify-between items-center shadow-sm">
-                <span class="text-slate-500">Purata Keseluruhan (GPS)</span>
-                <span id="ind-avg" class="font-black text-base md:text-lg text-slate-800">0.0</span>
+              <div class="bg-white p-3 md:p-4 rounded-xl flex justify-between items-center shadow-sm border border-[#B3B4BD]/20">
+                <span class="text-[#2C2E3A]">Purata Keseluruhan (GPS)</span>
+                <span id="ind-avg" class="font-black text-base md:text-lg text-[#0A21C0]">0.0</span>
               </div>
               <div class="bg-red-50 p-3 md:p-4 rounded-xl flex justify-between items-center shadow-sm border border-red-100">
-                <span class="text-red-500">Subjek Paling Lemah (TP1-2)</span>
+                <span class="text-red-500">Subjek Lemah (TP1-2)</span>
                 <span id="ind-weak" class="font-black text-red-700 text-right w-1/2 line-clamp-2"></span>
               </div>
               <div class="bg-emerald-50 p-3 md:p-4 rounded-xl flex justify-between items-center shadow-sm border border-emerald-100">
-                <span class="text-emerald-600">Subjek Paling Kuat (TP5-6)</span>
+                <span class="text-emerald-600">Subjek Kuat (TP5-6)</span>
                 <span id="ind-strong" class="font-black text-emerald-700 text-right w-1/2 line-clamp-2"></span>
               </div>
             </div>
           </div>
         </div>
         
-        <div class="bg-white p-5 md:p-6 rounded-2xl card-shadow border border-slate-100">
-          <h3 class="text-[10px] md:text-xs font-black text-slate-700 uppercase mb-4 md:mb-6 tracking-widest border-l-4 border-orange-500 pl-2.5">⚡ Prioriti Tindakan Panitia</h3>
+        <div class="bg-white p-5 md:p-6 rounded-2xl card-shadow border border-[#B3B4BD]/30">
+          <h3 class="text-[10px] md:text-xs font-black text-[#141619] uppercase mb-4 md:mb-6 tracking-widest border-l-4 border-orange-500 pl-2.5">⚡ Prioriti Tindakan Panitia</h3>
           <div class="space-y-4">
             <div class="p-4 md:p-5 bg-red-50 rounded-2xl border-l-8 border-red-500 flex justify-between items-center shadow-sm">
               <div>
@@ -251,41 +258,41 @@
         </div>
       </div>
       
-      <div class="bg-white rounded-2xl card-shadow border border-slate-100 overflow-hidden">
-        <div class="px-4 py-4 md:px-6 md:py-5 bg-slate-50 border-b border-slate-200">
+      <div class="bg-white rounded-2xl card-shadow border border-[#B3B4BD]/30 overflow-hidden">
+        <div class="px-4 py-4 md:px-6 md:py-5 bg-[#f8f9fa] border-b border-[#B3B4BD]/30">
           <div class="flex flex-col md:flex-row md:items-center justify-between gap-3 mb-3">
             <div>
-              <h3 class="text-[11px] md:text-sm font-black text-slate-800 uppercase tracking-widest">Senarai Murid Intervensi</h3>
-              <p class="text-[8px] md:text-[9px] font-bold text-slate-400 uppercase mt-0.5">Klik tajuk lajur untuk menyusun</p>
+              <h3 class="text-[11px] md:text-sm font-black text-[#141619] uppercase tracking-widest">Senarai Murid Intervensi</h3>
+              <p class="text-[8px] md:text-[9px] font-bold text-[#B3B4BD] uppercase mt-0.5">Klik tajuk lajur untuk menyusun</p>
             </div>
             <span id="inter-badge" class="bg-red-500 text-white text-[9px] px-3 py-1.5 md:px-4 md:py-2 rounded-full font-black uppercase shadow-sm self-start md:self-auto">0 Kes</span>
           </div>
           
-          <div class="grid grid-cols-2 md:grid-cols-5 gap-2 bg-white p-2 md:p-3 rounded-xl border border-slate-200 shadow-sm">
-            <select id="filter-inter-nama" onchange="applyIntervensiFilters()" class="p-1.5 md:p-2 border border-slate-100 bg-slate-50 rounded-lg text-[9px] md:text-[10px] font-bold text-slate-700 focus:ring-1 focus:ring-indigo-500 outline-none w-full uppercase"><option value="Semua">Semua Nama</option></select>
-            <select id="filter-inter-kelas" onchange="applyIntervensiFilters()" class="p-1.5 md:p-2 border border-slate-100 bg-slate-50 rounded-lg text-[9px] md:text-[10px] font-bold text-slate-700 focus:ring-1 focus:ring-indigo-500 outline-none w-full uppercase"><option value="Semua">Semua Kelas</option></select>
-            <select id="filter-inter-subjek" onchange="applyIntervensiFilters()" class="p-1.5 md:p-2 border border-slate-100 bg-slate-50 rounded-lg text-[9px] md:text-[10px] font-bold text-slate-700 focus:ring-1 focus:ring-indigo-500 outline-none w-full uppercase"><option value="Semua">Semua Subjek</option></select>
-            <select id="filter-inter-tp" onchange="applyIntervensiFilters()" class="p-1.5 md:p-2 border border-slate-100 bg-slate-50 rounded-lg text-[9px] md:text-[10px] font-bold text-slate-700 focus:ring-1 focus:ring-indigo-500 outline-none w-full uppercase">
+          <div class="grid grid-cols-2 md:grid-cols-5 gap-2 bg-white p-2 md:p-3 rounded-xl border border-[#B3B4BD]/40 shadow-sm">
+            <select id="filter-inter-nama" onchange="applyIntervensiFilters()" class="p-1.5 md:p-2 border border-[#B3B4BD]/30 bg-slate-50 rounded-lg text-[9px] md:text-[10px] font-bold text-[#2C2E3A] focus:border-[#0A21C0] outline-none w-full uppercase"><option value="Semua">Semua Nama</option></select>
+            <select id="filter-inter-kelas" onchange="applyIntervensiFilters()" class="p-1.5 md:p-2 border border-[#B3B4BD]/30 bg-slate-50 rounded-lg text-[9px] md:text-[10px] font-bold text-[#2C2E3A] focus:border-[#0A21C0] outline-none w-full uppercase"><option value="Semua">Semua Kelas</option></select>
+            <select id="filter-inter-subjek" onchange="applyIntervensiFilters()" class="p-1.5 md:p-2 border border-[#B3B4BD]/30 bg-slate-50 rounded-lg text-[9px] md:text-[10px] font-bold text-[#2C2E3A] focus:border-[#0A21C0] outline-none w-full uppercase"><option value="Semua">Semua Subjek</option></select>
+            <select id="filter-inter-tp" onchange="applyIntervensiFilters()" class="p-1.5 md:p-2 border border-[#B3B4BD]/30 bg-slate-50 rounded-lg text-[9px] md:text-[10px] font-bold text-[#2C2E3A] focus:border-[#0A21C0] outline-none w-full uppercase">
                 <option value="Semua">Tahap (TP1-TP2)</option>
                 <option value="1">TP 1 Sahaja</option>
                 <option value="2">TP 2 Sahaja</option>
             </select>
-            <input type="text" id="search-intervensi" onkeyup="applyIntervensiFilters()" placeholder="🔍 Carian bebas..." class="col-span-2 md:col-span-1 p-1.5 md:p-2 border border-slate-200 bg-white rounded-lg text-[9px] md:text-[10px] font-bold text-slate-700 focus:ring-1 focus:ring-indigo-500 outline-none w-full placeholder-slate-400">
+            <input type="text" id="search-intervensi" onkeyup="applyIntervensiFilters()" placeholder="🔍 Carian bebas..." class="col-span-2 md:col-span-1 p-1.5 md:p-2 border border-[#B3B4BD]/40 bg-white rounded-lg text-[9px] md:text-[10px] font-bold text-[#141619] focus:border-[#0A21C0] outline-none w-full placeholder-[#B3B4BD]">
           </div>
         </div>
 
         <div class="overflow-x-auto max-h-[400px] md:max-h-[500px] custom-scrollbar">
           <table class="w-full text-left text-[9px] md:text-xs font-bold border-collapse relative min-w-[600px]">
-            <thead class="bg-white text-slate-400 uppercase text-[8px] md:text-[10px] tracking-widest border-b-2 border-slate-100 sticky top-0 z-10 shadow-sm cursor-pointer">
+            <thead class="bg-white text-[#2C2E3A] uppercase text-[8px] md:text-[10px] tracking-widest border-b-2 border-[#B3B4BD]/30 sticky top-0 z-10 shadow-sm cursor-pointer">
               <tr>
                 <th class="px-4 py-3 md:px-6 md:py-4">Bil</th>
-                <th class="px-4 py-3 md:px-6 md:py-4 hover:text-indigo-600 transition-colors whitespace-nowrap" onclick="sortIntervensi('nama')">Nama Murid ↕</th>
-                <th class="px-4 py-3 md:px-6 md:py-4 hover:text-indigo-600 transition-colors whitespace-nowrap" onclick="sortIntervensi('kelas')">Kelas ↕</th>
-                <th class="px-4 py-3 md:px-6 md:py-4 hover:text-indigo-600 transition-colors whitespace-nowrap" onclick="sortIntervensi('subjek')">Subjek ↕</th>
-                <th class="px-4 py-3 md:px-6 md:py-4 text-center hover:text-indigo-600 transition-colors" onclick="sortIntervensi('tp')">Tahap ↕</th>
+                <th class="px-4 py-3 md:px-6 md:py-4 hover:text-[#0A21C0] transition-colors whitespace-nowrap" onclick="sortIntervensi('nama')">Nama Murid ↕</th>
+                <th class="px-4 py-3 md:px-6 md:py-4 hover:text-[#0A21C0] transition-colors whitespace-nowrap" onclick="sortIntervensi('kelas')">Kelas ↕</th>
+                <th class="px-4 py-3 md:px-6 md:py-4 hover:text-[#0A21C0] transition-colors whitespace-nowrap" onclick="sortIntervensi('subjek')">Subjek ↕</th>
+                <th class="px-4 py-3 md:px-6 md:py-4 text-center hover:text-[#0A21C0] transition-colors" onclick="sortIntervensi('tp')">Tahap ↕</th>
               </tr>
             </thead>
-            <tbody id="table-inter" class="divide-y divide-slate-100 text-slate-700">
+            <tbody id="table-inter" class="divide-y divide-[#B3B4BD]/20 text-[#141619]">
             </tbody>
           </table>
         </div>
@@ -294,33 +301,33 @@
   </main>
 
   <main id="admin-view" class="hidden max-w-3xl mx-auto px-4 md:px-6 py-6 md:py-10 w-full space-y-6 md:space-y-8 flex-grow">
-    <div class="bg-white p-6 md:p-10 rounded-2xl md:rounded-3xl card-shadow border border-slate-200">
-      <h2 class="text-sm md:text-lg font-black text-slate-800 mb-4 md:mb-6 uppercase tracking-widest border-l-4 border-indigo-500 pl-3">Muat Naik Data Excel</h2>
+    <div class="bg-white p-6 md:p-10 rounded-2xl md:rounded-3xl card-shadow border border-[#B3B4BD]/30">
+      <h2 class="text-sm md:text-lg font-black text-[#141619] mb-4 md:mb-6 uppercase tracking-widest border-l-4 border-[#0A21C0] pl-3">Muat Naik Data Excel</h2>
       <div class="space-y-4 md:space-y-6">
         <div>
           <input type="file" id="file-upload" accept=".xls,.xlsx" multiple class="hidden" onchange="handleFileSelect(event)">
-          <div onclick="document.getElementById('file-upload').click()" class="border-2 md:border-4 border-dashed border-indigo-200 rounded-xl md:rounded-2xl p-8 md:p-12 text-center bg-indigo-50/50 cursor-pointer hover:bg-indigo-50 hover:border-indigo-400 transition-all">
-            <p id="file-display" class="text-indigo-700 font-black uppercase text-xs md:text-sm tracking-widest">Klik Sini Pilih Fail Excel</p>
-            <p class="text-[8px] md:text-[9px] text-indigo-500 font-bold mt-2 uppercase">Format: TAHUN KELAS FASA.xls</p>
+          <div onclick="document.getElementById('file-upload').click()" class="border-2 md:border-4 border-dashed border-[#0A21C0]/30 rounded-xl md:rounded-2xl p-8 md:p-12 text-center bg-[#0A21C0]/5 cursor-pointer hover:bg-[#0A21C0]/10 hover:border-[#0A21C0] transition-all">
+            <p id="file-display" class="text-[#050A44] font-black uppercase text-xs md:text-sm tracking-widest">Klik Sini Pilih Fail Excel</p>
+            <p class="text-[8px] md:text-[9px] text-[#0A21C0] font-bold mt-2 uppercase">Format: TAHUN KELAS FASA.xls</p>
           </div>
         </div>
-        <button onclick="processUploadAndSync()" class="w-full py-3 md:py-4 bg-indigo-600 hover:bg-indigo-700 text-white font-black rounded-xl md:rounded-2xl shadow-lg transition-all uppercase tracking-widest text-xs md:text-sm">🚀 Hantar Ke Cloud</button>
+        <button onclick="processUploadAndSync()" class="w-full py-3 md:py-4 bg-[#0A21C0] hover:bg-[#050A44] text-white font-black rounded-xl md:rounded-2xl shadow-lg transition-all uppercase tracking-widest text-xs md:text-sm">🚀 Hantar Ke Cloud</button>
       </div>
     </div>
     
     <div class="bg-white p-6 md:p-10 rounded-2xl md:rounded-3xl card-shadow border border-red-100">
       <h2 class="text-sm md:text-lg font-black text-red-800 mb-4 md:mb-6 uppercase tracking-widest border-l-4 border-red-500 pl-3">Pengurusan Padam Data</h2>
       <div class="space-y-4 md:space-y-6">
-        <select id="select-delete-file" class="w-full p-3 md:p-4 bg-slate-50 rounded-xl border border-slate-200 font-bold text-xs uppercase transition-all"></select>
+        <select id="select-delete-file" class="w-full p-3 md:p-4 bg-[#f8f9fa] rounded-xl border border-[#B3B4BD]/40 font-bold text-xs uppercase transition-all"></select>
         <div class="flex flex-col md:flex-row gap-3 md:gap-4">
           <button onclick="deleteSpecificFile()" class="flex-1 py-3 md:py-4 bg-red-600 hover:bg-red-700 text-white font-black rounded-xl transition-all uppercase text-[9px] md:text-[10px] tracking-widest shadow-md">🗑️ Padam Fail Terpilih</button>
-          <button onclick="clearAllData()" class="px-6 py-3 md:py-4 bg-slate-800 hover:bg-black text-white font-black rounded-xl transition-all uppercase text-[9px] md:text-[10px] tracking-widest">Reset Keseluruhan</button>
+          <button onclick="clearAllData()" class="px-6 py-3 md:py-4 bg-[#141619] hover:bg-[#2C2E3A] text-white font-black rounded-xl transition-all uppercase text-[9px] md:text-[10px] tracking-widest shadow-md">Reset Keseluruhan</button>
         </div>
       </div>
     </div>
   </main>
 
-  <footer class="py-6 md:py-8 bg-slate-100 border-t border-slate-200 text-center text-[8px] md:text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] w-full mt-auto">
+  <footer class="py-6 md:py-8 bg-white border-t border-[#B3B4BD]/30 text-center text-[8px] md:text-[10px] font-black text-[#B3B4BD] uppercase tracking-[0.2em] w-full mt-auto">
     <p>© 2026 Sistem Analisis PBD | SK Paya Resak</p>
   </footer>
 
@@ -386,9 +393,8 @@
         let data2D = await res.json();
         systemReady = true; 
         if (data2D.status === "error") throw new Error(data2D.message);
-        parseData(data2D);
         
-        // Populate filter awal selepas loading siap
+        parseData(data2D);
         updateFiltersDropdowns();
         populateProfilUtamaDropdowns();
         
@@ -407,7 +413,14 @@
       let header = data[0];
       for (let i = 1; i < data.length; i++) {
         let row = data[i];
-        let record = { id: String(row[0]), nama: String(row[1]).trim(), tahun: String(row[2]).trim(), kelas: String(row[3]).trim(), fasa: String(row[4]).trim(), scores: {} };
+        let record = { 
+            id: String(row[0]).trim(), 
+            nama: String(row[1]).trim(), 
+            tahun: String(row[2]).trim(),
+            kelas: String(row[3]).trim(), 
+            fasa: String(row[4]).trim(), 
+            scores: {} 
+        };
         for (let j = 5; j < header.length; j++) {
           if (row[j] !== '' && row[j] !== null) record.scores[header[j]] = parseInt(row[j]);
         }
@@ -442,8 +455,8 @@
 
     function switchTab(targetTab) {
       ['dashboard-view', 'laporan-view', 'admin-view', 'global-filters'].forEach(id => document.getElementById(id).classList.add('hidden'));
-      const styleActive = "flex-1 md:flex-none px-3 py-2 md:px-5 md:py-2.5 rounded-lg text-[9px] md:text-[10px] font-black uppercase transition-all bg-indigo-600 text-white shadow-md";
-      const styleInactive = "flex-1 md:flex-none px-3 py-2 md:px-5 md:py-2.5 rounded-lg text-[9px] md:text-[10px] font-black uppercase transition-all bg-transparent text-indigo-200 hover:text-white border border-transparent";
+      const styleActive = "flex-1 md:flex-none px-3 py-2 md:px-5 md:py-2.5 rounded-lg text-[9px] md:text-[10px] font-black uppercase transition-all bg-[#0A21C0] text-white shadow-md";
+      const styleInactive = "flex-1 md:flex-none px-3 py-2 md:px-5 md:py-2.5 rounded-lg text-[9px] md:text-[10px] font-black uppercase transition-all bg-transparent text-[#B3B4BD] hover:text-white border border-transparent";
       ['nav-dashboard', 'nav-laporan', 'nav-admin'].forEach(id => document.getElementById(id).className = styleInactive);
       
       document.getElementById(targetTab + '-view').classList.remove('hidden');
@@ -459,14 +472,14 @@
     function switchSubTab(targetSubTab) {
       document.getElementById('sub-view-kelas').classList.add('hidden');
       document.getElementById('sub-view-individu').classList.add('hidden');
-      const styleIn = "flex-1 md:flex-none px-4 py-2 md:px-8 md:py-2.5 rounded-full text-[10px] md:text-xs font-black uppercase transition-all text-slate-500 hover:text-slate-800 border border-transparent";
+      const styleIn = "flex-1 md:flex-none px-4 py-2 md:px-8 md:py-2.5 rounded-full text-[10px] md:text-xs font-black uppercase transition-all text-[#2C2E3A] hover:text-[#050A44] border border-transparent";
       document.getElementById('btn-sub-kelas').className = styleIn;
       document.getElementById('btn-sub-individu').className = styleIn;
       
       document.getElementById('sub-view-' + targetSubTab).classList.remove('hidden');
       let activeBtn = document.getElementById('btn-sub-' + targetSubTab);
       activeBtn.classList.add('sub-nav-active');
-      activeBtn.classList.remove('text-slate-500', 'hover:text-slate-800');
+      activeBtn.classList.remove('text-[#2C2E3A]', 'hover:text-[#050A44]');
     }
 
     function updateFiltersDropdowns() {
@@ -498,6 +511,12 @@
       document.getElementById('filter-subjek').innerHTML = hSubjek;
       document.getElementById('filter-subjek').value = curSubjek; 
 
+      // Populate Global Name Datalist
+      const uniqueNames = [...new Set(appData.map(d => d.nama))].sort();
+      let hNamesGlobal = '';
+      uniqueNames.forEach(n => hNamesGlobal += `<option value="${n}">`);
+      document.getElementById('list-nama-global').innerHTML = hNamesGlobal;
+
       const uniqueFiles = [...new Set(appData.map(d => `${d.tahun} ${d.kelas} ${d.fasa}`))].sort();
       let htmlDelete = '<option value="">Pilih Fail Untuk Dipadam</option>';
       uniqueFiles.forEach(f => htmlDelete += `<option value="${f}">${f}</option>`);
@@ -505,16 +524,17 @@
     }
 
     function processAllViews() {
-      // TIDAK LAGI AUTO-UPDATE MASA KLIK DROPDOWN (Kerana ada butang TERUSKAN)
       const fTahun = document.getElementById('filter-tahun').value;
       const fFasa = document.getElementById('filter-fasa').value;
       const fKelas = document.getElementById('filter-kelas').value;
       const fSubjek = document.getElementById('filter-subjek').value;
+      const fNamaGlobal = document.getElementById('filter-nama-global').value.trim().toUpperCase();
       
       let filteredData = appData.filter(d => 
         (fTahun === 'Semua' || String(d.tahun) === fTahun) && 
         (fFasa === 'Semua' || d.fasa === fFasa) && 
-        (fKelas === 'Semua' || d.kelas === fKelas)
+        (fKelas === 'Semua' || d.kelas === fKelas) &&
+        (fNamaGlobal === '' || d.nama === fNamaGlobal)
       );
 
       document.getElementById('stat-total-records').textContent = filteredData.length;
@@ -588,9 +608,11 @@
       let sortedKelas = Object.keys(statsKelas).map(n => ({ nama: n, avg: statsKelas[n].sum / statsKelas[n].count, dist: statsKelas[n].tpDist })).sort((a,b) => b.avg - a.avg);
       let htmlKelas = '';
       sortedKelas.slice(0, 5).forEach((cls, i) => {
-        htmlKelas += `<div class="flex justify-between items-center p-3 md:p-4 bg-indigo-50 rounded-xl md:rounded-2xl border border-indigo-100"><span class="font-bold text-[10px] md:text-xs text-indigo-900 uppercase">${i+1}. ${cls.nama}</span><span class="font-black text-indigo-600 bg-white px-2 py-0.5 md:px-3 md:py-1 rounded-full text-[9px] md:text-[10px] shadow-sm">${cls.avg.toFixed(2)}</span></div>`;
+        htmlKelas += `<div class="flex justify-between items-center p-3 md:p-4 bg-[#0A21C0]/5 rounded-xl md:rounded-2xl border border-[#0A21C0]/20"><span class="font-bold text-[10px] md:text-xs text-[#050A44] uppercase">${i+1}. ${cls.nama}</span><span class="font-black text-[#0A21C0] bg-white px-2 py-0.5 md:px-3 md:py-1 rounded-full text-[9px] md:text-[10px] shadow-sm border border-[#0A21C0]/10">${cls.avg.toFixed(2)}</span></div>`;
       });
       document.getElementById('rank-kelas').innerHTML = htmlKelas;
+      
+      // Update label di Profil Individu (Prioriti Tindakan)
       document.getElementById('p1-desc').textContent = `Fokus Panitia: ${sortedSubjek[0] ? getFullSub(sortedSubjek[0].nama) : 'Tiada'}`;
       document.getElementById('p2-desc').textContent = `Sasaran Pemulihan: ${uniqueIntervensiCount} Murid Terlibat`;
 
@@ -602,12 +624,12 @@
       applyIntervensiFilters();
 
       let totalMurid = filteredData.length;
-      let htmlTpTable = `<thead class="bg-slate-50 border-b border-slate-200"><tr><th class="py-2.5 px-3 md:py-3 md:px-4">TAHAP</th><th class="py-2.5 px-3 md:py-3 md:px-4 text-center">BILANGAN</th><th class="py-2.5 px-3 md:py-3 md:px-4 text-center">PERATUS</th></tr></thead><tbody class="divide-y divide-slate-100">`;
+      let htmlTpTable = `<thead class="bg-slate-50 border-b border-[#B3B4BD]/30"><tr><th class="py-2.5 px-3 md:py-3 md:px-4">TAHAP</th><th class="py-2.5 px-3 md:py-3 md:px-4 text-center">BILANGAN</th><th class="py-2.5 px-3 md:py-3 md:px-4 text-center">PERATUS</th></tr></thead><tbody class="divide-y divide-[#B3B4BD]/20">`;
       for (let i = 6; i >= 1; i--) {
           let count = tpPurataMuridCount[i];
           let perc = totalMurid > 0 ? ((count / totalMurid) * 100).toFixed(1) : 0;
           let badgeClass = 'tp' + i;
-          htmlTpTable += `<tr class="hover:bg-slate-50 transition-colors"><td class="py-2 px-3 md:py-3 md:px-4"><span class="tp-badge ${badgeClass} w-12 md:w-16 block shadow-sm">TP${i}</span></td><td class="py-2 px-3 md:py-3 md:px-4 text-center font-black text-slate-700">${count}</td><td class="py-2 px-3 md:py-3 md:px-4 text-center text-slate-500">${perc}%</td></tr>`;
+          htmlTpTable += `<tr class="hover:bg-slate-50 transition-colors"><td class="py-2 px-3 md:py-3 md:px-4"><span class="tp-badge ${badgeClass} w-12 md:w-16 block shadow-sm">TP${i}</span></td><td class="py-2 px-3 md:py-3 md:px-4 text-center font-black text-[#141619]">${count}</td><td class="py-2 px-3 md:py-3 md:px-4 text-center text-[#2C2E3A]">${perc}%</td></tr>`;
       }
       htmlTpTable += `</tbody>`;
       document.getElementById('table-tp-summary').innerHTML = htmlTpTable;
@@ -627,20 +649,17 @@
       let htmlBmtmList = '';
       if (bmtmSubjectsArr.length > 0) {
           bmtmSubjectsArr.forEach(item => {
-              let namesHtml = item.murid.map(name => `<li class="text-[9px] md:text-[10px] text-slate-600 mb-1.5 border-b border-slate-50 pb-1">${name}</li>`).join('');
-              htmlBmtmList += `<div class="bg-white border border-slate-200 rounded-2xl p-4 md:p-5 shadow-sm hover:shadow-md transition-shadow"><div class="flex justify-between items-center mb-3 md:mb-4 border-b border-slate-100 pb-2 md:pb-3"><span class="font-black text-slate-800 text-[10px] md:text-xs uppercase">${getFullSub(item.subjek)}</span><span class="text-[8px] md:text-[9px] font-bold text-red-500 bg-red-50 border border-red-100 px-2 py-1 rounded-full">${item.murid.length} Murid</span></div><ul class="max-h-32 md:max-h-40 overflow-y-auto pr-2 custom-scrollbar">${namesHtml}</ul></div>`;
+              let namesHtml = item.murid.map(name => `<li class="text-[9px] md:text-[10px] text-[#2C2E3A] mb-1.5 border-b border-[#B3B4BD]/20 pb-1">${name}</li>`).join('');
+              htmlBmtmList += `<div class="bg-white border border-[#B3B4BD]/30 rounded-2xl p-4 md:p-5 shadow-sm hover:shadow-md transition-shadow"><div class="flex justify-between items-center mb-3 md:mb-4 border-b border-[#B3B4BD]/20 pb-2 md:pb-3"><span class="font-black text-[#141619] text-[10px] md:text-xs uppercase">${getFullSub(item.subjek)}</span><span class="text-[8px] md:text-[9px] font-bold text-red-500 bg-red-50 border border-red-100 px-2 py-1 rounded-full">${item.murid.length} Murid</span></div><ul class="max-h-32 md:max-h-40 overflow-y-auto pr-2 custom-scrollbar">${namesHtml}</ul></div>`;
           });
       } else {
-           htmlBmtmList = `<div class="col-span-full text-center text-[10px] md:text-xs text-slate-400 font-bold p-6">Tiada data BMTM.</div>`;
+           htmlBmtmList = `<div class="col-span-full text-center text-[10px] md:text-xs text-[#B3B4BD] font-bold p-6">Tiada data BMTM.</div>`;
       }
       document.getElementById('bmtm-student-list').innerHTML = htmlBmtmList;
 
-      renderChartsVisual(totalTPCount, statsSubjek, statsKelas);
+      renderChartsVisual(totalTPCount, statsSubjek, statsKelas, fTahun, fKelas, fNamaGlobal);
     }
 
-    // =========================================================
-    // LOGIK BARU: DROPDOWN BERANTAI UNTUK PROFIL INDIVIDU
-    // =========================================================
     function populateProfilUtamaDropdowns() {
       const uniqueTahun = [...new Set(appData.map(d => String(d.tahun)))].sort().reverse();
       let hTahun = '<option value="Semua">Semua Tahun</option>';
@@ -652,26 +671,54 @@
       uniqueKelas.forEach(k => hKelas += `<option value="${k}">${k}</option>`);
       document.getElementById('profil-kelas').innerHTML = hKelas;
       
-      updateProfilDropdown(); // Panggil fungsi kemaskini murid
+      updateProfilDropdown(); 
     }
 
     function updateProfilDropdown() {
       const fT = document.getElementById('profil-tahun').value;
       const fK = document.getElementById('profil-kelas').value;
       
+      document.getElementById('search-profil-murid').value = '';
+      
       const uniqueMurid = [...new Set(appData.filter(d => (fT === 'Semua' || String(d.tahun) === fT) && (fK === 'Semua' || d.kelas === fK)).map(d => d.nama))].sort();
       
-      let htmlMurid = '<option value="">Pilih Nama Murid...</option>';
-      uniqueMurid.forEach(m => htmlMurid += `<option value="${m}">${m}</option>`);
+      let htmlMurid = '';
+      uniqueMurid.forEach(m => htmlMurid += `<option value="${m}">`);
       
-      const selectMurid = document.getElementById('select-murid');
-      selectMurid.innerHTML = htmlMurid;
-      
-      // Jika tiada murid dipilih/ditapis, sembunyikan kad profil
+      document.getElementById('list-murid').innerHTML = htmlMurid;
       document.getElementById('ind-card').classList.add('hidden');
     }
 
-    // ====================================================
+    function updateIndividual() {
+      const namaCarian = document.getElementById('search-profil-murid').value.trim().toUpperCase();
+      const cardUI = document.getElementById('ind-card');
+      
+      if (!namaCarian) { cardUI.classList.add('hidden'); return; }
+      
+      const fT = document.getElementById('profil-tahun').value;
+      const fK = document.getElementById('profil-kelas').value;
+      
+      let muridRecord = appData.find(d => 
+        d.nama === namaCarian && 
+        (fT === 'Semua' || String(d.tahun) === fT) && 
+        (fK === 'Semua' || d.kelas === fK)
+      );
+      
+      if(!muridRecord) { cardUI.classList.add('hidden'); return; }
+
+      cardUI.classList.remove('hidden');
+      document.getElementById('ind-nama').textContent = muridRecord.nama;
+      document.getElementById('ind-info').textContent = `${muridRecord.tahun} | KELAS ${muridRecord.kelas}`;
+      
+      let sum = 0, count = 0, weakSubs = [], strongSubs = [];
+      for (let subjek in muridRecord.scores) { 
+        let val = muridRecord.scores[subjek]; sum += val; count++; 
+        if (val >= 5) strongSubs.push(subjek); if (val <= 2) weakSubs.push(subjek); 
+      }
+      document.getElementById('ind-avg').textContent = count > 0 ? (sum/count).toFixed(2) : '0.00';
+      document.getElementById('ind-weak').textContent = weakSubs.length > 0 ? weakSubs.map(getFullSub).join(', ') : 'Tiada';
+      document.getElementById('ind-strong').textContent = strongSubs.length > 0 ? strongSubs.map(getFullSub).join(', ') : 'Tiada';
+    }
 
     function populateIntervensiDropdowns() {
       const names = [...new Set(senaraiIntervensiGlobal.map(m => m.nama))].sort();
@@ -713,10 +760,10 @@
     function renderIntervensiTable(dataToRender) {
       let htmlIntervensi = '';
       dataToRender.forEach((murid, i) => {
-        let rowClass = murid.tp === 1 ? 'bg-red-50 text-red-900 border-b border-red-100' : 'bg-white text-slate-700 hover:bg-slate-50 border-b border-slate-100 transition-colors';
-        htmlIntervensi += `<tr class="${rowClass}"><td class="px-4 py-3 md:px-6 md:py-4 font-bold opacity-60">${i+1}</td><td class="px-4 py-3 md:px-6 md:py-4 uppercase font-black whitespace-nowrap">${murid.nama}</td><td class="px-4 py-3 md:px-6 md:py-4 font-bold opacity-80 whitespace-nowrap">${murid.kelas}</td><td class="px-4 py-3 md:px-6 md:py-4 font-black opacity-60 whitespace-nowrap">${getFullSub(murid.subjek)}</td><td class="px-4 py-3 md:px-6 md:py-4 text-center"><span class="tp-badge tp${murid.tp} shadow-sm">TP${murid.tp}</span></td></tr>`;
+        let rowClass = murid.tp === 1 ? 'bg-red-50 text-red-900 border-b border-red-100' : 'bg-white text-[#2C2E3A] hover:bg-slate-50 border-b border-[#B3B4BD]/20 transition-colors';
+        htmlIntervensi += `<tr class="${rowClass}"><td class="px-4 py-3 md:px-6 md:py-4 font-bold opacity-60">${i+1}</td><td class="px-4 py-3 md:px-6 md:py-4 uppercase font-black whitespace-nowrap text-[#141619]">${murid.nama}</td><td class="px-4 py-3 md:px-6 md:py-4 font-bold opacity-80 whitespace-nowrap">${murid.kelas}</td><td class="px-4 py-3 md:px-6 md:py-4 font-black opacity-60 whitespace-nowrap">${getFullSub(murid.subjek)}</td><td class="px-4 py-3 md:px-6 md:py-4 text-center"><span class="tp-badge tp${murid.tp} shadow-sm">TP${murid.tp}</span></td></tr>`;
       });
-      document.getElementById('table-inter').innerHTML = htmlIntervensi || `<tr><td colspan='5' class='text-center py-10 text-slate-400 font-bold uppercase text-[10px] tracking-widest'>Tiada Data Jumpa</td></tr>`;
+      document.getElementById('table-inter').innerHTML = htmlIntervensi || `<tr><td colspan='5' class='text-center py-10 text-[#B3B4BD] font-bold uppercase text-[10px] tracking-widest'>Tiada Data Jumpa</td></tr>`;
     }
 
     function sortIntervensi(col) {
@@ -735,40 +782,9 @@
       applyIntervensiFilters();
     }
 
-    function updateIndividual() {
-      const namaCarian = document.getElementById('select-murid').value;
-      const cardUI = document.getElementById('ind-card');
-      if (!namaCarian) { cardUI.classList.add('hidden'); return; }
-      
-      // Padankan NAMA dan TAHUN dan KELAS supaya tak tarik murid nama sama dari kelas lain
-      const fT = document.getElementById('profil-tahun').value;
-      const fK = document.getElementById('profil-kelas').value;
-      
-      let muridRecord = appData.find(d => 
-        d.nama === namaCarian && 
-        (fT === 'Semua' || String(d.tahun) === fT) && 
-        (fK === 'Semua' || d.kelas === fK)
-      );
-      
-      if(!muridRecord) return;
-
-      cardUI.classList.remove('hidden');
-      document.getElementById('ind-nama').textContent = muridRecord.nama;
-      document.getElementById('ind-info').textContent = `${muridRecord.tahun} | KELAS ${muridRecord.kelas}`;
-      
-      let sum = 0, count = 0, weakSubs = [], strongSubs = [];
-      for (let subjek in muridRecord.scores) { 
-        let val = muridRecord.scores[subjek]; sum += val; count++; 
-        if (val >= 5) strongSubs.push(subjek); if (val <= 2) weakSubs.push(subjek); 
-      }
-      document.getElementById('ind-avg').textContent = count > 0 ? (sum/count).toFixed(2) : '0.00';
-      document.getElementById('ind-weak').textContent = weakSubs.length > 0 ? weakSubs.map(getFullSub).join(', ') : 'Tiada';
-      document.getElementById('ind-strong').textContent = strongSubs.length > 0 ? strongSubs.map(getFullSub).join(', ') : 'Tiada';
-    }
-
-    function renderChartsVisual(tpCount, statsSubjek, statsKelas) {
+    function renderChartsVisual(tpCount, statsSubjek, statsKelas, fTahun, fKelas, fNamaGlobal) {
       Chart.defaults.font.family = "'Inter', sans-serif";
-      Chart.defaults.color = '#94a3b8';
+      Chart.defaults.color = '#B3B4BD';
 
       if (charts.dashPie) charts.dashPie.destroy();
       charts.dashPie = new Chart(document.getElementById('chart-dash-pie'), { 
@@ -780,7 +796,7 @@
         options: { 
           responsive: true, maintainAspectRatio: false, cutout: '70%',
           plugins: { 
-            legend: { position: 'right', labels: { boxWidth: 10, font: { weight: 'bold', size: 9 } } },
+            legend: { position: 'right', labels: { boxWidth: 10, font: { weight: 'bold', size: 9 }, color: '#2C2E3A' } },
             datalabels: {
               color: '#ffffff', font: { weight: 'bold', size: 9 },
               formatter: (value, ctx) => {
@@ -796,14 +812,15 @@
       if (charts.trend) charts.trend.destroy();
       const fSubjek = document.getElementById('filter-subjek').value;
       const top4Subjects = fSubjek !== 'Semua' ? [fSubjek] : Object.keys(statsSubjek).slice(0, 4); 
-      const trendColors = ['#4f46e5', '#ef4444', '#10b981', '#f59e0b'];
+      const trendColors = ['#0A21C0', '#ef4444', '#10b981', '#f59e0b'];
       let datasetTrend = top4Subjects.map((sub, i) => {
-        let fasa1Avg = calculateAverageFasa(sub, 'FASA 1'); let fasa2Avg = calculateAverageFasa(sub, 'FASA 2');
+        let fasa1Avg = calculateAverageFasa(sub, 'FASA 1', fTahun, fKelas, fNamaGlobal); 
+        let fasa2Avg = calculateAverageFasa(sub, 'FASA 2', fTahun, fKelas, fNamaGlobal);
         return { label: getFullSub(sub), data: [fasa1Avg, fasa2Avg], borderColor: trendColors[i], tension: 0.4, fill: false, borderWidth: 3 };
       });
       charts.trend = new Chart(document.getElementById('chart-trend'), { 
         type: 'line', data: { labels: ['FASA 1', 'FASA 2'], datasets: datasetTrend }, 
-        options: { responsive: true, maintainAspectRatio: false, scales: { y: { min: 1, max: 6 } }, plugins: { datalabels: { display: false } } } 
+        options: { responsive: true, maintainAspectRatio: false, scales: { y: { min: 1, max: 6, ticks: {color: '#2C2E3A'} }, x: { ticks: {color: '#2C2E3A'} } }, plugins: { datalabels: { display: false }, legend: { labels: {color: '#2C2E3A'} } } } 
       });
 
       if (charts.bar) charts.bar.destroy();
@@ -818,12 +835,18 @@
             { label: 'TP5-6', data: namaKelasArray.map(c => statsKelas[c].tpDist[5]), backgroundColor: '#10b981' } 
           ] 
         }, 
-        options: { responsive: true, maintainAspectRatio: false, scales: { x: { stacked: true }, y: { stacked: true } }, plugins: { datalabels: { display: false } } } 
+        options: { responsive: true, maintainAspectRatio: false, scales: { x: { stacked: true, ticks: {color: '#2C2E3A'} }, y: { stacked: true, ticks: {color: '#2C2E3A'} } }, plugins: { datalabels: { display: false }, legend: { labels: {color: '#2C2E3A'} } } } 
       });
     }
 
-    function calculateAverageFasa(subjek, targetFasa) {
-      let dataFasa = appData.filter(x => x.fasa === targetFasa && x.scores[subjek]);
+    function calculateAverageFasa(subjek, targetFasa, fTahun, fKelas, fNamaGlobal) {
+      let dataFasa = appData.filter(x => 
+          x.fasa === targetFasa && 
+          x.scores[subjek] !== undefined &&
+          (fTahun === 'Semua' || String(x.tahun) === fTahun) && 
+          (fKelas === 'Semua' || x.kelas === fKelas) &&
+          (fNamaGlobal === '' || x.nama === fNamaGlobal)
+      );
       if (dataFasa.length === 0) return null;
       let sum = dataFasa.reduce((total, x) => total + x.scores[subjek], 0);
       return sum / dataFasa.length;
@@ -876,7 +899,7 @@
       jsonArray.forEach((barisRow, index) => {
         if (!barisRow[keyNama] || String(barisRow[keyNama]).trim() === '') return; 
         let muridID = (keyId && barisRow[keyId]) ? String(barisRow[keyId]).replace(/[- ]/g, '').trim() : `AUTO_${kelas.replace(/\s/g,'')}_${index}`;
-        let recordMurid = { nama: String(barisRow[keyNama]).trim().toUpperCase(), id: muridID, tahun: tahun, kelas: kelas, fasa: fasa, scores: {} };
+        let recordMurid = { nama: String(barisRow[keyNama]).trim().toUpperCase(), id: String(muridID).trim(), tahun: String(tahun).trim(), kelas: String(kelas).trim(), fasa: String(fasa).trim(), scores: {} };
         
         for (let kodSub in keySubjekDitemui) { 
           let namaKolum = keySubjekDitemui[kodSub];
@@ -885,7 +908,7 @@
           if (!isNaN(nomborTP) && nomborTP >= 1 && nomborTP <= 6) recordMurid.scores[kodSub] = nomborTP; 
         }
         
-        let existingIndex = appData.findIndex(d => d.fasa === fasa && String(d.tahun) === tahun && d.kelas === kelas && d.nama === recordMurid.nama);
+        let existingIndex = appData.findIndex(d => d.fasa === recordMurid.fasa && String(d.tahun) === recordMurid.tahun && d.kelas === recordMurid.kelas && d.nama === recordMurid.nama);
         if (existingIndex > -1) { appData[existingIndex] = recordMurid; } else { appData.push(recordMurid); }
       });
     }
