@@ -106,8 +106,8 @@
 
   <main id="dashboard-view" class="hidden max-w-[1400px] mx-auto px-4 md:px-6 py-4 md:py-6 w-full space-y-4 md:space-y-6 flex-grow">
     <div id="empty-state-msg" class="hidden bg-white border border-[#B3B4BD]/50 p-8 rounded-2xl text-center card-shadow">
-      <h3 class="text-lg font-black text-[#2C2E3A] uppercase mb-1">Pangkalan Data Kosong</h3>
-      <p class="text-xs font-bold text-[#B3B4BD]">Sila pergi ke tab <strong>Admin</strong> dan muat naik fail Excel.</p>
+      <h3 class="text-lg font-black text-[#2C2E3A] uppercase mb-1">Pangkalan Data Kosong / Tiada Rekod</h3>
+      <p class="text-xs font-bold text-[#B3B4BD]">Sila pastikan tapisan di atas betul atau muat naik fail Excel di tab Admin.</p>
     </div>
 
     <div id="dashboard-content" class="space-y-4 md:space-y-6">
@@ -198,7 +198,7 @@
 
     <div id="sub-view-individu" class="hidden space-y-4 md:space-y-6">
       
-      <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6">
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6 items-start">
         <div class="bg-white p-5 md:p-6 rounded-2xl card-shadow border border-[#B3B4BD]/30 space-y-4 md:space-y-5">
           <h3 class="text-[10px] md:text-xs font-black text-[#141619] uppercase tracking-widest border-l-4 border-[#0A21C0] pl-2.5">Panel Carian Individu</h3>
           
@@ -212,29 +212,9 @@
             </div>
           </div>
           
-          <div id="ind-card" class="hidden bg-[#f8f9fa] rounded-2xl p-2 border border-[#B3B4BD]/30 mt-4">
-            <div class="flex items-center gap-4 bg-gradient-to-r from-[#0A21C0] to-[#050A44] p-4 md:p-5 rounded-xl text-white shadow-md">
-              <div class="w-12 h-12 md:w-14 md:h-14 bg-white/10 rounded-xl flex items-center justify-center font-black text-xl border border-white/20">ID</div>
-              <div>
-                <p id="ind-nama" class="font-black uppercase text-xs md:text-sm tracking-wide"></p>
-                <p id="ind-info" class="text-[9px] font-bold text-[#B3B4BD] uppercase tracking-widest mt-0.5"></p>
-              </div>
-            </div>
-            <div class="grid grid-cols-1 gap-2 mt-2 text-[9px] md:text-[10px] font-bold uppercase p-1">
-              <div class="bg-white p-3 md:p-4 rounded-xl flex justify-between items-center shadow-sm border border-[#B3B4BD]/20">
-                <span class="text-[#2C2E3A]">Purata Keseluruhan (GPS)</span>
-                <span id="ind-avg" class="font-black text-base md:text-lg text-[#0A21C0]">0.0</span>
-              </div>
-              <div class="bg-red-50 p-3 md:p-4 rounded-xl flex justify-between items-center shadow-sm border border-red-100">
-                <span class="text-red-500">Subjek Lemah (TP1-2)</span>
-                <span id="ind-weak" class="font-black text-red-700 text-right w-1/2 line-clamp-2"></span>
-              </div>
-              <div class="bg-emerald-50 p-3 md:p-4 rounded-xl flex justify-between items-center shadow-sm border border-emerald-100">
-                <span class="text-emerald-600">Subjek Kuat (TP5-6)</span>
-                <span id="ind-strong" class="font-black text-emerald-700 text-right w-1/2 line-clamp-2"></span>
-              </div>
-            </div>
-          </div>
+          <div id="ind-card-container" class="grid grid-cols-1 gap-4 mt-4">
+             </div>
+
         </div>
         
         <div class="bg-white p-5 md:p-6 rounded-2xl card-shadow border border-[#B3B4BD]/30">
@@ -612,7 +592,6 @@
       });
       document.getElementById('rank-kelas').innerHTML = htmlKelas;
       
-      // Update label di Profil Individu (Prioriti Tindakan)
       document.getElementById('p1-desc').textContent = `Fokus Panitia: ${sortedSubjek[0] ? getFullSub(sortedSubjek[0].nama) : 'Tiada'}`;
       document.getElementById('p2-desc').textContent = `Sasaran Pemulihan: ${uniqueIntervensiCount} Murid Terlibat`;
 
@@ -660,6 +639,9 @@
       renderChartsVisual(totalTPCount, statsSubjek, statsKelas, fTahun, fKelas, fNamaGlobal);
     }
 
+    // =========================================================
+    // LOGIK NAIK TARAF: KAD PROFIL INDIVIDU BERSUSUN (MULTIPLE YEARS)
+    // =========================================================
     function populateProfilUtamaDropdowns() {
       const uniqueTahun = [...new Set(appData.map(d => String(d.tahun)))].sort().reverse();
       let hTahun = '<option value="Semua">Semua Tahun</option>';
@@ -686,39 +668,79 @@
       uniqueMurid.forEach(m => htmlMurid += `<option value="${m}">`);
       
       document.getElementById('list-murid').innerHTML = htmlMurid;
-      document.getElementById('ind-card').classList.add('hidden');
+      document.getElementById('ind-card-container').innerHTML = ''; // Clear existing cards
     }
 
     function updateIndividual() {
       const namaCarian = document.getElementById('search-profil-murid').value.trim().toUpperCase();
-      const cardUI = document.getElementById('ind-card');
+      const container = document.getElementById('ind-card-container');
       
-      if (!namaCarian) { cardUI.classList.add('hidden'); return; }
+      if (!namaCarian) { container.innerHTML = ''; return; }
       
       const fT = document.getElementById('profil-tahun').value;
       const fK = document.getElementById('profil-kelas').value;
       
-      let muridRecord = appData.find(d => 
+      // Ambil SEMUA rekod yang sepadan dengan kriteria carian (Mungkin ada Tahun 2024 & 2025)
+      let matchedRecords = appData.filter(d => 
         d.nama === namaCarian && 
         (fT === 'Semua' || String(d.tahun) === fT) && 
         (fK === 'Semua' || d.kelas === fK)
       );
       
-      if(!muridRecord) { cardUI.classList.add('hidden'); return; }
-
-      cardUI.classList.remove('hidden');
-      document.getElementById('ind-nama').textContent = muridRecord.nama;
-      document.getElementById('ind-info').textContent = `${muridRecord.tahun} | KELAS ${muridRecord.kelas}`;
-      
-      let sum = 0, count = 0, weakSubs = [], strongSubs = [];
-      for (let subjek in muridRecord.scores) { 
-        let val = muridRecord.scores[subjek]; sum += val; count++; 
-        if (val >= 5) strongSubs.push(subjek); if (val <= 2) weakSubs.push(subjek); 
+      if(matchedRecords.length === 0) { 
+          container.innerHTML = '<p class="text-sm text-red-500 font-bold p-4 bg-red-50 rounded-xl text-center border border-red-100">Rekod tidak dijumpai bagi kriteria yang dipilih.</p>'; 
+          return; 
       }
-      document.getElementById('ind-avg').textContent = count > 0 ? (sum/count).toFixed(2) : '0.00';
-      document.getElementById('ind-weak').textContent = weakSubs.length > 0 ? weakSubs.map(getFullSub).join(', ') : 'Tiada';
-      document.getElementById('ind-strong').textContent = strongSubs.length > 0 ? strongSubs.map(getFullSub).join(', ') : 'Tiada';
+
+      // Susun rekod dari tahun paling terkini (Desc)
+      matchedRecords.sort((a,b) => parseInt(b.tahun) - parseInt(a.tahun));
+
+      let htmlCards = '';
+      
+      matchedRecords.forEach(muridRecord => {
+          let sum = 0, count = 0, weakSubs = [], strongSubs = [];
+          for (let subjek in muridRecord.scores) { 
+            let val = muridRecord.scores[subjek]; sum += val; count++; 
+            if (val >= 5) strongSubs.push(subjek); if (val <= 2) weakSubs.push(subjek); 
+          }
+          let avg = count > 0 ? (sum/count).toFixed(2) : '0.00';
+          let weakStr = weakSubs.length > 0 ? weakSubs.map(getFullSub).join(', ') : 'Tiada';
+          let strongStr = strongSubs.length > 0 ? strongSubs.map(getFullSub).join(', ') : 'Tiada';
+
+          htmlCards += `
+            <div class="bg-[#f8f9fa] rounded-2xl p-2 border border-[#B3B4BD]/30 relative overflow-hidden shadow-sm hover:shadow-md transition-shadow">
+              <div class="absolute top-0 right-0 bg-[#0A21C0] text-white text-[9px] md:text-[10px] font-black px-4 py-1.5 rounded-bl-2xl uppercase tracking-widest shadow-md z-10">TAHUN ${muridRecord.tahun}</div>
+              
+              <div class="flex items-center gap-4 bg-gradient-to-r from-[#0A21C0] to-[#050A44] p-4 md:p-5 rounded-xl text-white shadow-md relative">
+                <div class="w-12 h-12 md:w-14 md:h-14 bg-white/10 rounded-xl flex items-center justify-center font-black text-xl border border-white/20">ID</div>
+                <div class="pr-16">
+                  <p class="font-black uppercase text-xs md:text-sm tracking-wide">${muridRecord.nama}</p>
+                  <p class="text-[9px] font-bold text-[#B3B4BD] uppercase tracking-widest mt-0.5">KELAS ${muridRecord.kelas} | ${muridRecord.fasa}</p>
+                </div>
+              </div>
+              
+              <div class="grid grid-cols-1 gap-2 mt-2 text-[9px] md:text-[10px] font-bold uppercase p-1">
+                <div class="bg-white p-3 md:p-4 rounded-xl flex justify-between items-center shadow-sm border border-[#B3B4BD]/20">
+                  <span class="text-[#2C2E3A]">Purata Keseluruhan (GPS)</span>
+                  <span class="font-black text-base md:text-lg text-[#0A21C0]">${avg}</span>
+                </div>
+                <div class="bg-red-50 p-3 md:p-4 rounded-xl flex justify-between items-center shadow-sm border border-red-100">
+                  <span class="text-red-500 w-1/3">Subjek Lemah (TP1-2)</span>
+                  <span class="font-black text-red-700 text-right w-2/3 leading-relaxed whitespace-normal">${weakStr}</span>
+                </div>
+                <div class="bg-emerald-50 p-3 md:p-4 rounded-xl flex justify-between items-center shadow-sm border border-emerald-100">
+                  <span class="text-emerald-600 w-1/3">Subjek Kuat (TP5-6)</span>
+                  <span class="font-black text-emerald-700 text-right w-2/3 leading-relaxed whitespace-normal">${strongStr}</span>
+                </div>
+              </div>
+            </div>
+          `;
+      });
+      
+      container.innerHTML = htmlCards;
     }
+
+    // ====================================================
 
     function populateIntervensiDropdowns() {
       const names = [...new Set(senaraiIntervensiGlobal.map(m => m.nama))].sort();
